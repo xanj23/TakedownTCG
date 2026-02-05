@@ -4,11 +4,11 @@ Basis: TCG Pricing App (Business)
 Intent: Allow Users to find cards based on name, set, or TCG brand. Determine price, rarity, description, and more. View trends in price and sales. Allow to track cards or announcements.  
 Features: 
   -Find Card
-    -Limit by TCG, Set, or Name
+    -Filter by TCG, Set, or Name
   -Display Card
     -Name
-    -Description
-    -Card Text
+    -Description/Card Text
+    -Competitive Viable 
     -Price
     -Links to Buying and Image(For CLI)
   -Check Prices of Various Cards 
@@ -20,14 +20,13 @@ Features:
   -Link to Buy cards 
     -Various Card Sites 
       -3rd Party Shops 
-      -Stores 
-  -New Set Announcements 
+      -Retail Stores 
+  -New Set Announcements/Notifications 
     -Allow For Favorites 
       -Favorite Set 
       -Favorite Card 
       -Favorite TCG 
-  -Find Local Shops 
-
+  -Find Local Shops Nearby
 Language: C# 
 Database: 
   -APIs for Cards Databases 
