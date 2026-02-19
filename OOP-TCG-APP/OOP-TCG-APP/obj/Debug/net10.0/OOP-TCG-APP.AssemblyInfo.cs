@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("OOP-TCG-APP")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+96a97f54e25873b288fffedfd58f9d95304a6924")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+67b24950542c6837ec351ad24e5ad9ed730d1df9")]
 [assembly: System.Reflection.AssemblyProductAttribute("OOP-TCG-APP")]
 [assembly: System.Reflection.AssemblyTitleAttribute("OOP-TCG-APP")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
