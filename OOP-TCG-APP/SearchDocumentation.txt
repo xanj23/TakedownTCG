@@ -1,0 +1,51 @@
+Search Function Implementation Explanation
+
+The search function allows the program to retrieve trading card data from the JustTCG API based on user-provided filters such as card name, game, and set. When the user performs a search, the program creates a CardSearchQuery object containing the selected filters. This query is passed to the SearchCardsAsync method in the JustTcgCardsClient class.
+
+The SearchCardsAsync method builds a request URL using the provided filters and sends an HTTP GET request to the JustTCG /cards endpoint. The request includes the API key in the header for authentication. The API returns the results in JSON format, which the program deserializes into C# objects.
+
+The function then converts the API response into a simplified list of CardSearchResult objects containing key information such as the card name, set, price, and image URL. This list is returned to the main program, where it can be displayed to the user in the interface.
+
+This implementation separates the API communication from the user interface, making the search function reusable, easier to maintain, and consistent with object-oriented design principles.
+
+
+
+
+
+
+
+Specialized Code Documentation
+
+HttpClient
+HttpClient is used to send HTTP requests to the JustTCG API and receive responses. It is stored as a class field so it can be reused efficiently.
+
+API Key Header
+The API key is added to the request using:
+
+req.Headers.TryAddWithoutValidation("x-api-key", _apiKey);
+
+This authenticates the program with the JustTCG API.
+
+Async / Await
+The async and await keywords allow the search function to run without freezing the program while waiting for the API response.
+
+JSON Deserialization
+The JsonSerializer.DeserializeAsync method converts the JSON response into C# objects so the program can access card data easily.
+
+DTO Classes
+Classes such as ApiCard and ApiVariant are Data Transfer Objects used to store data from the API response.
+
+LINQ
+LINQ is used to process and convert data, such as finding the lowest card price or converting API objects into display objects.
+
+Record Types
+The record keyword is used for simple data storage objects. It automatically provides constructors and read-only properties.
+
+UriBuilder
+UriBuilder is used to safely create the API request URL with search parameters.
+
+CancellationToken
+The CancellationToken allows the request to be cancelled if needed, such as when a user starts a new search.
+
+Custom Exception
+JustTcgApiException is used to handle API errors and provide meaningful error messages.
