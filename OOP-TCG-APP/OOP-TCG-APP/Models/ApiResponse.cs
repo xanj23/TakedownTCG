@@ -16,9 +16,9 @@ using System.Collections.Generic; // Lets us use list
 // 429: Too Many Requests - Rate limit exceeded. Slow down your requests.
 // 500: Server Error - An unexpected error occurred on the server.
 // </summary>
-public class ApiResponse
+public class ApiResponse<T>
 {
-    public List<Card> Data { get; set; } = new List<Card>();  // the data coming in as a list of cards
+    public List<T> Data { get; set; } = new List<T>();  // the data coming in as a list of cards
     public Meta Meta { get; set; } = new Meta(); // Info about pages
     public Metadata _metadata { get; set; } = new Metadata(); // API usage info
     public string? Error { get; set; } // Error message

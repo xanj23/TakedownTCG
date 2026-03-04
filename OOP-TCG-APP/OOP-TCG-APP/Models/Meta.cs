@@ -1,12 +1,26 @@
-
-// <summary>
-//This model handles the pages of data. The api response will hit a limit so it gives a page of data.
-// This data keeps track of what page we are on.
-// </summary>
+/// <summary>
+/// Represents metadata for paginated API responses.  
+/// Tracks the total results, page size, current offset, and whether more pages are available.
+/// </summary>
 public class Meta
 {
-    public int Total { get; set; } // Total number of cards matching the search prompt
-    public int Limit { get; set; } // Number of results on the page
-    public int Offset { get; set; } // current page on
-    public bool HasMore { get; set; } // Whether there are more results available
+    /// <summary>
+    /// Total number of cards matching the search prompt.
+    /// </summary>
+    public int Total { get; set; }
+
+    /// <summary>
+    /// Number of results on the current page.
+    /// </summary>
+    public int Limit { get; set; }
+
+    /// <summary>
+    /// Current offset in the dataset (used for pagination).
+    /// </summary>
+    public int Offset { get; set; }
+
+    /// <summary>
+    /// Indicates whether there are more results available beyond the current page.
+    /// </summary>
+    public bool HasMore { get; set; }
 }

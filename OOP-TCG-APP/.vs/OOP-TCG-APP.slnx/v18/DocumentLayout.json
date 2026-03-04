@@ -3,8 +3,36 @@
   "WorkspaceRootPath": "C:\\Users\\tiger\\Documents\\oop26\\OOP-TCG-App\\OOP-TCG-APP\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{456C7694-4F4C-47E3-9C77-D51052AE7B82}|OOP-TCG-APP\\OOP-TCG-APP.csproj|c:\\users\\tiger\\documents\\oop26\\oop-tcg-app\\oop-tcg-app\\oop-tcg-app\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{456C7694-4F4C-47E3-9C77-D51052AE7B82}|OOP-TCG-APP\\OOP-TCG-APP.csproj|solutionrelative:oop-tcg-app\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{56097EC3-7DB4-21C7-CA20-92930CBCD177}|OOP-TCG-APP\\OOP-TCG-APP.csproj|c:\\users\\tiger\\documents\\oop26\\oop-tcg-app\\oop-tcg-app\\oop-tcg-app\\services\\helpers\\deserialization.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{56097EC3-7DB4-21C7-CA20-92930CBCD177}|OOP-TCG-APP\\OOP-TCG-APP.csproj|solutionrelative:oop-tcg-app\\services\\helpers\\deserialization.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{56097EC3-7DB4-21C7-CA20-92930CBCD177}|OOP-TCG-APP\\OOP-TCG-APP.csproj|c:\\users\\tiger\\documents\\oop26\\oop-tcg-app\\oop-tcg-app\\oop-tcg-app\\models\\apiresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{56097EC3-7DB4-21C7-CA20-92930CBCD177}|OOP-TCG-APP\\OOP-TCG-APP.csproj|solutionrelative:oop-tcg-app\\models\\apiresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{56097EC3-7DB4-21C7-CA20-92930CBCD177}|OOP-TCG-APP\\OOP-TCG-APP.csproj|c:\\users\\tiger\\documents\\oop26\\oop-tcg-app\\oop-tcg-app\\oop-tcg-app\\services\\cardservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{56097EC3-7DB4-21C7-CA20-92930CBCD177}|OOP-TCG-APP\\OOP-TCG-APP.csproj|solutionrelative:oop-tcg-app\\services\\cardservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{56097EC3-7DB4-21C7-CA20-92930CBCD177}|OOP-TCG-APP\\OOP-TCG-APP.csproj|c:\\users\\tiger\\documents\\oop26\\oop-tcg-app\\oop-tcg-app\\oop-tcg-app\\models\\metadata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{56097EC3-7DB4-21C7-CA20-92930CBCD177}|OOP-TCG-APP\\OOP-TCG-APP.csproj|solutionrelative:oop-tcg-app\\models\\metadata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{56097EC3-7DB4-21C7-CA20-92930CBCD177}|OOP-TCG-APP\\OOP-TCG-APP.csproj|c:\\users\\tiger\\documents\\oop26\\oop-tcg-app\\oop-tcg-app\\oop-tcg-app\\models\\meta.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{56097EC3-7DB4-21C7-CA20-92930CBCD177}|OOP-TCG-APP\\OOP-TCG-APP.csproj|solutionrelative:oop-tcg-app\\models\\meta.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{56097EC3-7DB4-21C7-CA20-92930CBCD177}|OOP-TCG-APP\\OOP-TCG-APP.csproj|c:\\users\\tiger\\documents\\oop26\\oop-tcg-app\\oop-tcg-app\\oop-tcg-app\\models\\variant.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{56097EC3-7DB4-21C7-CA20-92930CBCD177}|OOP-TCG-APP\\OOP-TCG-APP.csproj|solutionrelative:oop-tcg-app\\models\\variant.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{56097EC3-7DB4-21C7-CA20-92930CBCD177}|OOP-TCG-APP\\OOP-TCG-APP.csproj|c:\\users\\tiger\\documents\\oop26\\oop-tcg-app\\oop-tcg-app\\oop-tcg-app\\models\\card.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{56097EC3-7DB4-21C7-CA20-92930CBCD177}|OOP-TCG-APP\\OOP-TCG-APP.csproj|solutionrelative:oop-tcg-app\\models\\card.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{56097EC3-7DB4-21C7-CA20-92930CBCD177}|OOP-TCG-APP\\OOP-TCG-APP.csproj|c:\\users\\tiger\\documents\\oop26\\oop-tcg-app\\oop-tcg-app\\oop-tcg-app\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{56097EC3-7DB4-21C7-CA20-92930CBCD177}|OOP-TCG-APP\\OOP-TCG-APP.csproj|solutionrelative:oop-tcg-app\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -14,11 +42,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 6,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 7,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\tiger\\Documents\\oop26\\OOP-TCG-App\\OOP-TCG-APP\\OOP-TCG-APP\\Program.cs",
               "RelativeDocumentMoniker": "OOP-TCG-APP\\Program.cs",
@@ -26,7 +54,97 @@
               "RelativeToolTip": "OOP-TCG-APP\\Program.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-17T22:42:52.459Z",
+              "WhenOpened": "2026-02-17T22:42:52.459Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "ApiResponse.cs",
+              "DocumentMoniker": "C:\\Users\\tiger\\Documents\\oop26\\OOP-TCG-App\\OOP-TCG-APP\\OOP-TCG-APP\\Models\\ApiResponse.cs",
+              "RelativeDocumentMoniker": "OOP-TCG-APP\\Models\\ApiResponse.cs",
+              "ToolTip": "C:\\Users\\tiger\\Documents\\oop26\\OOP-TCG-App\\OOP-TCG-APP\\OOP-TCG-APP\\Models\\ApiResponse.cs",
+              "RelativeToolTip": "OOP-TCG-APP\\Models\\ApiResponse.cs",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAgwBcAAAA3AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-19T19:30:38.843Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Card.cs",
+              "DocumentMoniker": "C:\\Users\\tiger\\Documents\\oop26\\OOP-TCG-App\\OOP-TCG-APP\\OOP-TCG-APP\\Models\\Card.cs",
+              "RelativeDocumentMoniker": "OOP-TCG-APP\\Models\\Card.cs",
+              "ToolTip": "C:\\Users\\tiger\\Documents\\oop26\\OOP-TCG-App\\OOP-TCG-APP\\OOP-TCG-APP\\Models\\Card.cs",
+              "RelativeToolTip": "OOP-TCG-APP\\Models\\Card.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAASAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-19T16:35:58.627Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Variant.cs",
+              "DocumentMoniker": "C:\\Users\\tiger\\Documents\\oop26\\OOP-TCG-App\\OOP-TCG-APP\\OOP-TCG-APP\\Models\\Variant.cs",
+              "RelativeDocumentMoniker": "OOP-TCG-APP\\Models\\Variant.cs",
+              "ToolTip": "C:\\Users\\tiger\\Documents\\oop26\\OOP-TCG-App\\OOP-TCG-APP\\OOP-TCG-APP\\Models\\Variant.cs",
+              "RelativeToolTip": "OOP-TCG-APP\\Models\\Variant.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAPkAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-19T18:45:04.816Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Meta.cs",
+              "DocumentMoniker": "C:\\Users\\tiger\\Documents\\oop26\\OOP-TCG-App\\OOP-TCG-APP\\OOP-TCG-APP\\Models\\Meta.cs",
+              "RelativeDocumentMoniker": "OOP-TCG-APP\\Models\\Meta.cs",
+              "ToolTip": "C:\\Users\\tiger\\Documents\\oop26\\OOP-TCG-App\\OOP-TCG-APP\\OOP-TCG-APP\\Models\\Meta.cs",
+              "RelativeToolTip": "OOP-TCG-APP\\Models\\Meta.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-19T19:22:41.501Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Metadata.cs",
+              "DocumentMoniker": "C:\\Users\\tiger\\Documents\\oop26\\OOP-TCG-App\\OOP-TCG-APP\\OOP-TCG-APP\\Models\\Metadata.cs",
+              "RelativeDocumentMoniker": "OOP-TCG-APP\\Models\\Metadata.cs",
+              "ToolTip": "C:\\Users\\tiger\\Documents\\oop26\\OOP-TCG-App\\OOP-TCG-APP\\OOP-TCG-APP\\Models\\Metadata.cs",
+              "RelativeToolTip": "OOP-TCG-APP\\Models\\Metadata.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAC0AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-19T19:24:31.844Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Deserialization.cs",
+              "DocumentMoniker": "C:\\Users\\tiger\\Documents\\oop26\\OOP-TCG-App\\OOP-TCG-APP\\OOP-TCG-APP\\Services\\Helpers\\Deserialization.cs",
+              "RelativeDocumentMoniker": "OOP-TCG-APP\\Services\\Helpers\\Deserialization.cs",
+              "ToolTip": "C:\\Users\\tiger\\Documents\\oop26\\OOP-TCG-App\\OOP-TCG-APP\\OOP-TCG-APP\\Services\\Helpers\\Deserialization.cs",
+              "RelativeToolTip": "OOP-TCG-APP\\Services\\Helpers\\Deserialization.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAABIAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-19T20:34:24.269Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "CardService.cs",
+              "DocumentMoniker": "C:\\Users\\tiger\\Documents\\oop26\\OOP-TCG-App\\OOP-TCG-APP\\OOP-TCG-APP\\Services\\CardService.cs",
+              "RelativeDocumentMoniker": "OOP-TCG-APP\\Services\\CardService.cs",
+              "ToolTip": "C:\\Users\\tiger\\Documents\\oop26\\OOP-TCG-App\\OOP-TCG-APP\\OOP-TCG-APP\\Services\\CardService.cs",
+              "RelativeToolTip": "OOP-TCG-APP\\Services\\CardService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-19T20:18:30.991Z",
               "EditorCaption": ""
             }
           ]

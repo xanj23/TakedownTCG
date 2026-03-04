@@ -7,7 +7,7 @@ using System.Text.Json;
 // </summary>
 public static class ApiDeserializer
 {
-    public static ApiResponse DeserializeApiResponse(string json)
+    public ApiResponse<T> DeserializeApiResponse(string json)
     {
         ApiResponse apiResponse;
 

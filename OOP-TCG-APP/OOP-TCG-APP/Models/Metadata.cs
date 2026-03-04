@@ -1,19 +1,46 @@
-
-// <summary>
-// This model is for information about the API key owners plan.
-// This keeps track of request information when a api response comes in.
-// </summary>
+/// <summary>
+/// Represents information about the API key owner's subscription plan and usage.
+/// Tracks total request limits, daily usage, and rate limits returned by the API.
+/// </summary>
 public class Metadata
 {
-    public string ApiPlan { get; set; }                     // Name of your current API subscription plan
-    public int ApiRequestLimit { get; set; }                // Total number of API requests allowed for your plan
-    public int ApiRequestsUsed { get; set; }               // Number of API requests used so far
-    public int ApiRequestsRemaining { get; set; }          // Number of requests remaining before reaching total limit (from API)
+    /// <summary>
+    /// Name of the current API subscription plan.
+    /// </summary>
+    public string ApiPlan { get; set; }
 
-    public int ApiDailyLimit { get; set; }                 // Maximum number of API requests allowed per day
-    public int ApiDailyRequestsUsed { get; set; }         // Number of API requests used today
-    public int ApiDailyRequestsRemaining { get; set; }    // Number of API requests remaining for today (from API)
+    /// <summary>
+    /// Total number of API requests allowed for the plan.
+    /// </summary>
+    public int ApiRequestLimit { get; set; }
 
-    public int ApiRateLimit { get; set; }                  // Maximum number of requests allowed per minute
+    /// <summary>
+    /// Number of API requests used so far.
+    /// </summary>
+    public int ApiRequestsUsed { get; set; }
+
+    /// <summary>
+    /// Number of API requests remaining before reaching the total limit (from API).
+    /// </summary>
+    public int ApiRequestsRemaining { get; set; }
+
+    /// <summary>
+    /// Maximum number of API requests allowed per day.
+    /// </summary>
+    public int ApiDailyLimit { get; set; }
+
+    /// <summary>
+    /// Number of API requests used today.
+    /// </summary>
+    public int ApiDailyRequestsUsed { get; set; }
+
+    /// <summary>
+    /// Number of API requests remaining for today (from API).
+    /// </summary>
+    public int ApiDailyRequestsRemaining { get; set; }
+
+    /// <summary>
+    /// Maximum number of requests allowed per minute (rate limit).
+    /// </summary>
+    public int ApiRateLimit { get; set; }
 }
-
