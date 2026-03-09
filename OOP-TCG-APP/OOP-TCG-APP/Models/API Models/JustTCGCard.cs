@@ -1,69 +1,65 @@
-using System.Collections.Generic;
-
 /// <summary>
-/// Represents a collectible card, including metadata such as the game it belongs to,
-/// the set it is part of, card number, rarity, and available variants.
-/// This class models the general card information, not individual cards for purchase.
+/// Represents a card record returned by the JustTCG cards endpoint.
 /// </summary>
-public class Card
+public class JustTCGCard
 {
     /// <summary>
-    /// Unique identifier for the card.
+    /// Gets or sets the unique card identifier.
     /// </summary>
     public string Id { get; set; }
 
     /// <summary>
-    /// Name of the card.
+    /// Gets or sets the card name.
     /// </summary>
     public string Name { get; set; }
 
     /// <summary>
-    /// Name of the game this card belongs to.
+    /// Gets or sets the name of the game the card belongs to.
     /// </summary>
     public string Game { get; set; }
 
     /// <summary>
-    /// Unique identifier of the set this card comes from.
+    /// Gets or sets the set identifier.
     /// </summary>
     public string Set { get; set; }
 
     /// <summary>
-    /// Name of the set this card comes from.
+    /// Gets or sets the set name.
     /// </summary>
     public string SetName { get; set; }
 
     /// <summary>
-    /// Card number within the set.
+    /// Gets or sets the collector number within the set.
     /// </summary>
     public string Number { get; set; }
 
     /// <summary>
-    /// TCGplayer product ID for this card.
+    /// Gets or sets the linked TCGplayer product identifier.
     /// </summary>
     public string TcgplayerId { get; set; }
 
     /// <summary>
-    /// MTGJSON UUID for the card.
+    /// Gets or sets the linked MTGJSON identifier.
     /// </summary>
     public string MtgjsonId { get; set; }
 
     /// <summary>
-    /// Scryfall UUID for the card.
+    /// Gets or sets the linked Scryfall identifier.
     /// </summary>
     public string ScryfallId { get; set; }
 
     /// <summary>
-    /// Rarity of the card (e.g., Common, Rare, etc.).
+    /// Gets or sets the card rarity.
     /// </summary>
     public string Rarity { get; set; }
 
     /// <summary>
-    /// Additional card-specific details, if available.
+    /// Gets or sets additional descriptive details returned by the API.
     /// </summary>
     public string Details { get; set; }
 
     /// <summary>
-    /// List of all variants found for this card.
+    /// Gets or sets the available card variants.
     /// </summary>
     public List<Variant> Variants { get; set; } = new();
 }

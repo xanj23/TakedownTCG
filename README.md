@@ -1,35 +1,43 @@
 # OOP-TCG-App
-Project Scope: 
-Basis: TCG Pricing App (Business) 
-Intent: Allow Users to find cards based on name, set, or TCG brand. Determine price, rarity, description, and more. View trends in price and sales. Allow to track cards or announcements.  
-Features: 
-  -Find Card
-    -Filter by TCG, Set, or Name
-  -Display Card
-    -Name
-    -Description/Card Text
-    -Competitive Viable 
-    -Price
-    -Links to Buying and Image(For CLI)
-  -Check Prices of Various Cards 
-    -Various Types of TCGS 
-    -Graded and/or Ungraded 
-  -Price Trends for Cards 
-    -Price Rise and Drops	 
-    -Number of Sells Spike 
-  -Link to Buy cards 
-    -Various Card Sites 
-      -3rd Party Shops 
-      -Retail Stores 
-  -New Set Announcements/Notifications 
-    -Allow For Favorites 
-      -Favorite Set 
-      -Favorite Card 
-      -Favorite TCG 
-  -Find Local Shops Nearby
-Language: C# 
-Database: 
-  -APIs for Cards Databases 
-  -MySQL(or something else) for user accounts 
-GUI: Perchance
-Version Control Through Git/Github: https://github.com/xanj23/OOP-TCG-App  
+
+## Project Scope
+OOP-TCG-App is a C# console application for exploring trading card game data through the JustTCG API. The current implementation focuses on object-oriented modeling of API responses and interactive search workflows for cards, games, and sets.
+
+## Current Features
+- Search cards by required text query with optional number, printing, and condition filters.
+- Search sets by game with optional text search and sort options.
+- Retrieve the full `/games` endpoint from the menu.
+- Build URL-safe query strings from user input.
+- Deserialize JustTCG JSON responses into strongly typed C# models.
+- Read the JustTCG API key from the `JUSTTCG_API_KEY` environment variable instead of storing credentials in source control.
+
+## Current Architecture
+- `OOP-TCG-APP/Program.cs`
+  Starts the console app and initializes API authentication.
+- `OOP-TCG-APP/Services/`
+  Contains the menu flow, input collection classes, request building, and helper utilities.
+- `OOP-TCG-APP/Models/API Models/`
+  Contains object-oriented models for the API response payloads.
+- `OOP-TCG-APP/Models/Query Models/`
+  Contains query parameter models and enums used by the input services.
+- `OOP-TCG-APP/Search.cs`
+  Contains a typed JustTCG client prototype for card searching with paging and result mapping.
+
+## Setup
+1. Install the .NET SDK used by the project.
+2. Set the `JUSTTCG_API_KEY` environment variable.
+3. From the repository root, run:
+
+```powershell
+dotnet build .\OOP-TCG-APP\OOP-TCG-APP.csproj
+dotnet run --project .\OOP-TCG-APP\OOP-TCG-APP.csproj
+```
+
+## Documentation
+- `README.md`
+  High-level project scope and setup information.
+- `SearchDocumentation.txt`
+  Notes about the implemented search flow, query parameters, and related classes.
+
+## Planned Direction
+The broader project idea still points toward richer price tracking, watchlists, and additional user-facing features, but the repository currently implements the console search foundation and the supporting models needed for future expansion.

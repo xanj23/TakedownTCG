@@ -1,8 +1,11 @@
 /// <summary>
-/// 
+/// Presents the top-level search menu and routes the selected endpoint to the correct workflow.
 /// </summary>
 public class QueryMenu
 {
+    /// <summary>
+    /// Defines the searchable API endpoints exposed in the console menu.
+    /// </summary>
     private enum Endpoint
     {
         Card = 1,
@@ -13,6 +16,10 @@ public class QueryMenu
     private static readonly int numOfEndpoints = Enum.GetValues(typeof(Endpoint)).Length;
     private static readonly Endpoint[] endpoints = Enum.GetValues<Endpoint>();
 
+    /// <summary>
+    /// Runs the interactive query menu, executes the selected request, and displays the deserialized result.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous menu workflow.</returns>
     public static async Task Run()
     {
         bool menu = true;
@@ -51,7 +58,7 @@ public class QueryMenu
             {
                 case (int)Endpoint.Card:
                     ep = chosenEndpoint;
-                    query = "/cards" + BuildQuery.Run(ObjToDict.Run(CardInputQuery.Run()));
+                    query = "/cards" + BuildQuery.Run(ObjToDict.Run(InputJustTCGCardQuery.Run()));
                     menu = false;
                     break;
                 case (int)Endpoint.Game:
@@ -61,7 +68,7 @@ public class QueryMenu
                     break;
                 case (int)Endpoint.Set:
                     ep = chosenEndpoint;
-                    query = "/sets" + BuildQuery.Run(ObjToDict.Run(SetInputQuery.Run()));
+                    query = "/sets" + BuildQuery.Run(ObjToDict.Run(InputJustTCGSetQuery.Run()));
                     menu = false;
                     break;
                 default:
@@ -90,13 +97,13 @@ public class QueryMenu
         switch (ep)
         {
             case (int)Endpoint.Card:
-                Console.WriteLine(DeserializeApi.Run<Card>(rawResponse));
+                Console.WriteLine(DeserializeApi.Run<JustTCGCard>(rawResponse));
                 break;
             case (int)Endpoint.Set:
-                Console.WriteLine(DeserializeApi.Run<Set>(rawResponse));
+                Console.WriteLine(DeserializeApi.Run<JustTCGSet>(rawResponse));
                 break;
             case (int)Endpoint.Game:
-                Console.WriteLine(DeserializeApi.Run<Game>(rawResponse));
+                Console.WriteLine(DeserializeApi.Run<JustTCGGame>(rawResponse));
                 break;
             default:
                 Console.WriteLine("Error: Endpoint not found cannot send deserializer");

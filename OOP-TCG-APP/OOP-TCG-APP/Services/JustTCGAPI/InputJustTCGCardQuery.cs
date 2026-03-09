@@ -1,24 +1,24 @@
-﻿using System;
-
 /// <summary>
-/// 
+/// Collects JustTCG card search filters from the console and maps them into a card query model.
 /// </summary>
-/// 
-public class CardInputQuery
+public class InputJustTCGCardQuery
 {
-    public static CardQueryParameters Run()
+    /// <summary>
+    /// Prompts the user for JustTCG card search inputs and returns the resulting query parameters.
+    /// </summary>
+    /// <returns>A populated <see cref="JustTCGCardQueryParams"/> instance.</returns>
+    public static JustTCGCardQueryParams Run()
     {
-        CardQueryParameters param = new CardQueryParameters();
-        string input;
+        JustTCGCardQueryParams param = new JustTCGCardQueryParams();
         bool loop = true;
 
-        // Q (required)
         while (loop)
         {
             Console.WriteLine("Card Search Query:");
             Console.WriteLine("Must fill in required areas.\nIf you would like to not use a parameter then just press the 'enter' key\n");
             Console.Write("Search query (required): ");
-            input = Console.ReadLine();
+
+            string? input = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(input))
             {
                 Console.Clear();
@@ -31,22 +31,19 @@ public class CardInputQuery
             }
         }
 
-        // Number (optional)
         Console.Write("Card number (optional, e.g. 15): ");
-        input = Console.ReadLine();
-        param.Number = string.IsNullOrWhiteSpace(input) ? null : input;
+        string? number = Console.ReadLine();
+        param.Number = string.IsNullOrWhiteSpace(number) ? null : number;
 
-        // Printing (optional)
         Console.Write("Printing (optional, e.g. Normal, Foil): ");
-        input = Console.ReadLine();
-        param.Printing = string.IsNullOrWhiteSpace(input) ? null : input;
+        string? printing = Console.ReadLine();
+        param.Printing = string.IsNullOrWhiteSpace(printing) ? null : printing;
 
-        // Condition (optional)
         loop = true;
         while (loop)
         {
             Console.Write("Condition (optional): S, NM, LP, MP, HP, DMG: ");
-            input = Console.ReadLine();
+            string? input = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(input))
             {
                 param.Condition = null;

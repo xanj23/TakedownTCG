@@ -1,24 +1,29 @@
 using System.Net.Http;
 
+/// <summary>
+/// Sends authenticated HTTP requests to the JustTCG API.
+/// </summary>
 public static class FetchApi
 {
     private static readonly HttpClient client = new HttpClient();
     private const string BaseUrl = "https://api.justtcg.com/v1";
-    private const string ApiKeyEnvironmentVariable = "JUSTTCG_API_KEY";
+    private const string apiKey = "tcg_5b35dc7894bf4ea6bfd7234e094ae2e1";
 
+    /// <summary>
+    /// Configures the shared HTTP client with the API key header required by JustTCG.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown when the API key environment variable is not set.</exception>
     public static void SetApiHeader()
     {
-        string? apiKey = Environment.GetEnvironmentVariable(ApiKeyEnvironmentVariable);
-        if (string.IsNullOrWhiteSpace(apiKey))
-        {
-            throw new InvalidOperationException(
-                $"Missing JustTCG API key. Set the {ApiKeyEnvironmentVariable} environment variable before running the app.");
-        }
-
         client.DefaultRequestHeaders.Clear();
         client.DefaultRequestHeaders.Add("x-api-key", apiKey);
     }
 
+    /// <summary>
+    /// Executes a GET request against the JustTCG API.
+    /// </summary>
+    /// <param name="query">The relative endpoint path and optional query string.</param>
+    /// <returns>The raw response body, or <see langword="null"/> when the request cannot be completed successfully.</returns>
     public static async Task<string?> Run(string? query)
     {
         if (string.IsNullOrWhiteSpace(query))

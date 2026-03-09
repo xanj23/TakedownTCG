@@ -1,46 +1,45 @@
 /// <summary>
-/// Represents information about the API key owner's subscription plan and usage.
-/// Tracks total request limits, daily usage, and rate limits returned by the API.
+/// Represents API plan and rate-limit metadata returned by JustTCG.
 /// </summary>
 public class Metadata
 {
     /// <summary>
-    /// Name of the current API subscription plan.
+    /// Gets or sets the name of the active API plan.
     /// </summary>
     public string ApiPlan { get; set; }
 
     /// <summary>
-    /// Total number of API requests allowed for the plan.
+    /// Gets or sets the total request limit for the active plan.
     /// </summary>
     public int ApiRequestLimit { get; set; }
 
     /// <summary>
-    /// Number of API requests used so far.
+    /// Gets or sets the number of requests used against the total plan limit.
     /// </summary>
     public int ApiRequestsUsed { get; set; }
 
     /// <summary>
-    /// Number of API requests remaining before reaching the total limit (from API).
+    /// Gets or sets the remaining requests under the total plan limit.
     /// </summary>
     public int ApiRequestsRemaining { get; set; }
 
     /// <summary>
-    /// Maximum number of API requests allowed per day.
+    /// Gets or sets the daily request limit for the active plan.
     /// </summary>
     public int ApiDailyLimit { get; set; }
 
     /// <summary>
-    /// Number of API requests used today.
+    /// Gets or sets the number of API requests used today.
     /// </summary>
     public int ApiDailyRequestsUsed { get; set; }
 
     /// <summary>
-    /// Number of API requests remaining for today (from API).
+    /// Gets or sets the number of API requests remaining today.
     /// </summary>
     public int ApiDailyRequestsRemaining { get; set; }
 
     /// <summary>
-    /// Maximum number of requests allowed per minute (rate limit).
+    /// Gets or sets the per-minute rate limit returned by the API.
     /// </summary>
     public int ApiRateLimit { get; set; }
 }

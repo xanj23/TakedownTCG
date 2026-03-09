@@ -1,26 +1,25 @@
 /// <summary>
-/// Represents metadata for paginated API responses.  
-/// Tracks the total results, page size, current offset, and whether more pages are available.
+/// Represents pagination metadata returned with a JustTCG collection response.
 /// </summary>
 public class Meta
 {
     /// <summary>
-    /// Total number of cards matching the search prompt.
+    /// Gets or sets the total number of matching records.
     /// </summary>
     public int Total { get; set; }
 
     /// <summary>
-    /// Number of results on the current page.
+    /// Gets or sets the number of results returned in the current page.
     /// </summary>
     public int Limit { get; set; }
 
     /// <summary>
-    /// Current offset in the dataset (used for pagination).
+    /// Gets or sets the zero-based offset for the current page.
     /// </summary>
     public int Offset { get; set; }
 
     /// <summary>
-    /// Indicates whether there are more results available beyond the current page.
+    /// Gets or sets a value indicating whether another page of results is available.
     /// </summary>
     public bool HasMore { get; set; }
 }

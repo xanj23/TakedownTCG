@@ -1,23 +1,27 @@
-using System;
 using System.Text.Json;
 
-// <summary>
-// A helper class responsible for deserializing JSON from the API
-// Converts the raw JSON string from the API into a ApiResponse object.
-// </summary>
+/// <summary>
+/// Deserializes raw JustTCG JSON payloads into strongly typed API response objects.
+/// </summary>
 public static class DeserializeApi
 {
+    /// <summary>
+    /// Deserializes the supplied JSON string into an <see cref="ApiResponse{T}"/>.
+    /// </summary>
+    /// <typeparam name="T">The type stored inside the response data payload.</typeparam>
+    /// <param name="json">The raw JSON returned by the API.</param>
+    /// <returns>The deserialized response, or <see langword="null"/> when the payload is empty or invalid.</returns>
     public static ApiResponse<T>? Run<T>(string json)
     {
-        // Validate input
-        if (string.IsNullOrWhiteSpace(json)) {
+        if (string.IsNullOrWhiteSpace(json))
+        {
             return null;
         }
+
         try
         {
-            // Perform deserialization and return
             return JsonSerializer.Deserialize<ApiResponse<T>>(json);
-        }       
+        }
         catch (JsonException)
         {
             return null;

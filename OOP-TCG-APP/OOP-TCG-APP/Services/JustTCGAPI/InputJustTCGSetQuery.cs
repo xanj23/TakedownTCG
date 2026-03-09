@@ -1,23 +1,24 @@
-﻿using System;
 /// <summary>
-/// 
+/// Collects JustTCG set search filters from the console and maps them into a set query model.
 /// </summary>
-/// 
-public class SetInputQuery
+public class InputJustTCGSetQuery
 {
-    public static SetQueryParameters Run()
+    /// <summary>
+    /// Prompts the user for JustTCG set search inputs and returns the resulting query parameters.
+    /// </summary>
+    /// <returns>A populated <see cref="JustTCGSetQueryParams"/> instance.</returns>
+    public static JustTCGSetQueryParams Run()
     {
-        SetQueryParameters param = new SetQueryParameters();
-        string input;
+        JustTCGSetQueryParams param = new JustTCGSetQueryParams();
         bool loop = true;
 
-        // Game (required)
         while (loop)
         {
             Console.WriteLine("Set Search Query:");
             Console.WriteLine("Must fill in required areas.\nIf you would like to not use a parameter then just press the 'enter' key\n");
             Console.Write("Game (required, e.g. mtg, pokemon): ");
-            input = Console.ReadLine();
+
+            string? input = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(input))
             {
                 Console.Clear();
@@ -30,12 +31,10 @@ public class SetInputQuery
             }
         }
 
-        // Q (optional)
         Console.Write("Search query (optional): ");
-        input = Console.ReadLine();
-        param.Q = string.IsNullOrWhiteSpace(input) ? null : input;
+        string? query = Console.ReadLine();
+        param.Q = string.IsNullOrWhiteSpace(query) ? null : query;
 
-        // OrderBy (optional)
         loop = true;
         while (loop)
         {
@@ -43,7 +42,8 @@ public class SetInputQuery
             Console.WriteLine("[1 | name]");
             Console.WriteLine("[2 | release date]");
             Console.Write("Enter choice: ");
-            input = Console.ReadLine();
+
+            string? input = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(input))
             {
                 param.OrderBy = null;
@@ -66,7 +66,6 @@ public class SetInputQuery
             }
         }
 
-        // Order (optional)
         loop = true;
         while (loop)
         {
@@ -74,7 +73,8 @@ public class SetInputQuery
             Console.WriteLine("[1] asc");
             Console.WriteLine("[2] desc");
             Console.Write("Enter choice: ");
-            input = Console.ReadLine();
+
+            string? input = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(input))
             {
                 param.Order = null;
