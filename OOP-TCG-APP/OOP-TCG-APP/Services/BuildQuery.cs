@@ -1,20 +1,25 @@
-﻿using System.Diagnostics;
+using System.Net;
 
 public static class BuildQuery
 {
-
     /// <summary>
     /// 
     /// </summary>
-    /// 
-    public static string Run(Dictionary rawQuery)
+    public static string Run(Dictionary<string, string> rawQuery)
     {
-        string query;
-        for (int i = 1; i < rawQuery.Count; i+2)
+        if (rawQuery == null || rawQuery.Count == 0)
         {
-          query = query + "/" + tempQuery[i]
+            return "";
         }
-        return query;
-    }
 
+        List<string> parameters = new List<string>();
+        foreach (KeyValuePair<string, string> pair in rawQuery)
+        {
+            string key = pair.Key;
+            string value = WebUtility.UrlEncode(pair.Value);
+            parameters.Add(key + '=' + value);
+        }
+
+        return '?' + string.Join('&', parameters);
+    }
 }

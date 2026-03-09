@@ -1,2 +1,9 @@
-﻿// See https://aka.ms/new-console-template for more information
-Console.WriteLine("Hello, World!");
+try
+{
+    FetchApi.SetApiHeader();
+    await QueryMenu.Run();
+}
+catch (Exception ex)
+{
+    Console.WriteLine(ex.Message);
+}
