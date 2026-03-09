@@ -5,25 +5,22 @@ using System.Text.Json;
 // A helper class responsible for deserializing JSON from the API
 // Converts the raw JSON string from the API into a ApiResponse object.
 // </summary>
-public static class ApiDeserializer
+public static class DeserializeApi
 {
-    public static ApiResponse DeserializeApiResponse(string json)
+    public static ApiResponse<T>? Run<T>(string json)
     {
-        ApiResponse apiResponse;
-
         // Validate input
         if (string.IsNullOrWhiteSpace(json)) {
             return null;
         }
         try
         {
-            // Perform deserialization
-            apiResponse = JsonSerializer.Deserialize<ApiResponse>(json);
+            // Perform deserialization and return
+            return JsonSerializer.Deserialize<ApiResponse<T>>(json);
         }       
         catch (JsonException)
         {
             return null;
         }
-        return apiResponse;
     }
 }
