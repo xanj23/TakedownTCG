@@ -12,9 +12,10 @@ public class QueryMenu
         Game = 2,
         Set = 3
     }
+    private static readonly List<Endpoint> endpoints = Enum.GetValues<Endpoint>().ToList();
 
-    private static readonly int numOfEndpoints = Enum.GetValues(typeof(Endpoint)).Length;
-    private static readonly Endpoint[] endpoints = Enum.GetValues<Endpoint>();
+    private static readonly int _numOfEndpoints = Enum.GetValues(typeof(Endpoint)).Length;
+    //private static readonly Endpoint[] endpoints = Enum.GetValues<Endpoint>();
 
     /// <summary>
     /// Runs the interactive query menu, executes the selected request, and displays the deserialized result.
@@ -29,7 +30,7 @@ public class QueryMenu
         while (menu)
         {
             Console.WriteLine("What would you like to search?");
-            for (int i = 0; i < numOfEndpoints; i++)
+            for (int i = 0; i < _numOfEndpoints; i++)
             {
                 string epName = endpoints[i].ToString();
                 int epValue = (int)endpoints[i];
@@ -46,10 +47,10 @@ public class QueryMenu
                 continue;
             }
 
-            if (chosenEndpoint > numOfEndpoints || chosenEndpoint < 1)
+            if (chosenEndpoint > _numOfEndpoints || chosenEndpoint < 1)
             {
                 Console.Clear();
-                Console.WriteLine("Invalid selection. Please select from range 1-" + numOfEndpoints + '\n');
+                Console.WriteLine("Invalid selection. Please select from range 1-" + _numOfEndpoints + '\n');
                 continue;
             }
 
@@ -72,7 +73,7 @@ public class QueryMenu
                     menu = false;
                     break;
                 default:
-                    Console.WriteLine("Invalid selection. Please select from range 1-" + numOfEndpoints + '\n');
+                    Console.WriteLine("Invalid selection. Please select from range 1-" + _numOfEndpoints + '\n');
                     break;
             }
         }
