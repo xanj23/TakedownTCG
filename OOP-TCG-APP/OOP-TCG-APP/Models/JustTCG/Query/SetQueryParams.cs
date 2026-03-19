@@ -1,3 +1,5 @@
+using TCGAPP;
+
 namespace JustTCG
 {
     /// <summary>
@@ -19,29 +21,19 @@ namespace JustTCG
     }
 
     /// <summary>
-    /// Stores the user-provided parameters for a JustTCG set search request.
+    /// Stores parameters for a JustTCG set search dynamically in a dictionary.
     /// </summary>
-    public class SetQueryParams
+    public class SetQueryParams : IQueryParams
     {
-        /// <summary>
-        /// Gets or sets the optional free-text set search term.
-        /// </summary>
-        public string? Q { get; set; }
+        // Key = param name, Value = QueryParam (string or enum)
+        public Dictionary<string, QueryParam<object>> Parameters { get; } = new Dictionary<string, QueryParam<object>>();
 
-        /// <summary>
-        /// Gets or sets the required game filter.
-        /// </summary>
-        public string? Game { get; set; }
-
-        /// <summary>
-        /// Gets or sets the field used to order the returned sets.
-        /// </summary>
-        public OrderBy? OrderBy { get; set; }
-
-        /// <summary>
-        /// Gets or sets the direction used to order the returned sets.
-        /// </summary>
-        public Order? Order { get; set; }
+        public SetQueryParams()
+        {
+            Parameters.Add("Game", new QueryParam<object>("Game (e.g., mtg, pokemon)", true));
+            Parameters.Add("Q", new QueryParam<object>("Search query", false));
+            Parameters.Add("OrderBy", new QueryParam<object>("Order by (name, release date)", false));
+            Parameters.Add("Order", new QueryParam<object>("Sort order (asc, desc)", false));
+        }
     }
-
 }

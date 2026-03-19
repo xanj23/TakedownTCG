@@ -1,4 +1,3 @@
-using System.Runtime.InteropServices;
 using TCGAPP;
 using JustTCG;
 public class JustTCGApi : IApi
@@ -18,36 +17,27 @@ public class JustTCGApi : IApi
     {
         ApiManager.RegisterApi(new JustTCGApi());
     }
-  public Response<T> Handler<T>(Endpoint chosenEndpoint)
+    public async Task<object?> Handler(Endpoint chosenEndpoint, Dictionary<string, string> rawQuery)
     {
-        var _rawQuery;
-        string _queryURL;
-        string _rawResponse;
-        object _deseralResponse;
-        Dictionary<> _refinedQuery = new Directory<>;
-        switch (chosenEndpoint.Name)
+        HttpClient client = new HttpClient();
+
+        string refinedQuery = BuildQuery.Run(rawQuery);
+        string apiURL = BuildApiURL.Run(this, chosenEndpoint, refinedQuery);
+        SetClientHeader.Run(this, client);
+        string rawResponse = await FetchApi.Run(apiURL, client);
+
+        switch(chosenEndpoint.Name)
         {
             case "Card":
-                _rawQuery = InputCardQuery.Run();
-                _refinedQuery = ObjToDict.Run(_rawQuery);
-                _queryURL = BuildQuery.Run(_refinedQuery);
-                string apiURL = BuildApiURL.Run(ApiManager.ApiRepositories[0], chosenEndpoint, _queryURL);
-                _rawResponse = FetchApi.Run(apiURL);
-                _deseralResponse = DeserializeResponse.Run<Card>(_rawResponse);
-                break;
+                return DeserializeResponse.Run<Card>(rawResponse);
             case "Set":
-                _rawQuery = InputSetQuery.Run();
-                _refinedQuery = ObjToDict.Run(_rawQuery);
-                _queryURL = BuildQuery.Run(_refinedQuery);
-                break;
+                return DeserializeResponse.Run<Set>(rawResponse);
             case "Game":
-                break;
+            return DeserializeResponse.Run<Game>(rawResponse);
             default:
-                Console.WriteLine("Error: No endpoint found in JustApi");
-                return
+                Console.WriteLine($"Error: Could not find matching deserializer for {chosenEndpoint.Name}");
                 break;
-            
         }
-        return 
+        return null;
     }
 }

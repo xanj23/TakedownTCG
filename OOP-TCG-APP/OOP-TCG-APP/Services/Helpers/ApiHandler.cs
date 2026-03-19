@@ -1,6 +1,4 @@
 using System;
-using System.Net.Http;
-using JustTCG;
 using TCGAPP;
 
 public class ApiHandler
@@ -8,13 +6,28 @@ public class ApiHandler
     public static async Task Run()
     {
         IApi chosenApi = ApiMenu.Run();
+        if (chosenApi == null)
+        {
+            Console.WriteLine("Error: No API selected.");
+            return;
+        }
+
         Endpoint chosenEndpoint = EndpointMenu.Run(chosenApi);
-        Dictionary<T> rawQuery = InputQuery.Run<T>(chosenEndpoint);
-        string apiURL = BuildApiURL.Run(rawQuery);
-        SetClientHeader.Run(chosenApi);
-        string rawResponse = await FetchApi.Run(apiURL);
-        object deseralResponse = DeserializeResponse.Run<T>(rawResponse);
-        var refinedResponse = MapToUniversalResponse.Run(deseralResponse);
-        DisplayResponse.Run(refinedResponse);
+        if (chosenEndpoint == null)
+        {
+            Console.WriteLine("Error: No endpoint selected.");
+            return;
+        }
+
+        Dictionary<string, string> rawQuery = InputQuery.Run<object>(chosenEndpoint);
+        
+        object? rawResponse = await chosenApi.Handler(chosenEndpoint, rawQuery);
+        if (rawResponse == null)
+        {
+            Console.WriteLine("Error: No response received.");
+            return;
+        }
+
+        Console.WriteLine(rawResponse);
     }
 }

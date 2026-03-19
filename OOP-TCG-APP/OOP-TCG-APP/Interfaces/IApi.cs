@@ -7,7 +7,7 @@ namespace TCGAPP
         string ApiKey {get; }                 /// Api Key used for calling API
         List<Endpoint> Endpoints { get; }     /// Endpoints this API supports
         int NumOfEndpoints { get; }           /// Convenience property
-        object Handler(Endpoint endpoint);
+        Task<object?> Handler(Endpoint chosenEndpoint, Dictionary<string, string> rawQuery);
 
     }
 }
