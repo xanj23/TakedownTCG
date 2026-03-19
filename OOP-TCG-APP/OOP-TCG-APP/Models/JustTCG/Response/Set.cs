@@ -1,7 +1,7 @@
 /// <summary>
 /// Represents a set record returned by the JustTCG sets endpoint.
 /// </summary>
-public class JustTCGSet
+public class Set
 {
     /// <summary>
     /// Gets or sets the unique set identifier.

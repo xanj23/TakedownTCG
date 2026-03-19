@@ -1,7 +1,7 @@
 try
 {
     FetchApi.SetApiHeader();
-    await QueryMenu.Run();
+    await ApiHandler.Run();
 }
 catch (Exception ex)
 {

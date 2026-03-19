@@ -1,7 +1,7 @@
 /// <summary>
 /// Represents a trading card game summary returned by the JustTCG games endpoint.
 /// </summary>
-public class JustTCGGame
+public class Game
 {
     /// <summary>
     /// Gets or sets the unique game identifier.

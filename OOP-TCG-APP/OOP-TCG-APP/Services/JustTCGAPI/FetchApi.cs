@@ -5,9 +5,9 @@ using System.Net.Http;
 /// </summary>
 public static class FetchApi
 {
-    private static readonly HttpClient client = new HttpClient();
-    private const string BaseUrl = "https://api.justtcg.com/v1";
-    private const string apiKey = "tcg_5b35dc7894bf4ea6bfd7234e094ae2e1";
+    private static readonly HttpClient _client = new HttpClient();
+    private const string _baseUrl = "https://api.justtcg.com/v1";
+    private const string _apiKey = "tcg_5b35dc7894bf4ea6bfd7234e094ae2e1";
 
     /// <summary>
     /// Configures the shared HTTP client with the API key header required by JustTCG.
@@ -15,8 +15,8 @@ public static class FetchApi
     /// <exception cref="InvalidOperationException">Thrown when the API key environment variable is not set.</exception>
     public static void SetApiHeader()
     {
-        client.DefaultRequestHeaders.Clear();
-        client.DefaultRequestHeaders.Add("x-api-key", apiKey);
+        _client.DefaultRequestHeaders.Clear();
+        _client.DefaultRequestHeaders.Add("x-api-key", _apiKey);
     }
 
     /// <summary>
@@ -32,9 +32,9 @@ public static class FetchApi
             return null;
         }
 
-        string url = BaseUrl + query;
+        string url = _baseUrl + query;
         Console.WriteLine($"Fetching: {url}");
-        HttpResponseMessage response = await client.GetAsync(url);
+        HttpResponseMessage response = await _client.GetAsync(url);
 
         if (!response.IsSuccessStatusCode)
         {

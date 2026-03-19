@@ -1,7 +1,7 @@
 /// <summary>
 /// Represents a card record returned by the JustTCG cards endpoint.
 /// </summary>
-public class JustTCGCard
+public class Card
 {
     /// <summary>
     /// Gets or sets the unique card identifier.

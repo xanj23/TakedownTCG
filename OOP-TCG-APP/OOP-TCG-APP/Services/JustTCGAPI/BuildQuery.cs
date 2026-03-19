@@ -1,5 +1,4 @@
-using System.Net;
-
+namespace JustTCG {
 /// <summary>
 /// Builds a URL query string from a dictionary of request parameters.
 /// </summary>
@@ -21,10 +20,11 @@ public static class BuildQuery
         foreach (KeyValuePair<string, string> pair in rawQuery)
         {
             string key = pair.Key;
-            string value = WebUtility.UrlEncode(pair.Value);
+            string value = pair.Value;
             parameters.Add(key + '=' + value);
         }
 
         return '?' + string.Join('&', parameters);
     }
+}
 }
