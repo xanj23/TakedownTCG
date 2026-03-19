@@ -15,7 +15,7 @@ namespace TCGAPP
         {
             if (response == null)
             {
-                Console.WriteLine("Error: response was null.");
+                Console.WriteLine("Error: response was null. [DisplayResponse]");
                 return;
             }
 

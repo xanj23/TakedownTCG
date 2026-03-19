@@ -21,7 +21,12 @@ namespace JustTCG
 
             try
             {
-                return JsonSerializer.Deserialize<Response<T>>(json);
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                };
+                Response<T> rawResponse = JsonSerializer.Deserialize<Response<T>>(json, options);
+                return rawResponse;
             }
             catch (JsonException)
             {

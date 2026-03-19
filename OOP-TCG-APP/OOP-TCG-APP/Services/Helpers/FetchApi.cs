@@ -16,7 +16,7 @@ namespace TCGAPP
         {
             if (string.IsNullOrWhiteSpace(apiURL))
             {
-                Console.WriteLine($"Error: No query to fetch. query={apiURL}");
+                Console.WriteLine($"Error: No query to fetch. query={apiURL} [FetchApi]");
                 return null;
             }
 
@@ -25,7 +25,7 @@ namespace TCGAPP
 
             if (!response.IsSuccessStatusCode)
             {
-                Console.WriteLine($"Error: [{(int)response.StatusCode}] {response.StatusCode}");
+                Console.WriteLine($"Error: [{(int)response.StatusCode}] {response.StatusCode} [FetchApi]");
                 return null;
             }
 

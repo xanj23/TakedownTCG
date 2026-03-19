@@ -8,9 +8,9 @@ public class JustTCGApi : IApi
 
     public List<Endpoint> Endpoints { get; } = new List<Endpoint>
     {
-        new Endpoint { Name = "Card", URL = "/card", Parameters = new CardQueryParams()},
-        new Endpoint { Name = "Set",  URL = "/set", Parameters = new SetQueryParams()},
-        new Endpoint { Name = "Game", URL = "/game",}
+        new Endpoint { Name = "Card", URL = "/cards", Parameters = new CardQueryParams()},
+        new Endpoint { Name = "Set",  URL = "/sets", Parameters = new SetQueryParams()},
+        new Endpoint { Name = "Game", URL = "/games",}
     };
     public int NumOfEndpoints => Endpoints.Count;
     static JustTCGApi()

@@ -26,10 +26,10 @@ namespace JustTCG
         public CardQueryParams()
         {
             // Add parameters dynamically
-            Parameters.Add("Q", new QueryParam<object>("Name", true));
-            Parameters.Add("Number", new QueryParam<object>("Card number (e.g., 15)", false));
-            Parameters.Add("Printing", new QueryParam<object>("Printing", false));
-            Parameters.Add("Condition", new QueryParam<object>("Condition", false));
+            Parameters.Add("q", new QueryParam<object>("Name", true));
+            Parameters.Add("number", new QueryParam<object>("Card number (e.g., 15)", false));
+            Parameters.Add("printing", new QueryParam<object>("Printing", false));
+            Parameters.Add("condition", new QueryParam<object>("Condition", false));
         }
     }
 }

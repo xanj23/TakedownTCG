@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Text.Json;
 using TCGAPP;
 
 public class MaptoUniversalResponse
@@ -21,13 +22,16 @@ public class MaptoUniversalResponse
 
         if (response == null)
         {
-            result.Errors.Add("Response was null.");
+            result.Errors.Add("Response was null. [MaptoUniversalResponse]");
             return result;
         }
 
         if (response is string rawString)
         {
-            result.Raw = rawString;
+            if (!TryMapJsonEnvelope(rawString, result))
+            {
+                result.Raw = rawString;
+            }
             return result;
         }
 
@@ -131,6 +135,15 @@ public class MaptoUniversalResponse
             return record;
         }
 
+        if (item is JsonElement jsonElement)
+        {
+            foreach (var pair in JsonElementToFields(jsonElement))
+            {
+                record.Fields[pair.Key] = pair.Value;
+            }
+            return record;
+        }
+
         foreach (var pair in ToFieldDictionary(item))
         {
             record.Fields[pair.Key] = pair.Value;
@@ -176,6 +189,11 @@ public class MaptoUniversalResponse
             return null;
         }
 
+        if (value is JsonElement jsonElement)
+        {
+            return JsonElementToString(jsonElement);
+        }
+
         if (value is string str)
         {
             return str;
@@ -207,5 +225,104 @@ public class MaptoUniversalResponse
         }
 
         return $"[{count} items]";
+    }
+
+    private static bool TryMapJsonEnvelope(string rawJson, UniversalResponse result)
+    {
+        try
+        {
+            using JsonDocument doc = JsonDocument.Parse(rawJson);
+            JsonElement root = doc.RootElement;
+            if (root.ValueKind != JsonValueKind.Object)
+            {
+                return false;
+            }
+
+            if (!root.TryGetProperty("data", out JsonElement dataElement))
+            {
+                return false;
+            }
+
+            if (root.TryGetProperty("meta", out JsonElement metaElement))
+            {
+                AddJsonMeta(metaElement, result.Meta);
+            }
+
+            if (root.TryGetProperty("_metadata", out JsonElement metadataElement))
+            {
+                AddJsonMeta(metadataElement, result.Meta);
+            }
+
+            AddJsonRecords(dataElement, result.Records);
+            return true;
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
+    }
+
+    private static void AddJsonRecords(JsonElement dataElement, List<UniversalRecord> records)
+    {
+        if (dataElement.ValueKind == JsonValueKind.Array)
+        {
+            foreach (JsonElement item in dataElement.EnumerateArray())
+            {
+                records.Add(ToRecord(item));
+            }
+            return;
+        }
+
+        if (dataElement.ValueKind == JsonValueKind.Object)
+        {
+            records.Add(ToRecord(dataElement));
+        }
+    }
+
+    private static void AddJsonMeta(JsonElement metaElement, Dictionary<string, string?> metaBucket)
+    {
+        if (metaElement.ValueKind != JsonValueKind.Object)
+        {
+            return;
+        }
+
+        foreach (JsonProperty prop in metaElement.EnumerateObject())
+        {
+            if (!metaBucket.ContainsKey(prop.Name))
+            {
+                metaBucket.Add(prop.Name, JsonElementToString(prop.Value));
+            }
+        }
+    }
+
+    private static Dictionary<string, string?> JsonElementToFields(JsonElement element)
+    {
+        var fields = new Dictionary<string, string?>();
+        if (element.ValueKind != JsonValueKind.Object)
+        {
+            return fields;
+        }
+
+        foreach (JsonProperty prop in element.EnumerateObject())
+        {
+            fields[prop.Name] = JsonElementToString(prop.Value);
+        }
+
+        return fields;
+    }
+
+    private static string? JsonElementToString(JsonElement element)
+    {
+        return element.ValueKind switch
+        {
+            JsonValueKind.String => element.GetString(),
+            JsonValueKind.Number => element.ToString(),
+            JsonValueKind.True => "true",
+            JsonValueKind.False => "false",
+            JsonValueKind.Array => $"[{element.GetArrayLength()} items]",
+            JsonValueKind.Object => "{...}",
+            JsonValueKind.Null => null,
+            _ => element.ToString()
+        };
     }
 }

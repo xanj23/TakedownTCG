@@ -15,27 +15,29 @@ public class EndpointMenu
     /// <returns></returns>
     public static Endpoint Run(IApi api)
     {
-        Console.Clear();
-
         if(api == null)
         {
-            Console.WriteLine($"Error: Null Api received. Cannot find endpoint");
+            Console.WriteLine("Error: Null Api received. Cannot find endpoint [EndpointMenu]");
             return null; 
         }
 
         if (api.Endpoints == null || api.Endpoints.Count == 0)
         {
-            Console.WriteLine($"{api.Name} has no endpoints");
+            Console.WriteLine($"{api.Name} has no endpoints [EndpointMenu]");
             return null;
         }
-
-        Console.WriteLine($"Select query basis for {api.Name} API");
-        Console.WriteLine($"Enter from range of 1-{api.NumOfEndpoints}\n");
 
         int chosenEndpoint;
 
         while (true)
         {
+            if (!Console.IsOutputRedirected && !Console.IsErrorRedirected)
+            {
+                Console.Clear();
+            }
+            Console.WriteLine($"Select query basis for {api.Name} API");
+            Console.WriteLine($"Enter from range of 1-{api.NumOfEndpoints}\n");
+
             for (int i = 0; i < api.NumOfEndpoints; i++)
             {
                 Console.WriteLine($"[ {i + 1} | {api.Endpoints[i].Name} ]");
@@ -46,15 +48,17 @@ public class EndpointMenu
 
             if (!int.TryParse(input, out chosenEndpoint))
             {
-                Console.Clear();
                 Console.WriteLine("That's not a valid choice.\n");
+                Console.Write("Press Enter to continue...");
+                Console.ReadLine();
                 continue;
             }
 
             if (chosenEndpoint < 1 || chosenEndpoint > api.NumOfEndpoints)
             {
-                Console.Clear();
                 Console.WriteLine($"Invalid selection. Please select from range 1-{api.NumOfEndpoints}\n");
+                Console.Write("Press Enter to continue...");
+                Console.ReadLine();
                 continue;
             }
 

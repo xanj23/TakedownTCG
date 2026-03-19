@@ -1,9 +1,21 @@
-try
+using System;
+
+namespace TCGAPP
 {
-    FetchApi.SetApiHeader();
-    await ApiHandler.Run();
-}
-catch (Exception ex)
-{
-    Console.WriteLine(ex.Message);
+
+    class Program
+    {
+        static async Task Main(string[] args)
+        {
+            try
+            {
+                ApiManager.LoadApis();
+                await ApiHandler.Run();
+            }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"{ex.Message} [Program]");
+        }
+        }
+    }
 }

@@ -2,10 +2,11 @@ namespace TCGAPP
 {
     public class InputQuery
     {
-        private static object parameters;
         private static Dictionary<string, string> _rawQuery = new Dictionary<string, string>();
         public static Dictionary<string, string> Run<T>(Endpoint endpoint)
         {
+            _rawQuery = new Dictionary<string, string>();
+
             if (endpoint.Parameters == null)
             {
                 return _rawQuery;

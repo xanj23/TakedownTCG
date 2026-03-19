@@ -15,21 +15,23 @@ public class ApiMenu
     /// <returns></returns>
     public static IApi Run()
     {
-        Console.Clear();
-
-        if (ApiManager.NumofApis == null || ApiManager.NumofApis == 0)
+        if (ApiManager.NumofApis == 0)
         {
-            Console.WriteLine("Error: No avaible APIs");
+            Console.WriteLine("Error: No avaible APIs [ApiMenu]");
             return null;
         }
-
-        Console.WriteLine($"Select API to Search");
-        Console.WriteLine($"Enter from range of 1-{ApiManager.NumofApis}\n");
 
         int chosenApi;
 
         while (true)
         {
+            if (!Console.IsOutputRedirected && !Console.IsErrorRedirected)
+            {
+                Console.Clear();
+            }
+            Console.WriteLine("Select API to Search");
+            Console.WriteLine($"Enter from range of 1-{ApiManager.NumofApis}\n");
+
             for (int i = 0; i < ApiManager.NumofApis; i++)
             {
                 Console.WriteLine($"[ {i + 1} | {ApiManager.ApiRepositories[i].Name} ]");
@@ -40,15 +42,17 @@ public class ApiMenu
 
             if (!int.TryParse(input, out chosenApi))
             {
-                Console.Clear();
                 Console.WriteLine("That's not a valid choice.\n");
+                Console.Write("Press Enter to continue...");
+                Console.ReadLine();
                 continue;
             }
 
             if (chosenApi < 1 || chosenApi > ApiManager.NumofApis)
             {
-                Console.Clear();
                 Console.WriteLine($"Invalid selection. Please select from range 1-{ApiManager.NumofApis}\n");
+                Console.Write("Press Enter to continue...");
+                Console.ReadLine();
                 continue;
             }
 

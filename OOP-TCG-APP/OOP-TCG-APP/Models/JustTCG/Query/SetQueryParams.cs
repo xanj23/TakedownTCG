@@ -30,10 +30,10 @@ namespace JustTCG
 
         public SetQueryParams()
         {
-            Parameters.Add("Game", new QueryParam<object>("Game (e.g., mtg, pokemon)", true));
-            Parameters.Add("Q", new QueryParam<object>("Search query", false));
-            Parameters.Add("OrderBy", new QueryParam<object>("Order by (name, release date)", false));
-            Parameters.Add("Order", new QueryParam<object>("Sort order (asc, desc)", false));
+            Parameters.Add("game", new QueryParam<object>("Game (e.g., mtg, pokemon)", true));
+            Parameters.Add("q", new QueryParam<object>("Search query", false));
+            Parameters.Add("orderBy", new QueryParam<object>("Order by (name, release date)", false));
+            Parameters.Add("order", new QueryParam<object>("Sort order (asc, desc)", false));
         }
     }
 }
