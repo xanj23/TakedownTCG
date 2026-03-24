@@ -12,10 +12,10 @@ namespace TCGAPP
                 ApiManager.LoadApis();
                 await ApiHandler.Run();
             }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"{ex.Message} [Program]");
-        }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{ex.Message} [Program]");
+            }
         }
     }
 }
