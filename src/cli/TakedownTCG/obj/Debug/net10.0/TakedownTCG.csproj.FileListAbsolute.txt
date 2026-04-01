@@ -1,0 +1,15 @@
+C:\Users\tiger\Documents\oop26\OOP-TCG-App\src\cli\TakedownTCG\bin\Debug\net10.0\TakedownTCG.exe
+C:\Users\tiger\Documents\oop26\OOP-TCG-App\src\cli\TakedownTCG\bin\Debug\net10.0\TakedownTCG.deps.json
+C:\Users\tiger\Documents\oop26\OOP-TCG-App\src\cli\TakedownTCG\bin\Debug\net10.0\TakedownTCG.runtimeconfig.json
+C:\Users\tiger\Documents\oop26\OOP-TCG-App\src\cli\TakedownTCG\bin\Debug\net10.0\TakedownTCG.dll
+C:\Users\tiger\Documents\oop26\OOP-TCG-App\src\cli\TakedownTCG\bin\Debug\net10.0\TakedownTCG.pdb
+C:\Users\tiger\Documents\oop26\OOP-TCG-App\src\cli\TakedownTCG\obj\Debug\net10.0\TakedownTCG.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\tiger\Documents\oop26\OOP-TCG-App\src\cli\TakedownTCG\obj\Debug\net10.0\TakedownTCG.AssemblyInfoInputs.cache
+C:\Users\tiger\Documents\oop26\OOP-TCG-App\src\cli\TakedownTCG\obj\Debug\net10.0\TakedownTCG.AssemblyInfo.cs
+C:\Users\tiger\Documents\oop26\OOP-TCG-App\src\cli\TakedownTCG\obj\Debug\net10.0\TakedownTCG.csproj.CoreCompileInputs.cache
+C:\Users\tiger\Documents\oop26\OOP-TCG-App\src\cli\TakedownTCG\obj\Debug\net10.0\TakedownTCG.sourcelink.json
+C:\Users\tiger\Documents\oop26\OOP-TCG-App\src\cli\TakedownTCG\obj\Debug\net10.0\TakedownTCG.dll
+C:\Users\tiger\Documents\oop26\OOP-TCG-App\src\cli\TakedownTCG\obj\Debug\net10.0\refint\TakedownTCG.dll
+C:\Users\tiger\Documents\oop26\OOP-TCG-App\src\cli\TakedownTCG\obj\Debug\net10.0\TakedownTCG.pdb
+C:\Users\tiger\Documents\oop26\OOP-TCG-App\src\cli\TakedownTCG\obj\Debug\net10.0\TakedownTCG.genruntimeconfig.cache
+C:\Users\tiger\Documents\oop26\OOP-TCG-App\src\cli\TakedownTCG\obj\Debug\net10.0\ref\TakedownTCG.dll

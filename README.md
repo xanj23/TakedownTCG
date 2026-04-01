@@ -1,15 +1,21 @@
 # OOP-TCG-App
 
+## Status
+- This repository contains the legacy CLI version.
+- `TakedownTCG` will be the official CLI version going forward.
+- An application/GUI will be added in a future release.
+
 ## Project Scope
 OOP-TCG-App is a C# console application for exploring trading card game data through the JustTCG API. The current implementation focuses on object-oriented modeling of API responses and interactive search workflows for cards, games, and sets.
 
-## Current Features
+## Features
 - Search cards by required text query with optional number, printing, and condition filters.
 - Search sets by game with optional text search and sort options.
 - Retrieve the full `/games` endpoint from the menu.
 - Build URL-safe query strings from user input.
 - Deserialize JustTCG JSON responses into strongly typed C# models.
 - Read the JustTCG API key from the `JUSTTCG_API_KEY` environment variable instead of storing credentials in source control.
+- Available APIs: 1 (`JustTCG`).
 
 ## Current Architecture
 - `OOP-TCG-APP/Program.cs`

@@ -1,0 +1,27 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "TakedownTCG: Launch",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-takedown",
+      "program": "${workspaceFolder}/src/cli/TakedownTCG/bin/Debug/net10.0/TakedownTCG.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/src/cli/TakedownTCG",
+      "console": "integratedTerminal",
+      "stopAtEntry": false
+    },
+    {
+      "name": "Legacy OOP-TCG-APP: Launch",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-legacy",
+      "program": "${workspaceFolder}/src/cli/legacy/OOP-TCG-APP/OOP-TCG-APP/bin/Debug/net10.0/OOP-TCG-APP.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/src/cli/legacy/OOP-TCG-APP/OOP-TCG-APP",
+      "console": "integratedTerminal",
+      "stopAtEntry": false
+    }
+  ]
+}
