@@ -1,3 +1,5 @@
+namespace TakedownTCG.cli.Api.JustTCG.Response
+{
 /// <summary>
 /// Represents API plan and rate-limit metadata returned by JustTCG.
 /// </summary>
@@ -6,7 +8,7 @@ public class Metadata
     /// <summary>
     /// Gets or sets the name of the active API plan.
     /// </summary>
-    public string ApiPlan { get; set; }
+    public string ApiPlan { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the total request limit for the active plan.
@@ -42,4 +44,5 @@ public class Metadata
     /// Gets or sets the per-minute rate limit returned by the API.
     /// </summary>
     public int ApiRateLimit { get; set; }
+}
 }

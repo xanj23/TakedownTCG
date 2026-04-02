@@ -1,32 +1,45 @@
 using System;
-using System.Collections.Generic;
 using System.Net.Http;
-using System.Threading.Tasks;
 using TakedownTCG.cli.Api.JustTCG.Query;
-using TakedownTCG.cli.Util;
+using TakedownTCG.cli.Menu;
 
 namespace TakedownTCG.cli.Api.JustTCG
 {
+    /// <summary>
+    /// Coordinates the JustTCG client flow from menu selection through response output.
+    /// </summary>
     public class JustTCGClient : IApiClient
     {
-        private const string ApiKeyHeaderName = "x-api-key";
-        private static readonly HttpClient HttpClient = new HttpClient();
+        internal const string ApiKeyHeaderName = "x-api-key";
+        internal static readonly HttpClient HttpClient = new HttpClient();
+        private readonly JustTCGCommands _commands;
 
-        public string Name => "JustTCG";
-        public string BaseUrl => "https://api.justtcg.com/v1";
-        public string ApiKey => Environment.GetEnvironmentVariable("JUSTTCG_API_KEY") ?? string.Empty;
-
-        public static string MenuName { get; } = "JustTCG Endpoints";
-        public static List<string> Options { get; } = new List<string> { "Cards", "Sets", "Games", "Back", "Quit" };
-        public static List<Action> Actions { get; } = new List<Action>
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JustTCGClient"/> class.
+        /// </summary>
+        public JustTCGClient()
         {
-            Action.Cards,
-            Action.Sets,
-            Action.Games,
-            Action.Back,
-            Action.Quit
-        };
+            _commands = new JustTCGCommands(this);
+        }
 
+        /// <summary>
+        /// Gets the display name of the API client.
+        /// </summary>
+        public string Name => "JustTCG";
+
+        /// <summary>
+        /// Gets the JustTCG API base URL.
+        /// </summary>
+        public string BaseUrl => "https://api.justtcg.com/v1";
+
+        /// <summary>
+        /// Gets the JustTCG API key used for authenticated requests.
+        /// </summary>
+        public string ApiKey => "tcg_5b35dc7894bf4ea6bfd7234e094ae2e1";
+
+        /// <summary>
+        /// Represents the endpoint actions available in the JustTCG menu.
+        /// </summary>
         public enum Action
         {
             Cards = 0,
@@ -36,123 +49,32 @@ namespace TakedownTCG.cli.Api.JustTCG
             Quit = 4
         }
 
+        /// <summary>
+        /// Runs the JustTCG endpoint-selection and query flow.
+        /// </summary>
         public void Run()
         {
             while (true)
             {
-                Action selected = EndpointController.SelectEndpoint();
-                if (selected == Action.Back)
+                Action selectedAction = MenuRunner.Select(JustTCGMenu.Definition);
+
+                if (JustTCGMenu.Definition.BackAction.HasValue && selectedAction == JustTCGMenu.Definition.BackAction.Value)
                 {
                     return;
                 }
 
-                if (selected == Action.Quit)
+                if (selectedAction == JustTCGMenu.Definition.QuitAction)
                 {
                     Environment.Exit(0);
                 }
 
-                IQueryParams query = InputQuery(selected);
-                HttpRequestMessage request = BuildRequest(selected, query);
-                Console.WriteLine($"Built url: {request.RequestUri}");
+                IQueryParams query = _commands.InputQuery(selectedAction);
+                HttpRequestMessage request = _commands.BuildRequest(selectedAction, query);
+                string responseContent = _commands.FetchResponse(request);
+                object responseData = _commands.Deserialize(selectedAction, responseContent);
+                string mappedData = _commands.Map(responseData);
+                _commands.Display(mappedData);
             }
-        }
-
-        public static IQueryParams InputQuery(Action endpoint)
-        {
-            IQueryParams query = endpoint switch
-            {
-                Action.Cards => new CardQueryParams(),
-                Action.Sets => new SetQueryParams(),
-                Action.Games => new GameQueryParams(),
-                _ => throw new NotSupportedException($"Unsupported endpoint: {endpoint}")
-            };
-
-            foreach (KeyValuePair<string, QueryParam<object>> kvp in query.Parameters)
-            {
-                QueryParam<object> param = kvp.Value;
-                if (param.IsRequired)
-                {
-                    string value = UserInput.InputRequiredString(param.Label);
-                    param.Value = value;
-                }
-                else
-                {
-                    Console.Write($"{param.Label} (optional): ");
-                    string value = (Console.ReadLine() ?? string.Empty).Trim();
-                    param.Value = value.Length == 0 ? null : value;
-                }
-            }
-
-            return query;
-        }
-
-        public static string BuildQuery(IQueryParams query)
-        {
-            if (query == null)
-            {
-                throw new ArgumentNullException(nameof(query));
-            }
-
-            var parts = new List<string>();
-            foreach (KeyValuePair<string, QueryParam<object>> kvp in query.Parameters)
-            {
-                string key = kvp.Key;
-                QueryParam<object> param = kvp.Value;
-                object? value = param.Value;
-
-                if (value == null || string.IsNullOrWhiteSpace(value.ToString()))
-                {
-                    if (param.IsRequired)
-                    {
-                        throw new InvalidOperationException($"Missing required parameter: {param.Label}");
-                    }
-                    continue;
-                }
-
-                string encodedValue = Uri.EscapeDataString(value.ToString() ?? string.Empty);
-                parts.Add($"{key}={encodedValue}");
-            }
-
-            if (parts.Count == 0)
-            {
-                return string.Empty;
-            }
-
-            return "?" + string.Join("&", parts);
-        }
-
-        public string BuildUrl(Action endpoint, IQueryParams query)
-        {
-            string path = endpoint switch
-            {
-                Action.Cards => "/cards",
-                Action.Sets => "/sets",
-                Action.Games => "/games",
-                _ => throw new NotSupportedException($"Unsupported endpoint: {endpoint}")
-            };
-
-            string queryString = BuildQuery(query);
-            return $"{BaseUrl}{path}{queryString}";
-        }
-
-        public HttpRequestMessage BuildRequest(Action endpoint, IQueryParams query)
-        {
-            string url = BuildUrl(endpoint, query);
-            var request = new HttpRequestMessage(HttpMethod.Get, url);
-
-            if (!string.IsNullOrWhiteSpace(ApiKey))
-            {
-                request.Headers.Add(ApiKeyHeaderName, ApiKey);
-            }
-
-            return request;
-        }
-
-        public async Task<string> FetchAsync(HttpRequestMessage request)
-        {
-            using HttpResponseMessage response = await HttpClient.SendAsync(request);
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadAsStringAsync();
         }
     }
 }

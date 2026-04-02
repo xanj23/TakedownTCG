@@ -1,3 +1,5 @@
+namespace TakedownTCG.cli.Api.JustTCG.Response
+{
 /// <summary>
 /// Represents pagination metadata returned with a JustTCG collection response.
 /// </summary>
@@ -22,4 +24,5 @@ public class Meta
     /// Gets or sets a value indicating whether another page of results is available.
     /// </summary>
     public bool HasMore { get; set; }
+}
 }

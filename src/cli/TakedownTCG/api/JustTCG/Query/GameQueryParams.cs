@@ -7,6 +7,6 @@ namespace TakedownTCG.cli.Api.JustTCG.Query
     /// </summary>
     public sealed class GameQueryParams : IQueryParams
     {
-        public Dictionary<string, QueryParam<object>> Parameters { get; } = new Dictionary<string, QueryParam<object>>();
+        public Dictionary<string, QueryParameter> Parameters { get; } = new Dictionary<string, QueryParameter>();
     }
 }

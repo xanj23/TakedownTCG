@@ -24,27 +24,27 @@ namespace TakedownTCG.cli.Api.JustTCG.Response
         /// <summary>
         /// Gets or sets the unique variant identifier.
         /// </summary>
-        public string Id { get; set; }
+        public string Id { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the reported card condition.
         /// </summary>
-        public string Condition { get; set; }
+        public string Condition { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the printing type.
         /// </summary>
-        public string Printing { get; set; }
+        public string Printing { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the language of the variant.
         /// </summary>
-        public string Language { get; set; }
+        public string Language { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the linked TCGplayer SKU identifier.
         /// </summary>
-        public string TcgplayerSkuId { get; set; }
+        public string TcgplayerSkuId { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the current price.

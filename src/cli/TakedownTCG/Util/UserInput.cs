@@ -82,5 +82,17 @@ namespace TakedownTCG.cli.Util
                 return value;
             }
         }
+
+        /// <summary>
+        /// Prompts for an optional string value and returns null when left blank.
+        /// </summary>
+        /// <param name="label">Prompt label shown to the user.</param>
+        /// <returns>Trimmed string value or null when no input is provided.</returns>
+        public static string? InputString(string label)
+        {
+            Console.Write($"{label}: ");
+            string value = (Console.ReadLine() ?? string.Empty).Trim();
+            return value.Length == 0 ? null : value;
+        }
     }
 }

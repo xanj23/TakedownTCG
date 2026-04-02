@@ -4,6 +4,6 @@ namespace TakedownTCG.cli.Api.JustTCG.Query
 {
     public interface IQueryParams
     {
-        Dictionary<string, QueryParam<object>> Parameters { get; }
+        Dictionary<string, QueryParameter> Parameters { get; }
     }
 }

@@ -1,3 +1,5 @@
+namespace TakedownTCG.cli.Api.JustTCG.Response
+{
 /// <summary>
 /// Represents a set record returned by the JustTCG sets endpoint.
 /// </summary>
@@ -6,22 +8,22 @@ public class Set
     /// <summary>
     /// Gets or sets the unique set identifier.
     /// </summary>
-    public string Id { get; set; }
+    public string Id { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the set name.
     /// </summary>
-    public string Name { get; set; }
+    public string Name { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the owning game identifier.
     /// </summary>
-    public string GameId { get; set; }
+    public string GameId { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the owning game name.
     /// </summary>
-    public string Game { get; set; }
+    public string Game { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the number of cards in the set.
@@ -41,7 +43,7 @@ public class Set
     /// <summary>
     /// Gets or sets the release date string returned by the API.
     /// </summary>
-    public string ReleaseDate { get; set; }
+    public string ReleaseDate { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the aggregate set value in USD.
@@ -62,4 +64,5 @@ public class Set
     /// Gets or sets the ninety-day percentage change in set value.
     /// </summary>
     public float SetValueChange90dPct { get; set; }
+}
 }

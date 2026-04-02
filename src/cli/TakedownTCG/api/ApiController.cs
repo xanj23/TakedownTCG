@@ -1,31 +1,50 @@
-using TakedownTCG.cli.Util;
+using TakedownTCG.cli.Menu;
 
 namespace TakedownTCG.cli.Api
 {
+    /// <summary>
+    /// Coordinates the API-selection submenu flow.
+    /// </summary>
     public static class ApiController
     {
+        /// <summary>
+        /// Runs the API submenu loop.
+        /// </summary>
         public static void Run()
         {
             while (true)
             {
-                int selectedIndex = UserInput.GetIndex(Api.Name, Api.Options);
-                Api.Action selectedAction = Api.Actions[selectedIndex];
+                ApiMenu.Action selectedAction = MenuRunner.Select(ApiMenu.Definition);
 
-                if (selectedAction == Api.Action.Back)
+                if (ApiMenu.Definition.BackAction.HasValue && selectedAction == ApiMenu.Definition.BackAction.Value)
                 {
                     return;
                 }
 
-                if (selectedAction == Api.Action.Quit)
-                {
-                    Environment.Exit(0);
-                }
+                RunAction(selectedAction);
+            }
+        }
 
-                if (selectedAction == Api.Action.JustTCG)
-                {
+        /// <summary>
+        /// Executes the selected API-menu action.
+        /// </summary>
+        /// <param name="selectedAction">The selected API action.</param>
+        private static void RunAction(ApiMenu.Action selectedAction)
+        {
+            if (selectedAction == ApiMenu.Definition.QuitAction)
+            {
+                Environment.Exit(0);
+            }
+
+            switch (selectedAction)
+            {
+                case ApiMenu.Action.JustTCG:
                     IApiClient client = ApiRegistry.Resolve(selectedAction);
                     client.Run();
-                }
+                    break;
+                default:
+                    Console.WriteLine("Unknown API menu option was selected.");
+                    break;
             }
         }
     }

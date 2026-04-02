@@ -20,16 +20,15 @@ namespace TakedownTCG.cli.Api.JustTCG.Query
     /// </summary>
     public class CardQueryParams : IQueryParams
     {
-        // Key = param name, Value = QueryParam (string or enum)
-        public Dictionary<string, QueryParam<object>> Parameters { get; } = new Dictionary<string, QueryParam<object>>();
+        // Key = API parameter name, Value = prompt/value metadata for that field.
+        public Dictionary<string, QueryParameter> Parameters { get; } = new Dictionary<string, QueryParameter>();
 
         public CardQueryParams()
         {
-            // Add parameters dynamically
-            Parameters.Add("q", new QueryParam<object>("Name", true));
-            Parameters.Add("number", new QueryParam<object>("Card number (e.g., 15)", false));
-            Parameters.Add("printing", new QueryParam<object>("Printing", false));
-            Parameters.Add("condition", new QueryParam<object>("Condition", false));
+            Parameters.Add("q", new QueryParameter("Name", true));
+            Parameters.Add("number", new QueryParameter("Card number (e.g., 15)", false));
+            Parameters.Add("printing", new QueryParameter("Printing", false));
+            Parameters.Add("condition", new QueryParameter("Condition", false));
         }
     }
 }

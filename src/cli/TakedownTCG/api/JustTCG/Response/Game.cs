@@ -1,3 +1,5 @@
+namespace TakedownTCG.cli.Api.JustTCG.Response
+{
 /// <summary>
 /// Represents a trading card game summary returned by the JustTCG games endpoint.
 /// </summary>
@@ -6,12 +8,12 @@ public class Game
     /// <summary>
     /// Gets or sets the unique game identifier.
     /// </summary>
-    public string Id { get; set; }
+    public string Id { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the display name of the game.
     /// </summary>
-    public string Name { get; set; }
+    public string Name { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the number of cards tracked for the game.
@@ -117,4 +119,5 @@ public class Game
     /// Gets or sets the count of sealed products with negative ninety-day price movement.
     /// </summary>
     public int SealedCardsNeg90dCount { get; set; }
+}
 }

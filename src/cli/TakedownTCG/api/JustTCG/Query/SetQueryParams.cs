@@ -25,15 +25,15 @@ namespace TakedownTCG.cli.Api.JustTCG.Query
     /// </summary>
     public class SetQueryParams : IQueryParams
     {
-        // Key = param name, Value = QueryParam (string or enum)
-        public Dictionary<string, QueryParam<object>> Parameters { get; } = new Dictionary<string, QueryParam<object>>();
+        // Key = API parameter name, Value = prompt/value metadata for that field.
+        public Dictionary<string, QueryParameter> Parameters { get; } = new Dictionary<string, QueryParameter>();
 
         public SetQueryParams()
         {
-            Parameters.Add("game", new QueryParam<object>("Game (e.g., mtg, pokemon)", true));
-            Parameters.Add("q", new QueryParam<object>("Search query", false));
-            Parameters.Add("orderBy", new QueryParam<object>("Order by (name, release date)", false));
-            Parameters.Add("order", new QueryParam<object>("Sort order (asc, desc)", false));
+            Parameters.Add("game", new QueryParameter("Game (e.g., mtg, pokemon)", true));
+            Parameters.Add("q", new QueryParameter("Search query", false));
+            Parameters.Add("orderBy", new QueryParameter("Order by (name, release date)", false));
+            Parameters.Add("order", new QueryParameter("Sort order (asc, desc)", false));
         }
     }
 }
