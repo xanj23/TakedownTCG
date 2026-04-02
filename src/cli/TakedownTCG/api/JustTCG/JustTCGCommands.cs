@@ -18,6 +18,10 @@ namespace TakedownTCG.cli.Api.JustTCG
     public sealed class JustTCGCommands
     {
         private readonly JustTCGClient _client;
+        private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        };
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JustTCGCommands"/> class.
@@ -222,7 +226,7 @@ namespace TakedownTCG.cli.Api.JustTCG
 
         private static Response<T> DeserializeResponse<T>(string responseContent)
         {
-            Response<T>? response = JsonSerializer.Deserialize<Response<T>>(responseContent);
+            Response<T>? response = JsonSerializer.Deserialize<Response<T>>(responseContent, JsonOptions);
 
             if (response == null)
             {
