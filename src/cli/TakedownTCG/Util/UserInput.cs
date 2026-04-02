@@ -61,5 +61,26 @@ namespace TakedownTCG.cli.Util
                 }
             }
         }
+
+        /// <summary>
+        /// Prompts for a required string value; input must not be null or blank.
+        /// </summary>
+        /// <param name="label">Prompt label shown to the user.</param>
+        /// <returns>Non-empty trimmed string.</returns>
+        public static string InputRequiredString(string label)
+        {
+            while (true)
+            {
+                Console.Write($"{label}: ");
+                string value = (Console.ReadLine() ?? string.Empty).Trim();
+                if (value.Length == 0)
+                {
+                    Console.WriteLine("Input is required and cannot be blank.");
+                    continue;
+                }
+
+                return value;
+            }
+        }
     }
 }

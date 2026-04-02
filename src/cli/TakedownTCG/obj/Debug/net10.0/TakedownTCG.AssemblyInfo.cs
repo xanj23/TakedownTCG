@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TakedownTCG")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+24c614a2d18fb1b66521ba31889a4546ea6be2c0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7a7d248a9e99b0ab10129710647bcac304932411")]
 [assembly: System.Reflection.AssemblyProductAttribute("TakedownTCG")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TakedownTCG")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

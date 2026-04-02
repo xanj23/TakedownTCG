@@ -1,35 +1,42 @@
 using System.Collections.Generic;
 
-namespace TakedownTCG.cli.Config
+namespace TakedownTCG.cli.Api
 {
-    public static class MainMenu
+    public static class Api
     {
         public static string Name { get; }
+        public static List<string> Apis { get; }
         public static List<string> Options { get; }
         public static List<Action> Actions { get; }
 
-        static MainMenu()
+        static Api()
         {
-            Name = "Main Menu";
+            Name = "Api Menu";
+
+            Apis = new List<string>
+            {
+                "JustTCG"
+            };
+
             Actions = new List<Action>
             {
-                Action.SearchAPIs,
-                Action.UserAccount,
+                Action.JustTCG,
+                Action.Back,
                 Action.Quit
             };
 
             Options = new List<string>
             {
-                "Search APIs",
-                "User Account",
+                "JustTCG",
+                "Back",
                 "Quit"
             };
         }
 
         public enum Action
         {
-            SearchAPIs = 0,
-            UserAccount = 1,
+            JustTCG = 0,
+            Back = 1,
             Quit = 2
         }
     }
