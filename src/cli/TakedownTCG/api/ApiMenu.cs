@@ -1,6 +1,7 @@
 using System.Collections.Generic;
+using TakedownTCG.cli.Menu;
 
-namespace TakedownTCG.cli.Menu
+namespace TakedownTCG.cli.Api
 {
     /// <summary>
     /// Defines the API-selection submenu.
