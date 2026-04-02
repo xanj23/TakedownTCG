@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Xml;
 using TakedownTCG.cli;
 
 namespace TakedownTCG.cli.Util
@@ -7,11 +6,11 @@ namespace TakedownTCG.cli.Util
     public static class UserInput
     {
         /// <summary>
-        /// 
+        /// Prompts the user to choose an option and returns the zero-based index.
         /// </summary>
-        /// <param name="prompt"></param>
-        /// <param name="options"></param>
-        /// <returns name="></returns>
+        /// <param name="prompt">Header text shown above the option list.</param>
+        /// <param name="options">Options to display; must not be null or empty.</param>
+        /// <returns>The zero-based index of the selected option.</returns>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="ArgumentException"></exception>
         public static int GetIndex<T>(string prompt, IReadOnlyList<T> options)
@@ -61,6 +60,39 @@ namespace TakedownTCG.cli.Util
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Prompts for a required string value; input must not be null or blank.
+        /// </summary>
+        /// <param name="label">Prompt label shown to the user.</param>
+        /// <returns>Non-empty trimmed string.</returns>
+        public static string InputRequiredString(string label)
+        {
+            while (true)
+            {
+                Console.Write($"{label}: ");
+                string value = (Console.ReadLine() ?? string.Empty).Trim();
+                if (value.Length == 0)
+                {
+                    Console.WriteLine("Input is required and cannot be blank.");
+                    continue;
+                }
+
+                return value;
+            }
+        }
+
+        /// <summary>
+        /// Prompts for an optional string value and returns null when left blank.
+        /// </summary>
+        /// <param name="label">Prompt label shown to the user.</param>
+        /// <returns>Trimmed string value or null when no input is provided.</returns>
+        public static string? InputString(string label)
+        {
+            Console.Write($"{label}: ");
+            string value = (Console.ReadLine() ?? string.Empty).Trim();
+            return value.Length == 0 ? null : value;
         }
     }
 }

@@ -5,11 +5,11 @@ namespace TakedownTCG.cli.Util
     public static class Formatting
     {
         /// <summary>
-        /// 
+        /// Formats options into a numbered list for console display.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="options"></param>
-        /// <returns name="result"></returns>
+        /// <param name="options">Options to format; must not be null or empty.</param>
+        /// <returns>A numbered list string, one option per line.</returns>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="ArgumentException"></exception>
         public static string BuildOptionsList<T>(IReadOnlyList<T> options)
