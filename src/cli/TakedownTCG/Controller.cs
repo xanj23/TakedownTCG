@@ -38,7 +38,7 @@ namespace TakedownTCG.cli
                     ApiController.Run();
                     break;
                 case MainMenu.Action.UserAccount:
-                    Console.WriteLine("User Account is not implemented yet.");
+                    UserAccountController.Run();
                     break;
                 default:
                     Console.WriteLine("Unknown menu option was selected.");

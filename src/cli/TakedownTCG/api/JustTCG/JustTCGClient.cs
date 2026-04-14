@@ -1,6 +1,8 @@
 using System;
 using System.Net.Http;
 using TakedownTCG.cli.Api.JustTCG.Query;
+using TakedownTCG.cli.Api.JustTCG.Response;
+using TakedownTCG.cli.Api;
 using TakedownTCG.cli.Menu;
 
 namespace TakedownTCG.cli.Api.JustTCG
@@ -74,6 +76,73 @@ namespace TakedownTCG.cli.Api.JustTCG
                 object responseData = _commands.Deserialize(selectedAction, responseContent);
                 string mappedData = _commands.Map(responseData);
                 _commands.Display(mappedData);
+
+                // Offer to add a displayed result to favorites for logged-in users
+                try
+                {
+                    Console.WriteLine();
+                    string favInput = TakedownTCG.cli.Util.UserInput.InputString("Add a result to favorites? Enter result number or press Enter to skip");
+                    if (!string.IsNullOrWhiteSpace(favInput))
+                    {
+                        if (!int.TryParse(favInput.Trim(), out int favIndex))
+                        {
+                            Console.WriteLine("Invalid number.");
+                            continue;
+                        }
+
+                        var current = UserAccountController.CurrentUser;
+                        if (current is null)
+                        {
+                            Console.WriteLine("Login to add favorites.");
+                            continue;
+                        }
+
+                        if (responseData is Response<Card> cardResp)
+                        {
+                            if (favIndex < 1 || favIndex > cardResp.Data.Count)
+                            {
+                                Console.WriteLine("Index out of range.");
+                                continue;
+                            }
+
+                            var card = cardResp.Data[favIndex - 1];
+                            bool added = UserAccountController.FavoriteService.AddFavorite(current.UserName, "Card", card.Id, card.Name);
+                            Console.WriteLine(added ? "Added to favorites." : "Already favorited or failed.");
+                        }
+                        else if (responseData is Response<Set> setResp)
+                        {
+                            if (favIndex < 1 || favIndex > setResp.Data.Count)
+                            {
+                                Console.WriteLine("Index out of range.");
+                                continue;
+                            }
+
+                            var set = setResp.Data[favIndex - 1];
+                            bool added = UserAccountController.FavoriteService.AddFavorite(current.UserName, "Set", set.Id, set.Name);
+                            Console.WriteLine(added ? "Added to favorites." : "Already favorited or failed.");
+                        }
+                        else if (responseData is Response<Game> gameResp)
+                        {
+                            if (favIndex < 1 || favIndex > gameResp.Data.Count)
+                            {
+                                Console.WriteLine("Index out of range.");
+                                continue;
+                            }
+
+                            var game = gameResp.Data[favIndex - 1];
+                            bool added = UserAccountController.FavoriteService.AddFavorite(current.UserName, "Game", game.Id, game.Name);
+                            Console.WriteLine(added ? "Added to favorites." : "Already favorited or failed.");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Favoriting is not supported for this response type.");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Failed to add favorite: {ex.Message}");
+                }
             }
         }
     }
