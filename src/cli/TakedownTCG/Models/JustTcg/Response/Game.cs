@@ -47,7 +47,7 @@ namespace TakedownTCG.cli.Models.JustTcg.Response
         /// Gets or sets the Unix timestamp of the last update.
         /// </summary>
         [JsonPropertyName("last_updated")]
-        public long LastUpdated { get; set; }
+        public string LastUpdated { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the aggregate game value index in cents.

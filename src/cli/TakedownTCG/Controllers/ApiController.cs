@@ -1,4 +1,4 @@
-using TakedownTCG.cli.Api;
+using TakedownTCG.cli.Services.Api;
 using TakedownTCG.cli.Views.Menus;
 using TakedownTCG.cli.Views.Output;
 using TakedownTCG.cli.Views.Shared;

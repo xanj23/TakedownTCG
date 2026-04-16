@@ -1,6 +1,6 @@
-using TakedownTCG.cli.Api;
-using TakedownTCG.cli.Api.JustTCG;
 using TakedownTCG.cli.Controllers;
+using TakedownTCG.cli.Services.Api;
+using TakedownTCG.cli.Services.JustTcg;
 using TakedownTCG.cli.Views.Menus;
 
 namespace TakedownTCG.cli.Composition

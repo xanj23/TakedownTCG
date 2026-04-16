@@ -1,4 +1,4 @@
-namespace TakedownTCG.cli.Api
+namespace TakedownTCG.cli.Services.Api
 {
     /// <summary>
     /// Defines the common contract for API clients exposed through the CLI.

@@ -1,7 +1,6 @@
 using System;
 using System.Text;
 using System.Text.Json;
-using TakedownTCG.cli.Api.JustTCG;
 using TakedownTCG.cli.Models.JustTcg.Response;
 
 namespace TakedownTCG.cli.Services.JustTcg

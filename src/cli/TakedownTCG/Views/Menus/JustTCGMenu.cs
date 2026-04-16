@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using TakedownTCG.cli.Api.JustTCG;
+using TakedownTCG.cli.Services.JustTcg;
 using TakedownTCG.cli.Views.Shared;
 
 namespace TakedownTCG.cli.Views.Menus

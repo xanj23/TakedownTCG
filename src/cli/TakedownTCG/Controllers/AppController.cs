@@ -39,7 +39,7 @@ namespace TakedownTCG.cli.Controllers
                     ApiController.Run();
                     break;
                 case MainMenu.Action.UserAccount:
-                    AppStatusView.ShowUserAccountNotImplemented();
+                    UserAccountController.Run();
                     break;
                 default:
                     AppStatusView.ShowUnknownMainMenuOption();

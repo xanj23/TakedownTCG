@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using TakedownTCG.cli.Api.JustTCG;
 using TakedownTCG.cli.Models.JustTcg.Query;
 using TakedownTCG.cli.Views.Input;
 

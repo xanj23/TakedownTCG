@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using TakedownTCG.cli.Views.Menus;
 
-namespace TakedownTCG.cli.Api
+namespace TakedownTCG.cli.Services.Api
 {
     /// <summary>
     /// Central registry that maps menu actions to API client factories.

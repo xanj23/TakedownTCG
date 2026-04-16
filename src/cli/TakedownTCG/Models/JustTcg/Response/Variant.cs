@@ -65,7 +65,7 @@ namespace TakedownTCG.cli.Models.JustTcg.Response
         /// Gets or sets the Unix timestamp of the last price update.
         /// </summary>
         [JsonPropertyName("last_updated")]
-        public long LastUpdated { get; set; }
+        public string LastUpdated { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the twenty-four-hour price change percentage.
