@@ -1,10 +1,12 @@
-﻿namespace TakedownTCG.cli
+using TakedownTCG.cli.Composition;
+
+namespace TakedownTCG.cli
 {
     public static class Program
     {
         public static void Main()
         {
-            Controller.RunCli();
+            AppCompositionRoot.Run();
         }
     }
 }

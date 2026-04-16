@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using TakedownTCG.cli.Menu;
+using TakedownTCG.cli.Views.Menus;
 
 namespace TakedownTCG.cli.Api
 {
@@ -15,13 +15,6 @@ namespace TakedownTCG.cli.Api
         /// a new client instance when resolved.
         /// </summary>
         private static readonly Dictionary<ApiMenu.Action, Func<IApiClient>> Factories = new();
-
-        static ApiRegistry()
-        {
-            // Example registration so the flow is visible end-to-end.
-            // This binds the JustTCG menu action to the card endpoint using the generic client.
-            Register<JustTCG.JustTCGClient>(ApiMenu.Action.JustTCG);
-        }
 
         /// <summary>
         /// Registers an API client type against a menu action.

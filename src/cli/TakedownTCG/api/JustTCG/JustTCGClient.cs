@@ -1,7 +1,11 @@
 using System;
-using System.Net.Http;
-using TakedownTCG.cli.Api.JustTCG.Query;
-using TakedownTCG.cli.Menu;
+using TakedownTCG.cli.Models.JustTcg.Query;
+using TakedownTCG.cli.Infrastructure.Config;
+using TakedownTCG.cli.Infrastructure.Http;
+using TakedownTCG.cli.Services.JustTcg;
+using TakedownTCG.cli.Views.Menus;
+using TakedownTCG.cli.Views.Output;
+using TakedownTCG.cli.Views.Shared;
 
 namespace TakedownTCG.cli.Api.JustTCG
 {
@@ -10,16 +14,20 @@ namespace TakedownTCG.cli.Api.JustTCG
     /// </summary>
     public class JustTCGClient : IApiClient
     {
-        internal const string ApiKeyHeaderName = "x-api-key";
-        internal static readonly HttpClient HttpClient = new HttpClient();
-        private readonly JustTCGCommands _commands;
+        private readonly JustTcgApiConfig _config;
+        private readonly JustTcgQueryService _queryService;
+        private readonly JustTcgResponseService _responseService;
+        private readonly JustTcgHttpGateway _httpGateway;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JustTCGClient"/> class.
         /// </summary>
         public JustTCGClient()
         {
-            _commands = new JustTCGCommands(this);
+            _config = new JustTcgApiConfig();
+            _queryService = new JustTcgQueryService();
+            _responseService = new JustTcgResponseService();
+            _httpGateway = new JustTcgHttpGateway();
         }
 
         /// <summary>
@@ -30,12 +38,12 @@ namespace TakedownTCG.cli.Api.JustTCG
         /// <summary>
         /// Gets the JustTCG API base URL.
         /// </summary>
-        public string BaseUrl => "https://api.justtcg.com/v1";
+        public string BaseUrl => _config.BaseUrl;
 
         /// <summary>
         /// Gets the JustTCG API key used for authenticated requests.
         /// </summary>
-        public string ApiKey => "tcg_5b35dc7894bf4ea6bfd7234e094ae2e1";
+        public string ApiKey => _config.ApiKey;
 
         /// <summary>
         /// Represents the endpoint actions available in the JustTCG menu.
@@ -68,13 +76,14 @@ namespace TakedownTCG.cli.Api.JustTCG
                     Environment.Exit(0);
                 }
 
-                IQueryParams query = _commands.InputQuery(selectedAction);
-                HttpRequestMessage request = _commands.BuildRequest(selectedAction, query);
-                string responseContent = _commands.FetchResponse(request);
-                object responseData = _commands.Deserialize(selectedAction, responseContent);
-                string mappedData = _commands.Map(responseData);
-                _commands.Display(mappedData);
+                IQueryParams query = _queryService.InputQuery(selectedAction);
+                string url = _queryService.BuildUrl(selectedAction, query, BaseUrl);
+                string responseContent = _httpGateway.FetchResponse(url, _config.ApiKeyHeaderName, ApiKey);
+                object responseData = _responseService.Deserialize(selectedAction, responseContent);
+                string mappedData = _responseService.Map(responseData);
+                JustTcgOutputView.DisplayMappedData(mappedData);
             }
         }
     }
 }
+
