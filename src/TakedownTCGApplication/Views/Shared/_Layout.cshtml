@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - TakedownTCG</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="bg-slate-100 text-slate-900">
+    <div class="min-h-screen bg-[radial-gradient(circle_at_top_left,#dbeafe_0%,#f1f5f9_45%,#e2e8f0_100%)]">
+        <header class="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+            <div class="rounded-2xl border border-slate-300 bg-white/85 p-3 shadow-sm backdrop-blur">
+                <div class="hidden items-center gap-3 md:flex">
+                    <a asp-controller="Home" asp-action="Index" class="inline-flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                        <img src="~/images/TakedownTCG_Icon.png" alt="TakedownTCG logo" class="h-7 w-7 rounded-md" />
+                        <span class="text-sm font-semibold tracking-wide">TAKEDOWN TCG</span>
+                    </a>
+                    <nav class="flex flex-1 items-center justify-end gap-2 text-sm font-medium">
+                        <a asp-controller="Home" asp-action="Index" class="nav-link">Home</a>
+                        <a asp-controller="Search" asp-action="Cards" class="nav-link">Cards</a>
+                        <a asp-controller="Search" asp-action="Sets" class="nav-link">Sets</a>
+                        <a asp-controller="Search" asp-action="Games" class="nav-link">Games</a>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <a asp-controller="Favorites" asp-action="Index" class="nav-link">Favorites</a>
+                            <a asp-controller="Account" asp-action="Profile" class="nav-link">Account</a>
+                            <form asp-controller="Account" asp-action="Logout" method="post" class="inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn-ghost">Logout</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <a asp-controller="Account" asp-action="Login" class="nav-link">Login</a>
+                            <a asp-controller="Account" asp-action="Register" class="btn-primary">Register</a>
+                        }
+                    </nav>
+                </div>
+
+                <div class="md:hidden">
+                    <div class="mb-3 flex items-center justify-between">
+                        <a asp-controller="Home" asp-action="Index" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                            <img src="~/images/TakedownTCG_Icon.png" alt="TakedownTCG logo" class="h-6 w-6 rounded-md" />
+                            <span class="text-xs font-bold tracking-wide">TAKEDOWN TCG</span>
+                        </a>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <form asp-controller="Account" asp-action="Logout" method="post">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn-ghost text-xs">Logout</button>
+                            </form>
+                        }
+                    </div>
+                    <nav class="grid grid-cols-2 gap-2 text-xs font-semibold">
+                        <a asp-controller="Search" asp-action="Cards" class="mobile-nav-link">Cards</a>
+                        <a asp-controller="Search" asp-action="Sets" class="mobile-nav-link">Sets</a>
+                        <a asp-controller="Search" asp-action="Games" class="mobile-nav-link">Games</a>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <a asp-controller="Favorites" asp-action="Index" class="mobile-nav-link">Favorites</a>
+                            <a asp-controller="Account" asp-action="Profile" class="mobile-nav-link col-span-2">Account</a>
+                        }
+                        else
+                        {
+                            <a asp-controller="Account" asp-action="Login" class="mobile-nav-link">Login</a>
+                            <a asp-controller="Account" asp-action="Register" class="mobile-nav-link">Register</a>
+                        }
+                    </nav>
+                </div>
+            </div>
+        </header>
+
+        <main class="mx-auto w-full max-w-7xl px-4 pb-10 sm:px-6 lg:px-8">
+            @if (TempData["StatusMessage"] is string statusMessage && !string.IsNullOrWhiteSpace(statusMessage))
+            {
+                <div class="mb-4 rounded-xl border border-emerald-300 bg-emerald-50 p-3 text-sm text-emerald-900">@statusMessage</div>
+            }
+            @if (TempData["ErrorMessage"] is string errorMessage && !string.IsNullOrWhiteSpace(errorMessage))
+            {
+                <div class="mb-4 rounded-xl border border-rose-300 bg-rose-50 p-3 text-sm text-rose-900">@errorMessage</div>
+            }
+            @RenderBody()
+        </main>
+    </div>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

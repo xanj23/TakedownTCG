@@ -1,0 +1,46 @@
+@model RegisterViewModel
+@{
+    ViewData["Title"] = "Register";
+}
+
+<section class="mx-auto max-w-xl rounded-3xl border border-slate-300 bg-white/90 p-6 shadow-sm md:p-8">
+    <h1 class="text-3xl font-extrabold text-slate-900">Create Account</h1>
+    <p class="mt-2 text-sm text-slate-600">Register to save favorites and manage your TakedownTCG profile.</p>
+
+    <form asp-action="Register" method="post" class="mt-6 space-y-4">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="rounded-lg bg-rose-50 p-2 text-sm text-rose-700"></div>
+
+        <label class="block">
+            <span class="form-label">Username</span>
+            <input asp-for="UserName" class="form-input" />
+            <span asp-validation-for="UserName" class="form-error"></span>
+        </label>
+
+        <label class="block">
+            <span class="form-label">Email</span>
+            <input asp-for="Email" class="form-input" />
+            <span asp-validation-for="Email" class="form-error"></span>
+        </label>
+
+        <label class="block">
+            <span class="form-label">Password</span>
+            <input asp-for="Password" class="form-input" />
+            <span asp-validation-for="Password" class="form-error"></span>
+        </label>
+
+        <label class="block">
+            <span class="form-label">Confirm Password</span>
+            <input asp-for="ConfirmPassword" class="form-input" />
+            <span asp-validation-for="ConfirmPassword" class="form-error"></span>
+        </label>
+
+        <button type="submit" class="btn-primary w-full">Register</button>
+    </form>
+
+    <p class="mt-4 text-sm text-slate-600">Already have an account? <a asp-action="Login" class="font-semibold text-cyan-700">Sign in</a>.</p>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

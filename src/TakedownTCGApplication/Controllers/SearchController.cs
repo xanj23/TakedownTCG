@@ -1,0 +1,118 @@
+using Microsoft.AspNetCore.Mvc;
+using TakedownTCG.Core.Abstractions;
+using TakedownTCG.Core.Models.JustTcg.Query;
+using TakedownTCG.Core.Models.JustTcg.Response;
+using TakedownTCG.Core.Services.JustTcg;
+using TakedownTCGApplication.ViewModels.Search;
+
+namespace TakedownTCGApplication.Controllers;
+
+public sealed class SearchController : Controller
+{
+    private readonly IJustTcgSearchService _searchService;
+
+    public SearchController(IJustTcgSearchService searchService)
+    {
+        _searchService = searchService;
+    }
+
+    [HttpGet]
+    public IActionResult Index()
+    {
+        return RedirectToAction(nameof(Cards));
+    }
+
+    [HttpGet]
+    public IActionResult Cards()
+    {
+        return View(new CardsSearchViewModel());
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Cards(CardsSearchViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        CardQueryParams query = new();
+        query.Parameters["q"].Value = model.Query;
+        query.Parameters["number"].Value = model.Number;
+        query.Parameters["printing"].Value = model.Printing;
+        query.Parameters["condition"].Value = model.Condition;
+
+        try
+        {
+            Response<Card> response = (Response<Card>)await _searchService.SearchAsync(JustTcgEndpoint.Cards, query);
+            model.Results = response.Data;
+            model.ErrorMessage = response.Error ?? string.Empty;
+        }
+        catch (Exception ex)
+        {
+            model.ErrorMessage = $"Search failed: {ex.Message}";
+        }
+
+        return View(model);
+    }
+
+    [HttpGet]
+    public IActionResult Sets()
+    {
+        return View(new SetsSearchViewModel());
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Sets(SetsSearchViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        SetQueryParams query = new();
+        query.Parameters["game"].Value = model.Game;
+        query.Parameters["q"].Value = model.Query;
+        query.Parameters["orderBy"].Value = model.OrderBy;
+        query.Parameters["order"].Value = model.Order;
+
+        try
+        {
+            Response<Set> response = (Response<Set>)await _searchService.SearchAsync(JustTcgEndpoint.Sets, query);
+            model.Results = response.Data;
+            model.ErrorMessage = response.Error ?? string.Empty;
+        }
+        catch (Exception ex)
+        {
+            model.ErrorMessage = $"Search failed: {ex.Message}";
+        }
+
+        return View(model);
+    }
+
+    [HttpGet]
+    public IActionResult Games()
+    {
+        return View(new GamesSearchViewModel());
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Games(GamesSearchViewModel model)
+    {
+        try
+        {
+            Response<Game> response = (Response<Game>)await _searchService.SearchAsync(JustTcgEndpoint.Games, new GameQueryParams());
+            model.Results = response.Data;
+            model.ErrorMessage = response.Error ?? string.Empty;
+        }
+        catch (Exception ex)
+        {
+            model.ErrorMessage = $"Search failed: {ex.Message}";
+        }
+
+        return View(model);
+    }
+}

@@ -1,0 +1,38 @@
+@{
+    ViewData["Title"] = "Home";
+}
+
+<section class="space-y-6">
+    <div class="rounded-3xl border border-slate-300 bg-white/80 p-6 text-center shadow-sm md:p-10">
+        <h1 class="text-3xl font-black tracking-tight text-slate-900 md:text-5xl">Welcome to TakedownTCG</h1>
+        <p class="mt-3 text-sm text-slate-600 md:text-base">Search cards, sets, and games, then save favorites to your account.</p>
+    </div>
+
+    <div class="rounded-3xl border border-slate-300 bg-white/80 p-6 shadow-sm md:p-8">
+        <h2 class="text-2xl font-extrabold text-slate-900 md:text-3xl">Featured Price Changes</h2>
+        <div class="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-slate-600">
+            Static placeholder for the featured market panel. Dynamic pricing cards can be plugged in here next.
+        </div>
+    </div>
+
+    <div class="hidden rounded-3xl border border-slate-300 bg-white/80 p-8 shadow-sm md:block">
+        <h3 class="text-3xl font-extrabold text-slate-900">Want to Search for Card, Game, or Set?</h3>
+        <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <a asp-controller="Search" asp-action="Cards" class="btn-primary">Search Cards</a>
+            <a asp-controller="Search" asp-action="Sets" class="btn-primary">Search Sets</a>
+            <a asp-controller="Search" asp-action="Games" class="btn-primary">Search Games</a>
+        </div>
+    </div>
+
+    <div class="space-y-3 md:hidden">
+        <div class="rounded-2xl border border-slate-300 bg-white/90 p-4 shadow-sm">
+            <h3 class="text-lg font-bold text-slate-900">Mobile Search Deck</h3>
+            <p class="mt-1 text-sm text-slate-600">Fast, touch-friendly actions built for smaller screens.</p>
+        </div>
+        <div class="grid grid-cols-1 gap-3">
+            <a asp-controller="Search" asp-action="Cards" class="mobile-action">Find Cards</a>
+            <a asp-controller="Search" asp-action="Sets" class="mobile-action">Find Sets</a>
+            <a asp-controller="Search" asp-action="Games" class="mobile-action">Browse Games</a>
+        </div>
+    </div>
+</section>

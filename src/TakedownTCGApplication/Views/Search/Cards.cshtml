@@ -1,0 +1,78 @@
+@model CardsSearchViewModel
+@{
+    ViewData["Title"] = "Search Cards";
+}
+
+<section class="space-y-5">
+    <div class="rounded-3xl border border-slate-300 bg-white/90 p-6 shadow-sm">
+        <h1 class="text-3xl font-extrabold text-slate-900">Search Cards</h1>
+        <p class="mt-1 text-sm text-slate-600">Required: name. Optional: number, printing, condition.</p>
+
+        <form asp-action="Cards" method="post" class="mt-4 grid gap-3 md:grid-cols-2">
+            @Html.AntiForgeryToken()
+            <label class="block md:col-span-2">
+                <span class="form-label">Name</span>
+                <input asp-for="Query" class="form-input" />
+                <span asp-validation-for="Query" class="form-error"></span>
+            </label>
+            <label class="block">
+                <span class="form-label">Card Number</span>
+                <input asp-for="Number" class="form-input" />
+            </label>
+            <label class="block">
+                <span class="form-label">Printing</span>
+                <input asp-for="Printing" class="form-input" />
+            </label>
+            <label class="block">
+                <span class="form-label">Condition</span>
+                <input asp-for="Condition" class="form-input" />
+            </label>
+            <div class="md:col-span-2">
+                <button type="submit" class="btn-primary">Run Card Search</button>
+            </div>
+        </form>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="rounded-xl border border-rose-300 bg-rose-50 p-3 text-sm text-rose-700">@Model.ErrorMessage</div>
+    }
+
+    @if (Model.Results.Count > 0)
+    {
+        <div class="grid gap-3 md:grid-cols-2">
+            @foreach (var card in Model.Results)
+            {
+                <article class="panel-card">
+                    <h3 class="text-lg font-bold text-slate-900">@card.Name</h3>
+                    <p class="text-sm text-slate-600">@card.Game • @card.SetName (@card.Set) • #@card.Number</p>
+                    <p class="mt-2 text-sm text-slate-700">Rarity: @card.Rarity</p>
+                    @if (!string.IsNullOrWhiteSpace(card.Details))
+                    {
+                        <p class="mt-2 text-sm text-slate-600">@card.Details</p>
+                    }
+                    <div class="mt-3 text-xs text-slate-500">Variants: @card.Variants.Count</div>
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <form asp-controller="Favorites" asp-action="Add" method="post" class="mt-3">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="ItemType" value="Card" />
+                            <input type="hidden" name="ItemId" value="@card.Id" />
+                            <input type="hidden" name="ItemName" value="@card.Name" />
+                            <input type="hidden" name="ReturnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                            <button type="submit" class="btn-ghost">Add to Favorites</button>
+                        </form>
+                    }
+                </article>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="rounded-xl border border-slate-300 bg-white/80 p-4 text-sm text-slate-600">No card results yet.</div>
+    }
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

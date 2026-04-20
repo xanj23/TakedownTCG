@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "tw:build": "npx @tailwindcss/cli -i ./src/TakedownTCGApplication/Styles/input.css -o ./src/TakedownTCGApplication/wwwroot/css/site.css --minify",
+    "tw:watch": "npx @tailwindcss/cli -i ./src/TakedownTCGApplication/Styles/input.css -o ./src/TakedownTCGApplication/wwwroot/css/site.css --watch"
+  },
+  "dependencies": {
+    "@tailwindcss/cli": "^4.2.2",
+    "tailwindcss": "^4.2.2"
+  }
+}

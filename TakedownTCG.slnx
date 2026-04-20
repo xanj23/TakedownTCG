@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/TakedownTCG.Core/TakedownTCG.Core.csproj" />
+    <Project Path="src/TakedownTCGApplication/TakedownTCGApplication.csproj" />
+  </Folder>
+  <Folder Name="/src/TakedownTCGCli/">
+    <Project Path="src/TakedownTCGCli/TakedownTCG.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/TakedownTCG.Core.Tests/TakedownTCG.Core.Tests.csproj" />
+    <Project Path="tests/TakedownTCG.Web.Tests/TakedownTCG.Web.Tests.csproj" />
+  </Folder>
+</Solution>
