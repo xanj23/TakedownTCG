@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
-using TakedownTCG.Core.Abstractions;
-using TakedownTCG.Core.Infrastructure.Config;
-using TakedownTCG.Core.Infrastructure.Http;
-using TakedownTCG.Core.Infrastructure.Persistence.UserAccounts;
-using TakedownTCG.Core.Services.JustTcg;
-using TakedownTCG.Core.Services.UserAccounts;
+using TakedownTCGApplication.Abstractions;
+using TakedownTCGApplication.Infrastructure.Config;
+using TakedownTCGApplication.Infrastructure.Http;
+using TakedownTCGApplication.Infrastructure.Persistence.UserAccounts;
+using TakedownTCGApplication.Services.JustTcg;
+using TakedownTCGApplication.Services.UserAccounts;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,6 +49,7 @@ builder.Services.AddSingleton<JustTcgQueryService>();
 builder.Services.AddSingleton<JustTcgResponseService>();
 builder.Services.AddSingleton<IJustTcgResponseMapper>(sp => sp.GetRequiredService<JustTcgResponseService>());
 builder.Services.AddSingleton<IJustTcgSearchService, JustTcgSearchService>();
+builder.Services.AddSingleton<IProductsSearchService, ProductsSearchService>();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>

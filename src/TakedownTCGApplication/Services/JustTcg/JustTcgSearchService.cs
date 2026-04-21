@@ -1,8 +1,8 @@
-using TakedownTCG.Core.Abstractions;
-using TakedownTCG.Core.Infrastructure.Config;
-using TakedownTCG.Core.Models.JustTcg.Query;
+using TakedownTCGApplication.Abstractions;
+using TakedownTCGApplication.Infrastructure.Config;
+using TakedownTCGApplication.Models.JustTcg.Query;
 
-namespace TakedownTCG.Core.Services.JustTcg;
+namespace TakedownTCGApplication.Services.JustTcg;
 
 public sealed class JustTcgSearchService : IJustTcgSearchService
 {

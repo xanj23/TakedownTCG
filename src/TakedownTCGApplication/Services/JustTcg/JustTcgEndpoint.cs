@@ -1,4 +1,4 @@
-namespace TakedownTCG.Core.Services.JustTcg;
+namespace TakedownTCGApplication.Services.JustTcg;
 
 public enum JustTcgEndpoint
 {

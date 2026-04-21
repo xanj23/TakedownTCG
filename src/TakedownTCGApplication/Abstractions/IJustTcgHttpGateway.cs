@@ -1,4 +1,4 @@
-namespace TakedownTCG.Core.Abstractions;
+namespace TakedownTCGApplication.Abstractions;
 
 public interface IJustTcgHttpGateway
 {

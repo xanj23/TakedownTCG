@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace TakedownTCG.Core.Models.JustTcg.Query
+namespace TakedownTCGApplication.Models.JustTcg.Query
 {
     /// <summary>
     /// Defines the supported sort fields for a JustTCG set search request.

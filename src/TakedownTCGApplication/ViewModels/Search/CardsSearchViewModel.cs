@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using TakedownTCG.Core.Models.JustTcg.Response;
+using TakedownTCGApplication.Models.JustTcg.Response;
 
 namespace TakedownTCGApplication.ViewModels.Search;
 

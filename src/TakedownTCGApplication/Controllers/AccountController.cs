@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TakedownTCG.Core.Abstractions;
-using TakedownTCG.Core.Models.UserAccounts;
+using TakedownTCGApplication.Abstractions;
+using TakedownTCGApplication.Models.UserAccounts;
 using TakedownTCGApplication.ViewModels.Account;
 
 namespace TakedownTCGApplication.Controllers;

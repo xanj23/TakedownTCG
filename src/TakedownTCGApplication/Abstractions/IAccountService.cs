@@ -1,6 +1,6 @@
-using TakedownTCG.Core.Models.UserAccounts;
+using TakedownTCGApplication.Models.UserAccounts;
 
-namespace TakedownTCG.Core.Abstractions;
+namespace TakedownTCGApplication.Abstractions;
 
 public interface IAccountService
 {

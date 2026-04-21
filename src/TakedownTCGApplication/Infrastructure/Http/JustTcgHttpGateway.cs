@@ -1,6 +1,6 @@
-using TakedownTCG.Core.Abstractions;
+using TakedownTCGApplication.Abstractions;
 
-namespace TakedownTCG.Core.Infrastructure.Http;
+namespace TakedownTCGApplication.Infrastructure.Http;
 
 public sealed class JustTcgHttpGateway : IJustTcgHttpGateway
 {

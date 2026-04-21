@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 
-namespace TakedownTCG.Core.Services.UserAccounts
+namespace TakedownTCGApplication.Services.UserAccounts
 {
     public static class PasswordHasher
     {

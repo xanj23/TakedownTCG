@@ -1,4 +1,4 @@
-using TakedownTCG.Core.Models.UserAccounts;
+using TakedownTCGApplication.Models.UserAccounts;
 
 namespace TakedownTCGApplication.ViewModels.Favorites;
 

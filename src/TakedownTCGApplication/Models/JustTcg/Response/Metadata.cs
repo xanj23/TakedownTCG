@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace TakedownTCG.Core.Models.JustTcg.Response
+namespace TakedownTCGApplication.Models.JustTcg.Response
 {
     /// <summary>
     /// Represents API plan and rate-limit metadata returned by JustTCG.

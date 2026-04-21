@@ -1,4 +1,4 @@
-namespace TakedownTCG.Core.Models.UserAccounts
+namespace TakedownTCGApplication.Models.UserAccounts
 {
     public class User
     {

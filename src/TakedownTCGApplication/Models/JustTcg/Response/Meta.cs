@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace TakedownTCG.Core.Models.JustTcg.Response
+namespace TakedownTCGApplication.Models.JustTcg.Response
 {
     /// <summary>
     /// Represents pagination metadata returned with a JustTCG collection response.

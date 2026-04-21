@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace TakedownTCG.Core.Models.JustTcg.Query
+namespace TakedownTCGApplication.Models.JustTcg.Query
 {
     /// <summary>
     /// Marker query for the JustTCG games endpoint (no query parameters).

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace TakedownTCG.Core.Models.JustTcg.Query
+namespace TakedownTCGApplication.Models.JustTcg.Query
 {
     /// <summary>
     /// Represents a single query field, including prompt metadata and the entered value.

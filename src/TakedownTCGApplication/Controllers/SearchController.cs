@@ -1,26 +1,22 @@
 using Microsoft.AspNetCore.Mvc;
-using TakedownTCG.Core.Abstractions;
-using TakedownTCG.Core.Models.JustTcg.Query;
-using TakedownTCG.Core.Models.JustTcg.Response;
-using TakedownTCG.Core.Models.UserAccounts;
-using TakedownTCG.Core.Services.JustTcg;
+using TakedownTCGApplication.Abstractions;
+using TakedownTCGApplication.Models.JustTcg.Query;
+using TakedownTCGApplication.Models.Search;
 using TakedownTCGApplication.ViewModels.Search;
 
 namespace TakedownTCGApplication.Controllers;
 
 public sealed class SearchController : Controller
 {
-    private readonly IJustTcgSearchService _searchService;
-    private readonly IFavoriteService _favoriteService;
+    private readonly IProductsSearchService _productsSearchService;
     private const string JustTcgApi = "JustTCG";
     private const string EndpointCards = "cards";
     private const string EndpointSets = "sets";
     private const string EndpointGames = "games";
 
-    public SearchController(IJustTcgSearchService searchService, IFavoriteService favoriteService)
+    public SearchController(IProductsSearchService productsSearchService)
     {
-        _searchService = searchService;
-        _favoriteService = favoriteService;
+        _productsSearchService = productsSearchService;
     }
 
     [HttpGet]
@@ -85,13 +81,23 @@ public sealed class SearchController : Controller
             switch (model.Endpoint)
             {
                 case EndpointCards:
-                    await SearchCardsAsync(model);
+                    ProductsSearchOperationResult cardsResult = await _productsSearchService.SearchCardsAsync(
+                        BuildCardQuery(model),
+                        User.Identity?.Name,
+                        model.Limit);
+                    ApplyOperationResult(model, cardsResult);
                     break;
                 case EndpointSets:
-                    await SearchSetsAsync(model);
+                    ProductsSearchOperationResult setsResult = await _productsSearchService.SearchSetsAsync(
+                        BuildSetQuery(model),
+                        model.Limit);
+                    ApplyOperationResult(model, setsResult);
                     break;
                 case EndpointGames:
-                    await SearchGamesAsync(model);
+                    ProductsSearchOperationResult gamesResult = await _productsSearchService.SearchGamesAsync(
+                        new GameQueryParams(),
+                        model.Limit);
+                    ApplyOperationResult(model, gamesResult);
                     break;
                 default:
                     ModelState.AddModelError(nameof(model.Endpoint), "Unsupported endpoint selected.");
@@ -134,7 +140,7 @@ public sealed class SearchController : Controller
         return (endpoint ?? string.Empty).Trim().ToLowerInvariant();
     }
 
-    private async Task SearchCardsAsync(ProductsSearchViewModel model)
+    private static CardQueryParams BuildCardQuery(ProductsSearchViewModel model)
     {
         CardQueryParams query = new();
         query.Parameters["q"].Value = model.CardQuery;
@@ -145,25 +151,10 @@ public sealed class SearchController : Controller
         query.Parameters["order"].Value = model.CardOrder;
         query.Parameters["limit"].Value = model.Limit;
         query.Parameters["offset"].Value = model.Offset;
-
-        Response<Card> response = (Response<Card>)await _searchService.SearchAsync(JustTcgEndpoint.Cards, query);
-        model.CardResults = response.Data;
-        model.ErrorMessage = response.Error ?? string.Empty;
-        ApplyPaging(model, response.Meta);
-
-        string? userName = User.Identity?.Name;
-        if (!string.IsNullOrWhiteSpace(userName))
-        {
-            IReadOnlyList<Favorite> favorites = await _favoriteService.GetFavoritesAsync(userName);
-            model.FavoriteCardIds = favorites
-                .Where(f => string.Equals(f.ItemType, "card", StringComparison.OrdinalIgnoreCase))
-                .Select(f => f.ItemId)
-                .Where(id => !string.IsNullOrWhiteSpace(id))
-                .ToHashSet(StringComparer.OrdinalIgnoreCase);
-        }
+        return query;
     }
 
-    private async Task SearchSetsAsync(ProductsSearchViewModel model)
+    private static SetQueryParams BuildSetQuery(ProductsSearchViewModel model)
     {
         SetQueryParams query = new();
         query.Parameters["game"].Value = model.SetGame;
@@ -172,31 +163,28 @@ public sealed class SearchController : Controller
         query.Parameters["order"].Value = model.SetOrder;
         query.Parameters["limit"].Value = model.Limit;
         query.Parameters["offset"].Value = model.Offset;
-
-        Response<Set> response = (Response<Set>)await _searchService.SearchAsync(JustTcgEndpoint.Sets, query);
-        model.SetResults = response.Data;
-        model.ErrorMessage = response.Error ?? string.Empty;
-        ApplyPaging(model, response.Meta);
+        return query;
     }
 
-    private async Task SearchGamesAsync(ProductsSearchViewModel model)
+    private static void ApplyOperationResult(ProductsSearchViewModel model, ProductsSearchOperationResult result)
     {
-        Response<Game> response = (Response<Game>)await _searchService.SearchAsync(JustTcgEndpoint.Games, new GameQueryParams());
-        model.GameResults = response.Data;
-        model.ErrorMessage = response.Error ?? string.Empty;
-        ApplyPaging(model, response.Meta);
+        model.CardResults = result.CardResults;
+        model.SetResults = result.SetResults;
+        model.GameResults = result.GameResults;
+        model.CardDisplayResults = result.CardDisplayResults;
+        model.SetDisplayResults = result.SetDisplayResults;
+        model.GameDisplayResults = result.GameDisplayResults;
+        model.FavoriteCardIds = result.FavoriteCardIds;
+        model.ErrorMessage = result.ErrorMessage;
+        model.Total = result.Total;
+        model.Offset = result.Offset;
+        model.Limit = result.Limit;
+        model.HasMore = result.HasMore;
+        model.HasPrevious = result.HasPrevious;
+        model.PreviousOffset = result.PreviousOffset;
+        model.NextOffset = result.NextOffset;
+        model.CurrentPage = result.CurrentPage;
+        model.TotalPages = result.TotalPages;
     }
 
-    private static void ApplyPaging(ProductsSearchViewModel model, Meta meta)
-    {
-        model.Total = meta.Total;
-        model.Offset = meta.Offset;
-        model.Limit = meta.Limit > 0 ? meta.Limit : model.Limit;
-        model.HasMore = meta.HasMore;
-        model.NextOffset = model.Offset + model.Limit;
-        model.HasPrevious = model.Offset > 0;
-        model.PreviousOffset = Math.Max(0, model.Offset - model.Limit);
-        model.CurrentPage = (model.Offset / model.Limit) + 1;
-        model.TotalPages = Math.Max(1, (int)Math.Ceiling((double)model.Total / model.Limit));
-    }
 }

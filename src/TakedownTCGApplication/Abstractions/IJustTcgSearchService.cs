@@ -1,7 +1,7 @@
-using TakedownTCG.Core.Models.JustTcg.Query;
-using TakedownTCG.Core.Services.JustTcg;
+using TakedownTCGApplication.Models.JustTcg.Query;
+using TakedownTCGApplication.Services.JustTcg;
 
-namespace TakedownTCG.Core.Abstractions;
+namespace TakedownTCGApplication.Abstractions;
 
 public interface IJustTcgSearchService
 {

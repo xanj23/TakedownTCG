@@ -1,7 +1,7 @@
-using TakedownTCG.Core.Abstractions;
-using TakedownTCG.Core.Models.UserAccounts;
+using TakedownTCGApplication.Abstractions;
+using TakedownTCGApplication.Models.UserAccounts;
 
-namespace TakedownTCG.Core.Services.UserAccounts;
+namespace TakedownTCGApplication.Services.UserAccounts;
 
 public sealed class AccountService : IAccountService
 {

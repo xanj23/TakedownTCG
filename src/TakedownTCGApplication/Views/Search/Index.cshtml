@@ -5,47 +5,6 @@
     bool showCards = endpoint == "cards";
     bool showSets = endpoint == "sets";
     bool showGames = endpoint == "games";
-
-    static string Slugify(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return string.Empty;
-        }
-
-        char[] chars = value.Trim().ToLowerInvariant().ToCharArray();
-        var buffer = new System.Text.StringBuilder(chars.Length);
-        bool previousWasDash = false;
-
-        foreach (char ch in chars)
-        {
-            if (char.IsLetterOrDigit(ch))
-            {
-                buffer.Append(ch);
-                previousWasDash = false;
-            }
-            else if (!previousWasDash)
-            {
-                buffer.Append('-');
-                previousWasDash = true;
-            }
-        }
-
-        return buffer.ToString().Trim('-');
-    }
-
-    static string GetTcgplayerGameSlug(string? game)
-    {
-        string normalized = Slugify(game);
-        return normalized switch
-        {
-            "mtg" => "magic-the-gathering",
-            "magic-the-gathering" => "magic-the-gathering",
-            "yugioh" => "yu-gi-oh",
-            "yu-gi-oh" => "yu-gi-oh",
-            _ => normalized
-        };
-    }
 }
 
 <section class="space-y-5">
@@ -154,33 +113,25 @@
         <div class="rounded-xl border border-rose-300 bg-rose-50 p-3 text-sm text-rose-700">@Model.ErrorMessage</div>
     }
 
-    @if (showCards && Model.CardResults.Count > 0)
+    @if (showCards && Model.CardDisplayResults.Count > 0)
     {
         <div class="grid gap-3 md:grid-cols-2">
-            @foreach (var card in Model.CardResults)
+            @foreach (var card in Model.CardDisplayResults)
             {
-                var fallbackImageUrl = "https://tcgplayer-cdn.tcgplayer.com/product/image-missing.svg";
-                var imageUrl = !string.IsNullOrWhiteSpace(card.TcgplayerId)
-                    ? $"https://tcgplayer-cdn.tcgplayer.com/product/{card.TcgplayerId}_in_1000x1000.jpg"
-                    : fallbackImageUrl;
-                var displayPrice = card.Variants.Where(v => v.Price.HasValue).Select(v => v.Price).FirstOrDefault();
-                var price90d = card.Variants.Where(v => v.MaxPrice90d.HasValue).Select(v => v.MaxPrice90d).FirstOrDefault();
-                bool isFavorited = Model.FavoriteCardIds.Contains(card.Id);
-
                 <article class="panel-card">
                     <div class="flex items-start gap-4">
-                        <img src="@imageUrl" alt="@card.Name" class="h-auto w-full rounded-xl border border-slate-200 bg-slate-50 object-contain" style="max-width: 10rem;" loading="lazy" onerror="this.onerror=null;this.src='@fallbackImageUrl';" />
+                        <img src="@card.ImageUrl" alt="@card.Name" class="h-auto w-full rounded-xl border border-slate-200 bg-slate-50 object-contain" style="max-width: 10rem;" loading="lazy" onerror="this.onerror=null;this.src='@card.FallbackImageUrl';" />
                         <div class="flex-1">
                             <h3 class="text-lg font-bold text-slate-900">@card.Name</h3>
-                            <p class="text-sm text-slate-600">@card.Game • @card.SetName (@card.Set) • #@card.Number</p>
+                            <p class="text-sm text-slate-600">@card.Game | @card.SetName (@card.SetCode) | #@card.Number</p>
                             <p class="mt-2 text-sm text-slate-700">Rarity: @card.Rarity</p>
-                            @if (displayPrice.HasValue)
+                            @if (card.DisplayPrice.HasValue)
                             {
                                 <p class="mt-1 text-sm font-semibold text-cyan-700">
-                                    Price: $@displayPrice.Value.ToString("0.00")
-                                    @if (price90d.HasValue)
+                                    Price: $@card.DisplayPrice.Value.ToString("0.00")
+                                    @if (card.Price90d.HasValue)
                                     {
-                                        <span class="text-slate-600"> | Price was: $@price90d.Value.ToString("0.00") 3 months ago</span>
+                                        <span class="text-slate-600"> | Price was: $@card.Price90d.Value.ToString("0.00") 3 months ago</span>
                                     }
                                 </p>
                             }
@@ -188,11 +139,10 @@
                             {
                                 <p class="mt-1 text-sm font-semibold text-slate-500">Price: N/A</p>
                             }
-                            @if (!string.IsNullOrWhiteSpace(card.TcgplayerId))
+                            @if (!string.IsNullOrWhiteSpace(card.TcgplayerProductUrl))
                             {
-                                var tcgplayerProductUrl = $"https://www.tcgplayer.com/product/{card.TcgplayerId}";
                                 <p class="mt-1 text-xs">
-                                    <a href="@tcgplayerProductUrl" target="_blank" rel="noopener noreferrer" class="text-cyan-700 underline">Price from TCGplayer</a>
+                                    <a href="@card.TcgplayerProductUrl" target="_blank" rel="noopener noreferrer" class="text-cyan-700 underline">Price from TCGplayer</a>
                                 </p>
                             }
                             @if (!string.IsNullOrWhiteSpace(card.Details))
@@ -213,10 +163,10 @@
                                         <input type="hidden" name="ItemName" value="@card.Name" />
                                         <input type="hidden" name="ReturnUrl" value="@(Context.Request.Path + Context.Request.QueryString)" />
                                         <button type="submit"
-                                                class="js-favorite-btn @(isFavorited ? "btn-ghost bg-rose-50 text-rose-700 border border-rose-300" : "btn-ghost")"
-                                                data-favorited="@(isFavorited ? "true" : "false")"
-                                                title="@(isFavorited ? "Remove from favorites" : "Add to favorites")"
-                                                aria-label="@(isFavorited ? $"Remove {card.Name} from favorites" : $"Add {card.Name} to favorites")">
+                                                class="js-favorite-btn @(card.IsFavorited ? "btn-ghost bg-rose-50 text-rose-700 border border-rose-300" : "btn-ghost")"
+                                                data-favorited="@(card.IsFavorited ? "true" : "false")"
+                                                title="@(card.IsFavorited ? "Remove from favorites" : "Add to favorites")"
+                                                aria-label="@(card.IsFavorited ? $"Remove {card.Name} from favorites" : $"Add {card.Name} to favorites")">
                                             &#9829; Favorite
                                         </button>
                                     </form>
@@ -232,52 +182,42 @@
                                     </a>
                                 }
                             </div>
-                            <div class="mt-3 text-xs text-slate-500">Variants: @card.Variants.Count</div>
+                            <div class="mt-3 text-xs text-slate-500">Variants: @card.VariantsCount</div>
                         </div>
                     </div>
                 </article>
             }
         </div>
     }
-    else if (showSets && Model.SetResults.Count > 0)
+    else if (showSets && Model.SetDisplayResults.Count > 0)
     {
         <div class="grid gap-3 md:grid-cols-2">
-            @foreach (var setItem in Model.SetResults)
+            @foreach (var setItem in Model.SetDisplayResults)
             {
-                var setGameSlug = GetTcgplayerGameSlug(setItem.Game);
-                var setNameSlug = Slugify(setItem.Name);
-                var setTcgplayerUrl = $"https://www.tcgplayer.com/categories/trading-and-collectible-card-games/{setGameSlug}/{setNameSlug}";
-
                 <article class="panel-card">
                     <h3 class="text-lg font-bold text-slate-900">@setItem.Name</h3>
-                    <p class="text-sm text-slate-600">@setItem.Game • Release: @setItem.ReleaseDate</p>
+                    <p class="text-sm text-slate-600">@setItem.Game | Release: @setItem.ReleaseDate</p>
                     <div class="mt-2 grid grid-cols-2 gap-2 text-sm text-slate-700">
                         <span>Cards: @setItem.CardsCount</span>
                         <span>Variants: @setItem.VariantsCount</span>
                         <span>Sealed: @setItem.SealedCount</span>
                         <span>Value: $@setItem.SetValueUsd</span>
                     </div>
-                    @if (!string.IsNullOrWhiteSpace(setGameSlug)
-                        && !string.IsNullOrWhiteSpace(setNameSlug)
-                        && !string.IsNullOrWhiteSpace(setItem.ReleaseDate)
-                        && !setItem.ReleaseDate.Equals("null", StringComparison.OrdinalIgnoreCase))
+                    @if (!string.IsNullOrWhiteSpace(setItem.TcgplayerSetUrl))
                     {
                         <p class="mt-3 text-xs">
-                            <a href="@setTcgplayerUrl" target="_blank" rel="noopener noreferrer" class="text-cyan-700 underline">View set on TCGplayer</a>
+                            <a href="@setItem.TcgplayerSetUrl" target="_blank" rel="noopener noreferrer" class="text-cyan-700 underline">View set on TCGplayer</a>
                         </p>
                     }
                 </article>
             }
         </div>
     }
-    else if (showGames && Model.GameResults.Count > 0)
+    else if (showGames && Model.GameDisplayResults.Count > 0)
     {
         <div class="grid gap-3 md:grid-cols-2">
-            @foreach (var game in Model.GameResults)
+            @foreach (var game in Model.GameDisplayResults)
             {
-                var gameSlug = GetTcgplayerGameSlug(game.Name);
-                var gameTcgplayerUrl = $"https://www.tcgplayer.com/categories/trading-and-collectible-card-games/{gameSlug}";
-
                 <article class="panel-card">
                     <h3 class="text-lg font-bold text-slate-900">@game.Name</h3>
                     <div class="mt-2 grid grid-cols-2 gap-2 text-sm text-slate-700">
@@ -286,10 +226,10 @@
                         <span>Variants: @game.VariantsCount</span>
                         <span>Sealed: @game.SealedCount</span>
                     </div>
-                    @if (!string.IsNullOrWhiteSpace(gameSlug))
+                    @if (!string.IsNullOrWhiteSpace(game.TcgplayerGameUrl))
                     {
                         <p class="mt-3 text-xs">
-                            <a href="@gameTcgplayerUrl" target="_blank" rel="noopener noreferrer" class="text-cyan-700 underline">View game on TCGplayer</a>
+                            <a href="@game.TcgplayerGameUrl" target="_blank" rel="noopener noreferrer" class="text-cyan-700 underline">View game on TCGplayer</a>
                         </p>
                     }
                 </article>

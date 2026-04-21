@@ -1,4 +1,4 @@
-namespace TakedownTCG.Core.Infrastructure.Config;
+namespace TakedownTCGApplication.Infrastructure.Config;
 
 public static class DatabasePathDefaults
 {

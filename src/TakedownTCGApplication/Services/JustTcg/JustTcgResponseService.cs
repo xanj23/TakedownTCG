@@ -1,9 +1,9 @@
 using System.Text;
 using System.Text.Json;
-using TakedownTCG.Core.Abstractions;
-using TakedownTCG.Core.Models.JustTcg.Response;
+using TakedownTCGApplication.Abstractions;
+using TakedownTCGApplication.Models.JustTcg.Response;
 
-namespace TakedownTCG.Core.Services.JustTcg;
+namespace TakedownTCGApplication.Services.JustTcg;
 
 public sealed class JustTcgResponseService : IJustTcgResponseMapper
 {

@@ -1,4 +1,4 @@
-namespace TakedownTCG.Core.Models.JustTcg.Response
+namespace TakedownTCGApplication.Models.JustTcg.Response
 {
     using System.Text.Json.Serialization;
 

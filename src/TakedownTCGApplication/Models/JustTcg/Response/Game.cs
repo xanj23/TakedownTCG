@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace TakedownTCG.Core.Models.JustTcg.Response
+namespace TakedownTCGApplication.Models.JustTcg.Response
 {
     /// <summary>
     /// Represents a trading card game summary returned by the JustTCG games endpoint.

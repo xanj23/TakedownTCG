@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace TakedownTCG.Core.Models.JustTcg.Query
+namespace TakedownTCGApplication.Models.JustTcg.Query
 {
     public interface IQueryParams
     {

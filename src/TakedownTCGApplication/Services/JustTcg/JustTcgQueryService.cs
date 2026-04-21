@@ -1,6 +1,6 @@
-using TakedownTCG.Core.Models.JustTcg.Query;
+using TakedownTCGApplication.Models.JustTcg.Query;
 
-namespace TakedownTCG.Core.Services.JustTcg;
+namespace TakedownTCGApplication.Services.JustTcg;
 
 public sealed class JustTcgQueryService
 {

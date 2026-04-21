@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TakedownTCG.Core.Abstractions;
+using TakedownTCGApplication.Abstractions;
 using TakedownTCGApplication.ViewModels.Favorites;
 
 namespace TakedownTCGApplication.Controllers;

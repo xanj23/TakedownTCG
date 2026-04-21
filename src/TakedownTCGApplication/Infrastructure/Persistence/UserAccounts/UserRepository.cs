@@ -1,8 +1,8 @@
 using Microsoft.Data.Sqlite;
-using TakedownTCG.Core.Abstractions;
-using TakedownTCG.Core.Models.UserAccounts;
+using TakedownTCGApplication.Abstractions;
+using TakedownTCGApplication.Models.UserAccounts;
 
-namespace TakedownTCG.Core.Infrastructure.Persistence.UserAccounts;
+namespace TakedownTCGApplication.Infrastructure.Persistence.UserAccounts;
 
 public sealed class UserRepository : IUserRepository
 {

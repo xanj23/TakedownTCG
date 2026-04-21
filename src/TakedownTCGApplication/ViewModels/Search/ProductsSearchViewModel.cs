@@ -1,4 +1,5 @@
-using TakedownTCG.Core.Models.JustTcg.Response;
+using TakedownTCGApplication.Models.JustTcg.Response;
+using TakedownTCGApplication.Models.Search;
 
 namespace TakedownTCGApplication.ViewModels.Search;
 
@@ -31,6 +32,9 @@ public sealed class ProductsSearchViewModel
     public bool HasSearched { get; set; }
 
     public IReadOnlyList<Card> CardResults { get; set; } = Array.Empty<Card>();
+    public IReadOnlyList<CardSearchResult> CardDisplayResults { get; set; } = Array.Empty<CardSearchResult>();
+    public IReadOnlyList<SetSearchResult> SetDisplayResults { get; set; } = Array.Empty<SetSearchResult>();
+    public IReadOnlyList<GameSearchResult> GameDisplayResults { get; set; } = Array.Empty<GameSearchResult>();
     public IReadOnlyList<Set> SetResults { get; set; } = Array.Empty<Set>();
     public IReadOnlyList<Game> GameResults { get; set; } = Array.Empty<Game>();
     public IReadOnlySet<string> FavoriteCardIds { get; set; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);

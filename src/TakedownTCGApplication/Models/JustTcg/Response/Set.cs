@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace TakedownTCG.Core.Models.JustTcg.Response
+namespace TakedownTCGApplication.Models.JustTcg.Response
 {
     /// <summary>
     /// Represents a set record returned by the JustTCG sets endpoint.
