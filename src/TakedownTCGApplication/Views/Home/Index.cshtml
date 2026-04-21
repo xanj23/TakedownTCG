@@ -9,10 +9,10 @@
         <p class="mt-3 text-sm text-slate-600 md:text-base">Search cards, sets, and games, then save favorites to your account.</p>
     </div>
 
-    <div class="rounded-3xl border border-slate-300 bg-white/80 p-6 shadow-sm md:p-8">
-        <div class="flex flex-col gap-1 text-center">
-            <h2 class="text-2xl font-extrabold text-slate-900 md:text-3xl">Recently Completed Card Sales</h2>
-            <p class="text-sm text-slate-600">Sold and completed eBay TCG card listings from SerpApi.</p>
+    <div class="rounded-3xl border border-slate-300 bg-white/80 p-4 shadow-sm md:p-5">
+        <div class="flex flex-col text-center">
+            <h2 class="text-xl font-extrabold text-slate-900 md:text-2xl">Recently Completed Card Sales</h2>
+            <p class="text-xs text-slate-600">Sold and completed eBay TCG card listings from SerpApi.</p>
         </div>
 
         @if (!string.IsNullOrWhiteSpace(Model.CompletedSalesErrorMessage))
@@ -21,25 +21,27 @@
         }
         else if (Model.CompletedSales.Count > 0)
         {
-            <div id="completedSalesCarousel" class="mt-6 overflow-hidden" data-count="@Model.CompletedSales.Count">
-                <div class="flex min-h-[25rem] items-center justify-center gap-3 md:gap-5">
+            <div id="completedSalesCarousel" class="completed-sales-carousel mt-3" data-count="@Model.CompletedSales.Count">
+                <div class="completed-sales-stage" aria-live="polite">
                 @for (int i = 0; i < Model.CompletedSales.Count; i++)
                 {
                     var sale = Model.CompletedSales[i];
-                    <article class="completed-sale-card hidden w-[28%] min-w-0 rounded-2xl border border-slate-300 bg-white shadow-sm transition-all duration-700 ease-out"
+                    <article class="completed-sale-card"
                              data-carousel-index="@i">
                             <a href="@sale.Url" target="_blank" rel="noopener noreferrer" class="block">
-                                <img src="@sale.ImageUrl" alt="@sale.Title" class="h-40 w-full rounded-t-2xl bg-slate-50 object-contain p-3 md:h-48" loading="lazy" onerror="this.onerror=null;this.src='@sale.FallbackImageUrl';" />
-                                <div class="space-y-2 p-4">
-                                    <h3 class="line-clamp-2 text-sm font-bold text-slate-900">@sale.Title</h3>
-                                    <p class="text-base font-extrabold text-cyan-700">@sale.PriceText</p>
+                                <div class="completed-sale-image-frame">
+                                    <img src="@sale.ImageUrl" alt="@sale.Title" class="completed-sale-image" loading="lazy" onerror="this.onerror=null;this.src='@sale.FallbackImageUrl';" />
+                                </div>
+                                <div class="completed-sale-body">
+                                    <h3 class="completed-sale-title">@sale.Title</h3>
+                                    <p class="completed-sale-price">@sale.PriceText</p>
                                     @if (!string.IsNullOrWhiteSpace(sale.Condition))
                                     {
-                                        <p class="text-xs text-slate-600">@sale.Condition</p>
+                                        <p class="completed-sale-meta">@sale.Condition</p>
                                     }
                                     @if (!string.IsNullOrWhiteSpace(sale.Seller))
                                     {
-                                        <p class="text-xs text-slate-500">Seller: @sale.Seller</p>
+                                        <p class="completed-sale-meta completed-sale-seller">Seller: @sale.Seller</p>
                                     }
                                 </div>
                             </a>
@@ -87,50 +89,47 @@
                 return;
             }
 
-            let activeIndex = Math.min(1, cards.length - 1);
+            let activeIndex = 0;
 
-            function resetCard(card) {
-                card.classList.add("hidden");
-                card.classList.remove("block", "scale-110", "scale-90", "opacity-100", "opacity-70", "z-10", "z-0", "w-[38%]", "w-[28%]");
-            }
-
-            function applyCard(card, position) {
-                card.classList.remove("hidden");
-                card.classList.add("block");
-
-                if (position === "center") {
-                    card.classList.add("scale-110", "opacity-100", "z-10", "w-[38%]");
-                    return;
-                }
-
-                card.classList.add("scale-90", "opacity-70", "z-0", "w-[28%]");
+            function setSlot(card, slot) {
+                card.dataset.slot = slot;
+                card.setAttribute("aria-hidden", slot === "off-left" || slot === "off-right" ? "true" : "false");
             }
 
             function render() {
-                cards.forEach(resetCard);
+                cards.forEach(function (card) {
+                    setSlot(card, "off-left");
+                });
 
                 const leftIndex = (activeIndex - 1 + cards.length) % cards.length;
                 const rightIndex = (activeIndex + 1) % cards.length;
 
                 if (cards.length === 1) {
-                    applyCard(cards[activeIndex], "center");
+                    setSlot(cards[activeIndex], "center");
                     return;
                 }
 
                 if (cards.length === 2) {
-                    applyCard(cards[activeIndex], "center");
-                    applyCard(cards[rightIndex], "side");
+                    setSlot(cards[activeIndex], "center");
+                    setSlot(cards[rightIndex], "right");
                     return;
                 }
 
-                applyCard(cards[leftIndex], "side");
-                applyCard(cards[activeIndex], "center");
-                applyCard(cards[rightIndex], "side");
+                setSlot(cards[leftIndex], "left");
+                setSlot(cards[activeIndex], "center");
+                setSlot(cards[rightIndex], "right");
+
+                cards.forEach(function (card, index) {
+                    if (index !== leftIndex && index !== activeIndex && index !== rightIndex) {
+                        const distanceToRight = (index - rightIndex + cards.length) % cards.length;
+                        setSlot(card, distanceToRight < cards.length / 2 ? "off-right" : "off-left");
+                    }
+                });
             }
 
             render();
             window.setInterval(function () {
-                activeIndex = (activeIndex + 1) % cards.length;
+                activeIndex = (activeIndex - 1 + cards.length) % cards.length;
                 render();
             }, 4500);
         })();
