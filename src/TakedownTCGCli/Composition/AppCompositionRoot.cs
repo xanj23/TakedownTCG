@@ -11,16 +11,18 @@ namespace TakedownTCG.cli.Composition
     {
         private static bool _initialized;
         private static Func<IApiClient>? _justTcgFactory;
+        private static UserAccountController? _userAccountController;
 
-        public static void Configure(Func<IApiClient> justTcgFactory)
+        public static void Configure(Func<IApiClient> justTcgFactory, UserAccountController userAccountController)
         {
             _justTcgFactory = justTcgFactory;
+            _userAccountController = userAccountController;
         }
 
         public static void Run()
         {
             Initialize();
-            AppController.RunCli();
+            new AppController(_userAccountController!).RunCli();
         }
 
         private static void Initialize()
@@ -30,7 +32,7 @@ namespace TakedownTCG.cli.Composition
                 return;
             }
 
-            if (_justTcgFactory is null)
+            if (_justTcgFactory is null || _userAccountController is null)
             {
                 throw new InvalidOperationException("AppCompositionRoot.Configure must be called before Run.");
             }

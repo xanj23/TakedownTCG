@@ -1,13 +1,24 @@
 using System;
+using TakedownTCG.cli.Models.UserAccounts;
+using TakedownTCG.cli.Services.UserAccounts;
 using TakedownTCG.cli.Views.Input;
 
 namespace TakedownTCG.cli.Controllers
 {
-    public static class FavoriteController
+    public sealed class FavoriteController
     {
-        public static void ShowFavoritesMenu()
+        private readonly FavoriteService _favoriteService;
+        private readonly Func<User?> _currentUserProvider;
+
+        public FavoriteController(FavoriteService favoriteService, Func<User?> currentUserProvider)
         {
-            var current = UserAccountController.CurrentUser;
+            _favoriteService = favoriteService;
+            _currentUserProvider = currentUserProvider;
+        }
+
+        public void ShowFavoritesMenu()
+        {
+            User? current = _currentUserProvider();
             if (current is null)
             {
                 Console.WriteLine("Login to view favorites.");
@@ -16,7 +27,7 @@ namespace TakedownTCG.cli.Controllers
 
             while (true)
             {
-                var favorites = UserAccountController.FavoriteService.GetFavorites(current.UserName);
+                var favorites = _favoriteService.GetFavorites(current.UserName);
 
                 Console.WriteLine();
                 Console.WriteLine($"Favorites for {current.UserName}:");
@@ -63,7 +74,7 @@ namespace TakedownTCG.cli.Controllers
                     }
 
                     var toRemove = favorites[idx - 1];
-                    bool removed = UserAccountController.FavoriteService.RemoveFavorite(current.UserName, toRemove.ItemType, toRemove.ItemId);
+                    bool removed = _favoriteService.RemoveFavorite(current.UserName, toRemove.ItemType, toRemove.ItemId);
                     Console.WriteLine(removed ? "Favorite removed." : "Failed to remove favorite.");
                 }
                 else

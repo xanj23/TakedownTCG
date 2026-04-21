@@ -20,9 +20,15 @@
             <label class="block">
                 <span class="form-label">API</span>
                 <select asp-for="Api" id="apiSelect" class="form-input">
-                    <option value="JustTCG">JustTCG</option>
-                    <option value="PokemonTCG">Pokemon API</option>
-                    <option value="eBay">eBay</option>
+                    @foreach (var apiOption in Model.ApiOptions)
+                    {
+                        <option value="@apiOption.Value"
+                                data-endpoint-label="@apiOption.EndpointLabel"
+                                data-default-endpoint="@apiOption.DefaultEndpoint"
+                                data-requires-endpoint="@apiOption.RequiresEndpointSelection.ToString().ToLowerInvariant()">
+                            @apiOption.Label
+                        </option>
+                    }
                 </select>
                 <span asp-validation-for="Api" class="form-error"></span>
             </label>
@@ -30,15 +36,19 @@
             <label id="endpointField" class="block">
                 <span id="endpointLabel" class="form-label">Endpoint</span>
                 <select asp-for="Endpoint" id="endpointSelect" class="form-input">
-                    <option value="">Select endpoint</option>
-                    <option value="cards">Cards</option>
-                    <option value="sets" data-api="JustTCG">Sets</option>
-                    <option value="games" data-api="JustTCG">Games</option>
+                    @foreach (var endpointOption in Model.EndpointOptions)
+                    {
+                        <option value="@endpointOption.Value"
+                                data-apis="@endpointOption.SupportedApis"
+                                data-category-ids="@endpointOption.CategoryIds">
+                            @endpointOption.Label
+                        </option>
+                    }
                 </select>
                 <span asp-validation-for="Endpoint" class="form-error"></span>
             </label>
 
-            <div id="cardsFields" class="hidden md:col-span-2 grid gap-3 md:grid-cols-2">
+            <div data-search-fields data-api="JustTCG" data-endpoint="cards" class="hidden md:col-span-2 grid gap-3 md:grid-cols-2">
                 <label class="block md:col-span-2">
                     <span class="form-label">Card Name</span>
                     <input asp-for="CardQuery" class="form-input" />
@@ -77,7 +87,7 @@
                 </label>
             </div>
 
-            <div id="pokemonCardsFields" class="hidden md:col-span-2 grid gap-3 md:grid-cols-2">
+            <div data-search-fields data-api="PokemonTCG" data-endpoint="cards" class="hidden md:col-span-2 grid gap-3 md:grid-cols-2">
                 <label class="block md:col-span-2">
                     <span class="form-label">Pokemon Search</span>
                     <input asp-for="PokemonSearch" class="form-input" placeholder="charizard ex 199" />
@@ -97,7 +107,7 @@
                 </label>
             </div>
 
-            <div id="ebayCardsFields" class="hidden md:col-span-2 grid gap-3 md:grid-cols-2">
+            <div data-search-fields data-api="eBay" data-endpoint="cards" class="hidden md:col-span-2 grid gap-3 md:grid-cols-2">
                 <input asp-for="EbayCategoryIds" type="hidden" id="ebayCategoryIds" />
                 <label class="block md:col-span-2">
                     <span class="form-label">eBay Search</span>
@@ -125,7 +135,7 @@
                 </label>
             </div>
 
-            <div id="setsFields" class="hidden md:col-span-2 grid gap-3 md:grid-cols-2">
+            <div data-search-fields data-api="JustTCG" data-endpoint="sets" class="hidden md:col-span-2 grid gap-3 md:grid-cols-2">
                 <label class="block">
                     <span class="form-label">Game</span>
                     <input asp-for="SetGame" class="form-input" placeholder="mtg, pokemon" />
@@ -366,65 +376,60 @@
             const endpointField = document.getElementById("endpointField");
             const endpointLabel = document.getElementById("endpointLabel");
             const apiSelect = document.getElementById("apiSelect");
-            const cardsFields = document.getElementById("cardsFields");
-            const pokemonCardsFields = document.getElementById("pokemonCardsFields");
-            const ebayCardsFields = document.getElementById("ebayCardsFields");
             const ebayCategoryIds = document.getElementById("ebayCategoryIds");
-            const setsFields = document.getElementById("setsFields");
+            const searchFieldGroups = Array.from(document.querySelectorAll("[data-search-fields]"));
 
-            if (!apiSelect || !endpointSelect || !endpointField || !endpointLabel || !cardsFields || !pokemonCardsFields || !ebayCardsFields || !ebayCategoryIds || !setsFields) {
+            if (!apiSelect || !endpointSelect || !endpointField || !endpointLabel || !ebayCategoryIds) {
                 return;
             }
 
-            function syncFields() {
-                const api = apiSelect.value || "JustTCG";
-                const isPokemon = api === "PokemonTCG";
-                const isEbay = api === "eBay";
-                endpointLabel.textContent = isEbay ? "Category" : "Endpoint";
-                endpointField.classList.toggle("hidden", isPokemon);
+            function supportedApis(option) {
+                return (option.dataset.apis || "")
+                    .split("|")
+                    .map(function (api) { return api.trim(); })
+                    .filter(Boolean);
+            }
 
-                if (isPokemon) {
-                    endpointSelect.value = "cards";
-                }
+            function selectFirstVisibleEndpoint() {
+                const firstVisibleOption = Array.from(endpointSelect.options).find(function (option) {
+                    return !option.hidden;
+                });
+
+                endpointSelect.value = firstVisibleOption ? firstVisibleOption.value : "";
+            }
+
+            function syncFields() {
+                const api = apiSelect.value || "";
+                const selectedApiOption = apiSelect.options[apiSelect.selectedIndex];
+                const defaultEndpoint = selectedApiOption ? selectedApiOption.dataset.defaultEndpoint || "" : "";
+                const requiresEndpointSelection = !selectedApiOption || selectedApiOption.dataset.requiresEndpoint !== "false";
+
+                endpointLabel.textContent = selectedApiOption ? selectedApiOption.dataset.endpointLabel || "Endpoint" : "Endpoint";
+                endpointField.classList.toggle("hidden", !requiresEndpointSelection);
 
                 endpointSelect.querySelectorAll("option").forEach(function (option) {
-                    if (isEbay) {
-                        option.hidden = option.value !== "cards" && option.value !== "";
-                        if (option.value === "") {
-                            option.textContent = "All";
-                        }
-                        if (option.value === "cards") {
-                            option.textContent = "Cards";
-                        }
-                        return;
-                    }
-
-                    if (option.value === "") {
-                        option.textContent = "Select endpoint";
-                    }
-                    if (option.value === "cards") {
-                        option.textContent = "Cards";
-                    }
+                    const apis = supportedApis(option);
+                    option.hidden = apis.length > 0 && !apis.includes(api);
                 });
 
-                endpointSelect.querySelectorAll("option[data-api]").forEach(function (option) {
-                    option.hidden = option.dataset.api !== api;
+                if (!requiresEndpointSelection) {
+                    endpointSelect.value = defaultEndpoint;
+                } else if (defaultEndpoint && !endpointSelect.value) {
+                    endpointSelect.value = defaultEndpoint;
+                }
+
+                const selectedEndpointOption = endpointSelect.options[endpointSelect.selectedIndex];
+                if (!selectedEndpointOption || selectedEndpointOption.hidden) {
+                    selectFirstVisibleEndpoint();
+                }
+
+                const endpointOption = endpointSelect.options[endpointSelect.selectedIndex];
+                ebayCategoryIds.value = endpointOption ? endpointOption.dataset.categoryIds || "" : "";
+
+                const endpoint = (endpointSelect.value || defaultEndpoint || "").toLowerCase();
+                searchFieldGroups.forEach(function (group) {
+                    group.classList.toggle("hidden", group.dataset.api !== api || group.dataset.endpoint !== endpoint);
                 });
-
-                const selectedOption = endpointSelect.options[endpointSelect.selectedIndex];
-                if (selectedOption && selectedOption.hidden) {
-                    endpointSelect.value = "cards";
-                }
-
-                if (isEbay) {
-                    ebayCategoryIds.value = (endpointSelect.value || "") === "" ? "" : "183454";
-                }
-
-                const endpoint = isEbay && (endpointSelect.value || "") === "" ? "cards" : (endpointSelect.value || "").toLowerCase();
-                cardsFields.classList.toggle("hidden", isPokemon || isEbay || endpoint !== "cards");
-                pokemonCardsFields.classList.toggle("hidden", !isPokemon || endpoint !== "cards");
-                ebayCardsFields.classList.toggle("hidden", !isEbay || endpoint !== "cards");
-                setsFields.classList.toggle("hidden", endpoint !== "sets");
             }
 
             apiSelect.addEventListener("change", syncFields);

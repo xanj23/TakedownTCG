@@ -1,9 +1,8 @@
-using TakedownTCGApplication.ViewModels.Search;
-
 namespace TakedownTCGApplication.Models.Search;
 
 public sealed class ProductsSearchWorkflowResult
 {
-    public ProductsSearchViewModel Model { get; init; } = new();
+    public ProductsSearchRequest Request { get; init; } = new();
+    public ProductsSearchOperationResult OperationResult { get; init; } = new();
     public IReadOnlyList<SearchValidationError> ValidationErrors { get; init; } = Array.Empty<SearchValidationError>();
 }

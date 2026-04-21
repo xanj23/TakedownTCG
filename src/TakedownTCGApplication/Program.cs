@@ -16,31 +16,25 @@ builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 
 JustTcgApiOptions apiOptions = builder.Configuration.GetSection("JustTcgApi").Get<JustTcgApiOptions>() ?? new JustTcgApiOptions();
-string? apiKeyOverride = Environment.GetEnvironmentVariable("JUSTTCG_API_KEY");
-if (!string.IsNullOrWhiteSpace(apiKeyOverride))
-{
-    apiOptions.ApiKey = apiKeyOverride;
-}
 
 PersistenceOptions persistenceOptions = builder.Configuration.GetSection("Persistence").Get<PersistenceOptions>() ?? new PersistenceOptions();
-string? dbConnectionStringOverride = Environment.GetEnvironmentVariable("TAKEDOWNTCG_DB_CONNECTION_STRING");
-if (!string.IsNullOrWhiteSpace(dbConnectionStringOverride))
-{
-    persistenceOptions.ConnectionString = dbConnectionStringOverride;
-}
-
 if (string.IsNullOrWhiteSpace(persistenceOptions.ConnectionString))
 {
     persistenceOptions.ConnectionString = DatabaseConnectionDefaults.ResolveDefaultConnectionString();
 }
 
-PokemonTcgApiOptions pokemonApiOptions = builder.Configuration.GetSection("PokemonTcgApi").Get<PokemonTcgApiOptions>() ?? new PokemonTcgApiOptions();
-string? pokemonApiKeyOverride = Environment.GetEnvironmentVariable("POKEMON_TCG_API_KEY")
-                                ?? Environment.GetEnvironmentVariable("RAPIDAPI_KEY");
-if (!string.IsNullOrWhiteSpace(pokemonApiKeyOverride))
+bool usePostgresPersistence = true;
+try
 {
-    pokemonApiOptions.ApiKey = pokemonApiKeyOverride;
+    PostgreSqlDatabaseInitializer.EnsureSchema(persistenceOptions.ConnectionString);
 }
+catch (Exception ex)
+{
+    usePostgresPersistence = false;
+    Console.WriteLine($"PostgreSQL is unavailable; using in-memory accounts and favorites for this run. {ex.Message}");
+}
+
+PokemonTcgApiOptions pokemonApiOptions = builder.Configuration.GetSection("PokemonTcgApi").Get<PokemonTcgApiOptions>() ?? new PokemonTcgApiOptions();
 
 EbayApiOptions ebayApiOptions = builder.Configuration.GetSection("EbayApi").Get<EbayApiOptions>() ?? new EbayApiOptions();
 SerpApiOptions serpApiOptions = builder.Configuration.GetSection("SerpApi").Get<SerpApiOptions>() ?? new SerpApiOptions();
@@ -51,17 +45,26 @@ builder.Services.AddSingleton(pokemonApiOptions);
 builder.Services.AddSingleton(ebayApiOptions);
 builder.Services.AddSingleton(serpApiOptions);
 
-builder.Services.AddSingleton<IUserRepository>(sp =>
+if (usePostgresPersistence)
 {
-    PersistenceOptions options = sp.GetRequiredService<PersistenceOptions>();
-    return new UserRepository(options.ConnectionString);
-});
+    builder.Services.AddSingleton<IUserRepository>(sp =>
+    {
+        PersistenceOptions options = sp.GetRequiredService<PersistenceOptions>();
+        return new UserRepository(options.ConnectionString);
+    });
 
-builder.Services.AddSingleton<IFavoriteRepository>(sp =>
+    builder.Services.AddSingleton<IFavoriteRepository>(sp =>
+    {
+        PersistenceOptions options = sp.GetRequiredService<PersistenceOptions>();
+        return new FavoriteRepository(options.ConnectionString);
+    });
+}
+else
 {
-    PersistenceOptions options = sp.GetRequiredService<PersistenceOptions>();
-    return new FavoriteRepository(options.ConnectionString);
-});
+    builder.Services.AddSingleton<InMemoryAccountStore>();
+    builder.Services.AddSingleton<IUserRepository, InMemoryUserRepository>();
+    builder.Services.AddSingleton<IFavoriteRepository, InMemoryFavoriteRepository>();
+}
 
 builder.Services.AddSingleton<IAccountService, AccountService>();
 builder.Services.AddSingleton<IFavoriteService, FavoriteService>();
@@ -92,33 +95,37 @@ builder.Services.AddSingleton<IEbayProductsSearchService, EbayProductsSearchServ
 builder.Services.AddSingleton<IProductsSearchWorkflow, ProductsSearchWorkflow>();
 builder.Services.AddSingleton<ICompletedTcgSalesService, CompletedTcgSalesService>();
 
+DirectoryInfo dataProtectionKeysDirectory = Directory.CreateDirectory(
+    Path.Combine(builder.Environment.ContentRootPath, "App_Data", "DataProtectionKeys"));
+
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(dataProtectionKeysDirectory)
+    .SetApplicationName("TakedownTCGApplication");
+
+builder.Services.AddAntiforgery(options =>
+{
+    options.Cookie.Name = "TakedownTCG.Antiforgery.v2";
+});
+
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
         options.LoginPath = "/Account/Login";
         options.AccessDeniedPath = "/Account/Login";
-        options.Cookie.Name = "TakedownTCG.Auth";
+        options.Cookie.Name = "TakedownTCG.Auth.v2";
         options.SlidingExpiration = true;
     });
 
 builder.Services.AddAuthorization();
 builder.Services.AddSession(options =>
 {
-    options.Cookie.Name = "TakedownTCG.Session";
+    options.Cookie.Name = "TakedownTCG.Session.v2";
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
     options.IdleTimeout = TimeSpan.FromHours(8);
 });
 
 builder.Services.AddControllersWithViews();
-
-if (builder.Environment.IsDevelopment())
-{
-    string dataProtectionPath = Path.Combine(builder.Environment.ContentRootPath, "App_Data", "DataProtectionKeys");
-    builder.Services.AddDataProtection()
-        .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionPath))
-        .SetApplicationName("TakedownTCGApplication");
-}
 
 var app = builder.Build();
 
@@ -128,7 +135,6 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
 app.UseRouting();
 app.UseSession();
 app.UseAuthentication();

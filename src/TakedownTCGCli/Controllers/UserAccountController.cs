@@ -1,4 +1,5 @@
 using System;
+using TakedownTCG.cli.Models.JustTcg.Response;
 using TakedownTCG.cli.Models.UserAccounts;
 using TakedownTCG.cli.Services.UserAccounts;
 using TakedownTCG.cli.Views.Input;
@@ -7,27 +8,73 @@ using TakedownTCG.cli.Views.Shared;
 
 namespace TakedownTCG.cli.Controllers
 {
-    public static class UserAccountController
+    public sealed class UserAccountController
     {
-        private static AccountService? _accountService;
-        private static FavoriteService? _favoriteService;
-        private static User? _currentUser;
+        private readonly AccountService _accountService;
+        private readonly FavoriteService _favoriteService;
+        private readonly FavoriteController _favoriteController;
+        private User? _currentUser;
 
-        public static User? CurrentUser => _currentUser;
-        public static FavoriteService FavoriteService =>
-            _favoriteService ?? throw new InvalidOperationException("Favorite service is not initialized.");
-
-        public static void Configure(AccountService accountService, FavoriteService favoriteService)
+        public UserAccountController(AccountService accountService, FavoriteService favoriteService)
         {
             _accountService = accountService;
             _favoriteService = favoriteService;
-            _currentUser = null;
+            _favoriteController = new FavoriteController(favoriteService, () => _currentUser);
         }
 
-        public static void Run()
-        {
-            EnsureInitialized();
+        public User? CurrentUser => _currentUser;
 
+        public void OfferToFavorite(object responseData)
+        {
+            try
+            {
+                Console.WriteLine();
+                string? favInput = UserInput.InputString("Add a result to favorites? Enter result number or press Enter to skip");
+                if (string.IsNullOrWhiteSpace(favInput))
+                {
+                    return;
+                }
+
+                if (!int.TryParse(favInput.Trim(), out int favIndex))
+                {
+                    Console.WriteLine("Invalid number.");
+                    return;
+                }
+
+                if (_currentUser is null)
+                {
+                    Console.WriteLine("Login to add favorites.");
+                    return;
+                }
+
+                if (responseData is Response<Card> cardResp)
+                {
+                    AddCardFavorite(favIndex, cardResp);
+                    return;
+                }
+
+                if (responseData is Response<Set> setResp)
+                {
+                    AddSetFavorite(favIndex, setResp);
+                    return;
+                }
+
+                if (responseData is Response<Game> gameResp)
+                {
+                    AddGameFavorite(favIndex, gameResp);
+                    return;
+                }
+
+                Console.WriteLine("Favoriting is not supported for this response type.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to add favorite: {ex.Message}");
+            }
+        }
+
+        public void Run()
+        {
             while (true)
             {
                 Console.WriteLine();
@@ -45,18 +92,54 @@ namespace TakedownTCG.cli.Controllers
             }
         }
 
-        private static AccountService AccountService =>
-            _accountService ?? throw new InvalidOperationException("Account service is not initialized.");
-
-        private static void EnsureInitialized()
+        private void AddCardFavorite(int favIndex, Response<Card> cardResp)
         {
-            if (_accountService is null || _favoriteService is null)
+            if (!IsIndexInRange(favIndex, cardResp.Data.Count))
             {
-                throw new InvalidOperationException("UserAccountController.Configure must be called before use.");
+                Console.WriteLine("Index out of range.");
+                return;
             }
+
+            Card card = cardResp.Data[favIndex - 1];
+            bool added = _favoriteService.AddFavorite(_currentUser!.UserName, "Card", card.Id, card.Name);
+
+            Console.WriteLine(added ? "Added to favorites." : "Already favorited or failed.");
         }
 
-        private static void RunAction(UserAccountMenu.Action selectedAction)
+        private void AddSetFavorite(int favIndex, Response<Set> setResp)
+        {
+            if (!IsIndexInRange(favIndex, setResp.Data.Count))
+            {
+                Console.WriteLine("Index out of range.");
+                return;
+            }
+
+            Set set = setResp.Data[favIndex - 1];
+            bool added = _favoriteService.AddFavorite(_currentUser!.UserName, "Set", set.Id, set.Name);
+
+            Console.WriteLine(added ? "Added to favorites." : "Already favorited or failed.");
+        }
+
+        private void AddGameFavorite(int favIndex, Response<Game> gameResp)
+        {
+            if (!IsIndexInRange(favIndex, gameResp.Data.Count))
+            {
+                Console.WriteLine("Index out of range.");
+                return;
+            }
+
+            Game game = gameResp.Data[favIndex - 1];
+            bool added = _favoriteService.AddFavorite(_currentUser!.UserName, "Game", game.Id, game.Name);
+
+            Console.WriteLine(added ? "Added to favorites." : "Already favorited or failed.");
+        }
+
+        private static bool IsIndexInRange(int index, int count)
+        {
+            return index >= 1 && index <= count;
+        }
+
+        private void RunAction(UserAccountMenu.Action selectedAction)
         {
             if (selectedAction == UserAccountMenu.Definition.QuitAction)
             {
@@ -90,7 +173,7 @@ namespace TakedownTCG.cli.Controllers
                     ToggleNotifications();
                     break;
                 case UserAccountMenu.Action.Favorites:
-                    FavoriteController.ShowFavoritesMenu();
+                    _favoriteController.ShowFavoritesMenu();
                     break;
                 case UserAccountMenu.Action.DeleteAccount:
                     DeleteAccount();
@@ -101,17 +184,17 @@ namespace TakedownTCG.cli.Controllers
             }
         }
 
-        private static void Register()
+        private void Register()
         {
             string userName = UserInput.InputRequiredString("Enter username");
             string email = UserInput.InputRequiredString("Enter email");
             string password = UserInput.InputRequiredString("Enter password");
 
-            bool success = AccountService.CreateAccount(userName, email, password, true);
+            bool success = _accountService.CreateAccount(userName, email, password, true);
             Console.WriteLine(success ? "Account created successfully." : "Failed to create account. Username or email may already exist.");
         }
 
-        private static void Login()
+        private void Login()
         {
             if (_currentUser != null)
             {
@@ -122,7 +205,7 @@ namespace TakedownTCG.cli.Controllers
             string userNameOrEmail = UserInput.InputRequiredString("Enter username or email");
             string password = UserInput.InputRequiredString("Enter password");
 
-            User? user = AccountService.Login(userNameOrEmail, password);
+            User? user = _accountService.Login(userNameOrEmail, password);
             if (user is null)
             {
                 Console.WriteLine("Login failed. Please check credentials.");
@@ -133,7 +216,7 @@ namespace TakedownTCG.cli.Controllers
             Console.WriteLine($"Logged in as {_currentUser.UserName}.");
         }
 
-        private static void Logout()
+        private void Logout()
         {
             if (_currentUser is null)
             {
@@ -145,7 +228,7 @@ namespace TakedownTCG.cli.Controllers
             _currentUser = null;
         }
 
-        private static void ViewProfile()
+        private void ViewProfile()
         {
             if (_currentUser is null)
             {
@@ -158,7 +241,7 @@ namespace TakedownTCG.cli.Controllers
             Console.WriteLine($"Notifications: {(_currentUser.UserNotifications ? "Enabled" : "Disabled")}");
         }
 
-        private static void ChangeUserName()
+        private void ChangeUserName()
         {
             if (_currentUser is null)
             {
@@ -167,7 +250,7 @@ namespace TakedownTCG.cli.Controllers
             }
 
             string newUserName = UserInput.InputRequiredString("New username");
-            bool success = AccountService.ChangeUserName(_currentUser.UserName, newUserName);
+            bool success = _accountService.ChangeUserName(_currentUser.UserName, newUserName);
             if (success)
             {
                 _currentUser.UserName = newUserName;
@@ -179,7 +262,7 @@ namespace TakedownTCG.cli.Controllers
             }
         }
 
-        private static void ChangeEmail()
+        private void ChangeEmail()
         {
             if (_currentUser is null)
             {
@@ -188,7 +271,7 @@ namespace TakedownTCG.cli.Controllers
             }
 
             string newEmail = UserInput.InputRequiredString("New email");
-            bool success = AccountService.ChangeEmail(_currentUser.UserName, newEmail);
+            bool success = _accountService.ChangeEmail(_currentUser.UserName, newEmail);
             if (success)
             {
                 _currentUser.UserEmail = newEmail;
@@ -200,7 +283,7 @@ namespace TakedownTCG.cli.Controllers
             }
         }
 
-        private static void ChangePassword()
+        private void ChangePassword()
         {
             if (_currentUser is null)
             {
@@ -211,11 +294,11 @@ namespace TakedownTCG.cli.Controllers
             string currentPassword = UserInput.InputRequiredString("Current password");
             string newPassword = UserInput.InputRequiredString("New password");
 
-            bool success = AccountService.ChangePassword(_currentUser.UserName, currentPassword, newPassword);
+            bool success = _accountService.ChangePassword(_currentUser.UserName, currentPassword, newPassword);
             Console.WriteLine(success ? "Password changed successfully." : "Failed to change password. Current password may be incorrect.");
         }
 
-        private static void ToggleNotifications()
+        private void ToggleNotifications()
         {
             if (_currentUser is null)
             {
@@ -225,7 +308,7 @@ namespace TakedownTCG.cli.Controllers
 
             bool currentSetting = _currentUser.UserNotifications;
             bool newSetting = !currentSetting;
-            bool success = AccountService.UpdateUserNotifications(_currentUser.UserName, newSetting);
+            bool success = _accountService.UpdateUserNotifications(_currentUser.UserName, newSetting);
             if (success)
             {
                 _currentUser.UserNotifications = newSetting;
@@ -237,7 +320,7 @@ namespace TakedownTCG.cli.Controllers
             }
         }
 
-        private static void DeleteAccount()
+        private void DeleteAccount()
         {
             if (_currentUser is null)
             {
@@ -252,7 +335,7 @@ namespace TakedownTCG.cli.Controllers
                 return;
             }
 
-            bool success = AccountService.DeleteAccount(_currentUser.UserName);
+            bool success = _accountService.DeleteAccount(_currentUser.UserName);
             if (success)
             {
                 Console.WriteLine("Account deleted successfully.");

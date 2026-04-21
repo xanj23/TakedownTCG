@@ -7,12 +7,19 @@ namespace TakedownTCG.cli.Controllers
     /// <summary>
     /// Coordinates the top-level CLI menu flow.
     /// </summary>
-    public static class AppController
+    public sealed class AppController
     {
+        private readonly UserAccountController _userAccountController;
+
+        public AppController(UserAccountController userAccountController)
+        {
+            _userAccountController = userAccountController;
+        }
+
         /// <summary>
         /// Runs the main CLI loop and dispatches the selected menu action.
         /// </summary>
-        public static void RunCli()
+        public void RunCli()
         {
             while (true)
             {
@@ -31,7 +38,7 @@ namespace TakedownTCG.cli.Controllers
         /// Executes the selected main-menu action.
         /// </summary>
         /// <param name="selectedAction">The selected main-menu action.</param>
-        private static void RunAction(MainMenu.Action selectedAction)
+        private void RunAction(MainMenu.Action selectedAction)
         {
             switch (selectedAction)
             {
@@ -39,7 +46,7 @@ namespace TakedownTCG.cli.Controllers
                     ApiController.Run();
                     break;
                 case MainMenu.Action.UserAccount:
-                    UserAccountController.Run();
+                    _userAccountController.Run();
                     break;
                 default:
                     AppStatusView.ShowUnknownMainMenuOption();

@@ -1,6 +1,6 @@
 using TakedownTCGApplication.Abstractions;
+using TakedownTCGApplication.Models.Home;
 using TakedownTCGApplication.Models.SerpApi.Response;
-using TakedownTCGApplication.ViewModels.Home;
 
 namespace TakedownTCGApplication.Services.SerpApi;
 
@@ -10,7 +10,7 @@ public sealed class CompletedTcgSaleMapper : ICompletedTcgSaleMapper
     private const string EbayImageHost = "i.ebayimg.com";
     private const string PreferredEbayImageSize = "s-l500.jpg";
 
-    public IReadOnlyList<CompletedTcgSaleViewModel> MapSales(IEnumerable<SerpApiEbayOrganicResult> results, int limit)
+    public IReadOnlyList<CompletedTcgSale> MapSales(IEnumerable<SerpApiEbayOrganicResult> results, int limit)
     {
         return results
             .Where(result => !string.IsNullOrWhiteSpace(result.Title))
@@ -19,10 +19,10 @@ public sealed class CompletedTcgSaleMapper : ICompletedTcgSaleMapper
             .ToList();
     }
 
-    private static CompletedTcgSaleViewModel MapSale(SerpApiEbayOrganicResult result)
+    private static CompletedTcgSale MapSale(SerpApiEbayOrganicResult result)
     {
         SerpApiEbayPrice? price = result.Price?.From ?? result.Price;
-        return new CompletedTcgSaleViewModel
+        return new CompletedTcgSale
         {
             Title = result.Title,
             ProductId = result.ProductId,

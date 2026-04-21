@@ -3,7 +3,6 @@ using TakedownTCGApplication.Models.Ebay.Query;
 using TakedownTCGApplication.Models.JustTcg.Query;
 using TakedownTCGApplication.Models.PokemonTcg.Query;
 using TakedownTCGApplication.Models.Search;
-using TakedownTCGApplication.ViewModels.Search;
 
 namespace TakedownTCGApplication.Services.JustTcg;
 
@@ -29,182 +28,183 @@ public sealed class ProductsSearchWorkflow : IProductsSearchWorkflow
         _ebayProductsSearchService = ebayProductsSearchService;
     }
 
-    public ProductsSearchViewModel CreateSearchModel(string? endpoint = null)
+    public ProductsSearchRequest CreateSearchRequest(string? endpoint = null)
     {
-        ProductsSearchViewModel model = new();
+        ProductsSearchRequest request = new();
         if (!string.IsNullOrWhiteSpace(endpoint))
         {
-            model.Endpoint = NormalizeEndpoint(endpoint);
+            request.Endpoint = NormalizeEndpoint(endpoint);
         }
 
-        return model;
+        return request;
     }
 
     public async Task<ProductsSearchWorkflowResult> SearchAsync(
-        ProductsSearchViewModel model,
+        ProductsSearchRequest request,
         string? userName,
         CancellationToken cancellationToken = default)
     {
-        Normalize(model);
-        IReadOnlyList<SearchValidationError> validationErrors = Validate(model);
+        Normalize(request);
+        IReadOnlyList<SearchValidationError> validationErrors = Validate(request);
         if (validationErrors.Count > 0)
         {
             return new ProductsSearchWorkflowResult
             {
-                Model = model,
+                Request = request,
                 ValidationErrors = validationErrors
             };
         }
 
+        ProductsSearchOperationResult result = new();
         try
         {
-            ProductsSearchOperationResult result = model.Api.ToLowerInvariant() switch
+            result = request.Api.ToLowerInvariant() switch
             {
-                "pokemontcg" => await SearchPokemonAsync(model, userName, cancellationToken),
-                "ebay" => await SearchEbayAsync(model, userName, cancellationToken),
-                _ => await SearchJustTcgAsync(model, userName, cancellationToken)
+                "pokemontcg" => await SearchPokemonAsync(request, userName, cancellationToken),
+                "ebay" => await SearchEbayAsync(request, userName, cancellationToken),
+                _ => await SearchJustTcgAsync(request, userName, cancellationToken)
             };
-
-            ApplyOperationResult(model, result);
         }
         catch (Exception ex)
         {
-            model.ErrorMessage = $"Search failed: {ex.Message}";
+            result.ErrorMessage = $"Search failed: {ex.Message}";
         }
 
-        return new ProductsSearchWorkflowResult { Model = model };
+        return new ProductsSearchWorkflowResult
+        {
+            Request = request,
+            OperationResult = result
+        };
     }
 
     private async Task<ProductsSearchOperationResult> SearchJustTcgAsync(
-        ProductsSearchViewModel model,
+        ProductsSearchRequest request,
         string? userName,
         CancellationToken cancellationToken)
     {
-        return model.Endpoint switch
+        return request.Endpoint switch
         {
             EndpointCards => await _productsSearchService.SearchCardsAsync(
-                BuildCardQuery(model),
+                BuildCardQuery(request),
                 userName,
-                model.Limit,
+                request.Limit,
                 cancellationToken),
             EndpointSets => await _productsSearchService.SearchSetsAsync(
-                BuildSetQuery(model),
-                model.Limit,
+                BuildSetQuery(request),
+                request.Limit,
                 cancellationToken),
             EndpointGames => await _productsSearchService.SearchGamesAsync(
                 new GameQueryParams(),
-                model.Limit,
+                request.Limit,
                 cancellationToken),
             _ => new ProductsSearchOperationResult()
         };
     }
 
     private async Task<ProductsSearchOperationResult> SearchPokemonAsync(
-        ProductsSearchViewModel model,
+        ProductsSearchRequest request,
         string? userName,
         CancellationToken cancellationToken)
     {
         return await _pokemonProductsSearchService.SearchCardsAsync(
-            BuildPokemonCardQuery(model),
+            BuildPokemonCardQuery(request),
             userName,
             cancellationToken);
     }
 
     private async Task<ProductsSearchOperationResult> SearchEbayAsync(
-        ProductsSearchViewModel model,
+        ProductsSearchRequest request,
         string? userName,
         CancellationToken cancellationToken)
     {
-        return model.Endpoint switch
+        return request.Endpoint switch
         {
             EndpointCards => await _ebayProductsSearchService.SearchCardsAsync(
-                BuildEbayItemSearchQuery(model),
+                BuildEbayItemSearchQuery(request),
                 userName,
                 cancellationToken),
             _ => new ProductsSearchOperationResult()
         };
     }
 
-    private static void Normalize(ProductsSearchViewModel model)
+    private static void Normalize(ProductsSearchRequest request)
     {
-        model.Api = NormalizeInput(model.Api);
-        model.Endpoint = NormalizeEndpoint(model.Endpoint);
-        model.CardQuery = NormalizeInput(model.CardQuery);
-        model.CardNumber = NormalizeInput(model.CardNumber);
-        model.CardPrinting = NormalizeInput(model.CardPrinting);
-        model.CardCondition = NormalizeInput(model.CardCondition);
-        model.CardOrderBy = NormalizeInput(model.CardOrderBy);
-        model.CardOrder = NormalizeInput(model.CardOrder);
-        model.PokemonSearch = NormalizeInput(model.PokemonSearch);
-        model.PokemonTcgId = NormalizeInput(model.PokemonTcgId);
-        model.PokemonSort = NormalizeInput(model.PokemonSort);
-        model.EbaySearch = NormalizeInput(model.EbaySearch);
-        model.EbayCategoryIds = NormalizeInput(model.EbayCategoryIds);
-        model.EbayBuyingOptions = NormalizeInput(model.EbayBuyingOptions);
-        model.EbaySort = NormalizeInput(model.EbaySort);
-        model.SetGame = NormalizeInput(model.SetGame);
-        model.SetQuery = NormalizeInput(model.SetQuery);
-        model.SetOrderBy = NormalizeInput(model.SetOrderBy);
-        model.SetOrder = NormalizeInput(model.SetOrder);
-        model.Offset = Math.Max(0, model.Offset);
-        model.Limit = model.Limit <= 0 ? 20 : Math.Min(model.Limit, 100);
-        if (model.Api.Equals(PokemonTcgApi, StringComparison.OrdinalIgnoreCase))
+        request.Api = NormalizeInput(request.Api);
+        request.Endpoint = NormalizeEndpoint(request.Endpoint);
+        request.CardQuery = NormalizeInput(request.CardQuery);
+        request.CardNumber = NormalizeInput(request.CardNumber);
+        request.CardPrinting = NormalizeInput(request.CardPrinting);
+        request.CardCondition = NormalizeInput(request.CardCondition);
+        request.CardOrderBy = NormalizeInput(request.CardOrderBy);
+        request.CardOrder = NormalizeInput(request.CardOrder);
+        request.PokemonSearch = NormalizeInput(request.PokemonSearch);
+        request.PokemonTcgId = NormalizeInput(request.PokemonTcgId);
+        request.PokemonSort = NormalizeInput(request.PokemonSort);
+        request.EbaySearch = NormalizeInput(request.EbaySearch);
+        request.EbayCategoryIds = NormalizeInput(request.EbayCategoryIds);
+        request.EbayBuyingOptions = NormalizeInput(request.EbayBuyingOptions);
+        request.EbaySort = NormalizeInput(request.EbaySort);
+        request.SetGame = NormalizeInput(request.SetGame);
+        request.SetQuery = NormalizeInput(request.SetQuery);
+        request.SetOrderBy = NormalizeInput(request.SetOrderBy);
+        request.SetOrder = NormalizeInput(request.SetOrder);
+        request.Offset = Math.Max(0, request.Offset);
+        request.Limit = request.Limit <= 0 ? 20 : Math.Min(request.Limit, 100);
+        if (request.Api.Equals(PokemonTcgApi, StringComparison.OrdinalIgnoreCase))
         {
-            model.Endpoint = EndpointCards;
+            request.Endpoint = EndpointCards;
         }
-        else if (model.Api.Equals(EbayApi, StringComparison.OrdinalIgnoreCase) && string.IsNullOrWhiteSpace(model.Endpoint))
+        else if (request.Api.Equals(EbayApi, StringComparison.OrdinalIgnoreCase) && string.IsNullOrWhiteSpace(request.Endpoint))
         {
-            model.Endpoint = EndpointCards;
+            request.Endpoint = EndpointCards;
         }
-
-        model.HasSearched = true;
     }
 
-    private static IReadOnlyList<SearchValidationError> Validate(ProductsSearchViewModel model)
+    private static IReadOnlyList<SearchValidationError> Validate(ProductsSearchRequest request)
     {
         List<SearchValidationError> errors = new();
 
-        if (!IsSupportedApi(model.Api))
+        if (!IsSupportedApi(request.Api))
         {
-            errors.Add(new SearchValidationError(nameof(model.Api), "Please select a valid API."));
+            errors.Add(new SearchValidationError(nameof(request.Api), "Please select a valid API."));
         }
 
-        if (string.IsNullOrWhiteSpace(model.Endpoint))
+        if (string.IsNullOrWhiteSpace(request.Endpoint))
         {
-            errors.Add(new SearchValidationError(nameof(model.Endpoint), "Please select an endpoint."));
+            errors.Add(new SearchValidationError(nameof(request.Endpoint), "Please select an endpoint."));
         }
-        else if (!IsSupportedEndpointForApi(model.Api, model.Endpoint))
+        else if (!IsSupportedEndpointForApi(request.Api, request.Endpoint))
         {
-            errors.Add(new SearchValidationError(nameof(model.Endpoint), GetUnsupportedEndpointMessage(model.Api)));
-        }
-
-        if (model.Api.Equals(PokemonTcgApi, StringComparison.OrdinalIgnoreCase)
-            && model.Endpoint == EndpointCards
-            && string.IsNullOrWhiteSpace(model.PokemonSearch)
-            && string.IsNullOrWhiteSpace(model.PokemonTcgId))
-        {
-            errors.Add(new SearchValidationError(nameof(model.PokemonSearch), "Search text or Pokemon TCG ID is required for Pokemon cards."));
+            errors.Add(new SearchValidationError(nameof(request.Endpoint), GetUnsupportedEndpointMessage(request.Api)));
         }
 
-        if (model.Api.Equals(JustTcgApi, StringComparison.OrdinalIgnoreCase)
-            && model.Endpoint == EndpointCards
-            && string.IsNullOrWhiteSpace(model.CardQuery))
+        if (request.Api.Equals(PokemonTcgApi, StringComparison.OrdinalIgnoreCase)
+            && request.Endpoint == EndpointCards
+            && string.IsNullOrWhiteSpace(request.PokemonSearch)
+            && string.IsNullOrWhiteSpace(request.PokemonTcgId))
         {
-            errors.Add(new SearchValidationError(nameof(model.CardQuery), "Name is required for cards."));
+            errors.Add(new SearchValidationError(nameof(request.PokemonSearch), "Search text or Pokemon TCG ID is required for Pokemon cards."));
         }
 
-        if (model.Api.Equals(EbayApi, StringComparison.OrdinalIgnoreCase)
-            && model.Endpoint == EndpointCards
-            && string.IsNullOrWhiteSpace(model.EbaySearch))
+        if (request.Api.Equals(JustTcgApi, StringComparison.OrdinalIgnoreCase)
+            && request.Endpoint == EndpointCards
+            && string.IsNullOrWhiteSpace(request.CardQuery))
         {
-            errors.Add(new SearchValidationError(nameof(model.EbaySearch), "Search text is required for eBay listings."));
+            errors.Add(new SearchValidationError(nameof(request.CardQuery), "Name is required for cards."));
         }
 
-        if (model.Api.Equals(JustTcgApi, StringComparison.OrdinalIgnoreCase)
-            && model.Endpoint == EndpointSets
-            && string.IsNullOrWhiteSpace(model.SetGame))
+        if (request.Api.Equals(EbayApi, StringComparison.OrdinalIgnoreCase)
+            && request.Endpoint == EndpointCards
+            && string.IsNullOrWhiteSpace(request.EbaySearch))
         {
-            errors.Add(new SearchValidationError(nameof(model.SetGame), "Game is required for sets."));
+            errors.Add(new SearchValidationError(nameof(request.EbaySearch), "Search text is required for eBay listings."));
+        }
+
+        if (request.Api.Equals(JustTcgApi, StringComparison.OrdinalIgnoreCase)
+            && request.Endpoint == EndpointSets
+            && string.IsNullOrWhiteSpace(request.SetGame))
+        {
+            errors.Add(new SearchValidationError(nameof(request.SetGame), "Game is required for sets."));
         }
 
         return errors;
@@ -259,71 +259,54 @@ public sealed class ProductsSearchWorkflow : IProductsSearchWorkflow
         return (endpoint ?? string.Empty).Trim().ToLowerInvariant();
     }
 
-    private static CardQueryParams BuildCardQuery(ProductsSearchViewModel model)
+    private static CardQueryParams BuildCardQuery(ProductsSearchRequest request)
     {
         CardQueryParams query = new();
-        query.Parameters["q"].Value = model.CardQuery;
-        query.Parameters["number"].Value = model.CardNumber;
-        query.Parameters["printing"].Value = model.CardPrinting;
-        query.Parameters["condition"].Value = model.CardCondition;
-        query.Parameters["orderBy"].Value = model.CardOrderBy;
-        query.Parameters["order"].Value = model.CardOrder;
-        query.Parameters["limit"].Value = model.Limit;
-        query.Parameters["offset"].Value = model.Offset;
+        query.Parameters["q"].Value = request.CardQuery;
+        query.Parameters["number"].Value = request.CardNumber;
+        query.Parameters["printing"].Value = request.CardPrinting;
+        query.Parameters["condition"].Value = request.CardCondition;
+        query.Parameters["orderBy"].Value = request.CardOrderBy;
+        query.Parameters["order"].Value = request.CardOrder;
+        query.Parameters["limit"].Value = request.Limit;
+        query.Parameters["offset"].Value = request.Offset;
         return query;
     }
 
-    private static PokemonCardQueryParams BuildPokemonCardQuery(ProductsSearchViewModel model)
+    private static PokemonCardQueryParams BuildPokemonCardQuery(ProductsSearchRequest request)
     {
         return new PokemonCardQueryParams
         {
-            Search = model.PokemonSearch,
-            TcgId = model.PokemonTcgId,
-            Sort = string.IsNullOrWhiteSpace(model.PokemonSort) ? "price_highest" : model.PokemonSort,
-            Page = (model.Offset / Math.Max(1, model.Limit)) + 1,
-            PerPage = model.Limit
+            Search = request.PokemonSearch,
+            TcgId = request.PokemonTcgId,
+            Sort = string.IsNullOrWhiteSpace(request.PokemonSort) ? "price_highest" : request.PokemonSort,
+            Page = (request.Offset / Math.Max(1, request.Limit)) + 1,
+            PerPage = request.Limit
         };
     }
 
-    private static EbayItemSearchQueryParams BuildEbayItemSearchQuery(ProductsSearchViewModel model)
+    private static EbayItemSearchQueryParams BuildEbayItemSearchQuery(ProductsSearchRequest request)
     {
         return new EbayItemSearchQueryParams
         {
-            Search = model.EbaySearch,
-            CategoryIds = model.EbayCategoryIds,
-            BuyingOptions = model.EbayBuyingOptions,
-            Sort = string.IsNullOrWhiteSpace(model.EbaySort) ? "relevance" : model.EbaySort,
-            Limit = model.Limit,
-            Offset = model.Offset
+            Search = request.EbaySearch,
+            CategoryIds = request.EbayCategoryIds,
+            BuyingOptions = request.EbayBuyingOptions,
+            Sort = string.IsNullOrWhiteSpace(request.EbaySort) ? "relevance" : request.EbaySort,
+            Limit = request.Limit,
+            Offset = request.Offset
         };
     }
 
-    private static SetQueryParams BuildSetQuery(ProductsSearchViewModel model)
+    private static SetQueryParams BuildSetQuery(ProductsSearchRequest request)
     {
         SetQueryParams query = new();
-        query.Parameters["game"].Value = model.SetGame;
-        query.Parameters["q"].Value = model.SetQuery;
-        query.Parameters["orderBy"].Value = model.SetOrderBy;
-        query.Parameters["order"].Value = model.SetOrder;
-        query.Parameters["limit"].Value = model.Limit;
-        query.Parameters["offset"].Value = model.Offset;
+        query.Parameters["game"].Value = request.SetGame;
+        query.Parameters["q"].Value = request.SetQuery;
+        query.Parameters["orderBy"].Value = request.SetOrderBy;
+        query.Parameters["order"].Value = request.SetOrder;
+        query.Parameters["limit"].Value = request.Limit;
+        query.Parameters["offset"].Value = request.Offset;
         return query;
-    }
-
-    private static void ApplyOperationResult(ProductsSearchViewModel model, ProductsSearchOperationResult result)
-    {
-        model.CardDisplayResults = result.CardDisplayResults;
-        model.SetDisplayResults = result.SetDisplayResults;
-        model.GameDisplayResults = result.GameDisplayResults;
-        model.ErrorMessage = result.ErrorMessage;
-        model.Total = result.Total;
-        model.Offset = result.Offset;
-        model.Limit = result.Limit;
-        model.HasMore = result.HasMore;
-        model.HasPrevious = result.HasPrevious;
-        model.PreviousOffset = result.PreviousOffset;
-        model.NextOffset = result.NextOffset;
-        model.CurrentPage = result.CurrentPage;
-        model.TotalPages = result.TotalPages;
     }
 }

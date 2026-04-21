@@ -1,7 +1,7 @@
 using TakedownTCGApplication.Abstractions;
 using TakedownTCGApplication.Infrastructure.Config;
+using TakedownTCGApplication.Models.Home;
 using TakedownTCGApplication.Models.SerpApi.Response;
-using TakedownTCGApplication.ViewModels.Home;
 
 namespace TakedownTCGApplication.Services.SerpApi;
 
@@ -27,7 +27,7 @@ public sealed class CompletedTcgSalesService : ICompletedTcgSalesService
         _mapper = mapper;
     }
 
-    public async Task<IReadOnlyList<CompletedTcgSaleViewModel>> GetRecentCompletedSalesAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<CompletedTcgSale>> GetRecentCompletedSalesAsync(CancellationToken cancellationToken = default)
     {
         string url = _queryService.BuildCompletedSalesUrl(_options);
         string responseContent = await _httpGateway.FetchResponseAsync(url, _options.ApiKey, cancellationToken);

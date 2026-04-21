@@ -11,7 +11,6 @@ public sealed class FavoriteRepository : IFavoriteRepository
     public FavoriteRepository(string connectionString)
     {
         _connectionString = connectionString;
-        PostgreSqlDatabaseInitializer.EnsureSchema(_connectionString);
     }
 
     public async Task<bool> AddFavoriteAsync(Favorite favorite)

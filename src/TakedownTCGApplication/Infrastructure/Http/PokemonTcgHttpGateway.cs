@@ -17,7 +17,7 @@ public sealed class PokemonTcgHttpGateway : IPokemonTcgHttpGateway
         if (string.IsNullOrWhiteSpace(apiKey))
         {
             throw new InvalidOperationException(
-                "Pokemon API key is missing. Set POKEMON_TCG_API_KEY or RAPIDAPI_KEY before starting the app.");
+                "Pokemon API key is missing. Add ApiKey to PokemonTcgApi configuration before starting the app.");
         }
 
         using HttpRequestMessage request = new(HttpMethod.Get, url);
@@ -37,7 +37,7 @@ public sealed class PokemonTcgHttpGateway : IPokemonTcgHttpGateway
         if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
             throw new InvalidOperationException(
-                "Pokemon API authorization failed. Check that POKEMON_TCG_API_KEY or RAPIDAPI_KEY is valid and subscribed to pokemon-tcg-api on RapidAPI.");
+                "Pokemon API authorization failed. Check that PokemonTcgApi:ApiKey is valid and subscribed to pokemon-tcg-api on RapidAPI.");
         }
 
         response.EnsureSuccessStatusCode();

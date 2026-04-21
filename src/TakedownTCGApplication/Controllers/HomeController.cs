@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using TakedownTCGApplication.Abstractions;
 using TakedownTCGApplication.Models;
+using TakedownTCGApplication.Models.Home;
 using TakedownTCGApplication.ViewModels.Home;
 
 namespace TakedownTCGApplication.Controllers;
@@ -20,7 +21,8 @@ public class HomeController : Controller
         HomeIndexViewModel model = new();
         try
         {
-            model.CompletedSales = await _completedSalesService.GetRecentCompletedSalesAsync(cancellationToken);
+            IReadOnlyList<CompletedTcgSale> completedSales = await _completedSalesService.GetRecentCompletedSalesAsync(cancellationToken);
+            model.CompletedSales = completedSales.Select(ToViewModel).ToList();
         }
         catch (Exception ex)
         {
@@ -34,5 +36,22 @@ public class HomeController : Controller
     public IActionResult Error()
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+    }
+
+    private static CompletedTcgSaleViewModel ToViewModel(CompletedTcgSale sale)
+    {
+        return new CompletedTcgSaleViewModel
+        {
+            Title = sale.Title,
+            ProductId = sale.ProductId,
+            Url = sale.Url,
+            ImageUrl = sale.ImageUrl,
+            FallbackImageUrl = sale.FallbackImageUrl,
+            Price = sale.Price,
+            PriceText = sale.PriceText,
+            Condition = sale.Condition,
+            Seller = sale.Seller,
+            Shipping = sale.Shipping
+        };
     }
 }

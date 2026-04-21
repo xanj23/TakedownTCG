@@ -11,7 +11,6 @@ public sealed class UserRepository : IUserRepository
     public UserRepository(string connectionString)
     {
         _connectionString = connectionString;
-        PostgreSqlDatabaseInitializer.EnsureSchema(_connectionString);
     }
 
     public async Task<bool> InsertUserAsync(User user)

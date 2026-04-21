@@ -43,4 +43,7 @@ public sealed class ProductsSearchViewModel
     public IReadOnlyList<SetSearchResult> SetDisplayResults { get; set; } = Array.Empty<SetSearchResult>();
     public IReadOnlyList<GameSearchResult> GameDisplayResults { get; set; } = Array.Empty<GameSearchResult>();
     public string ErrorMessage { get; set; } = string.Empty;
+
+    public IReadOnlyList<SearchApiOptionViewModel> ApiOptions { get; set; } = Array.Empty<SearchApiOptionViewModel>();
+    public IReadOnlyList<SearchEndpointOptionViewModel> EndpointOptions { get; set; } = Array.Empty<SearchEndpointOptionViewModel>();
 }

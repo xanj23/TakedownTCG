@@ -12,7 +12,6 @@ namespace TakedownTCG.cli.Infrastructure.Persistence.UserAccounts
         public FavoriteRepository(string connectionString)
         {
             _connectionString = connectionString;
-            PostgreSqlDatabaseInitializer.EnsureSchema(_connectionString);
         }
 
         public bool AddFavorite(Favorite fav)

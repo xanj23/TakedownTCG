@@ -2,7 +2,7 @@ using Npgsql;
 
 namespace TakedownTCGApplication.Infrastructure.Persistence.UserAccounts;
 
-internal static class PostgreSqlDatabaseInitializer
+public static class PostgreSqlDatabaseInitializer
 {
     private const string SchemaSql = """
         CREATE TABLE IF NOT EXISTS users (

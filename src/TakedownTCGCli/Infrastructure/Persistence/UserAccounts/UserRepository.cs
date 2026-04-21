@@ -10,7 +10,6 @@ namespace TakedownTCG.cli.Infrastructure.Persistence.UserAccounts
         public UserRepository(string connectionString)
         {
             _connectionString = connectionString;
-            PostgreSqlDatabaseInitializer.EnsureSchema(_connectionString);
         }
 
         public bool InsertUser(User user)

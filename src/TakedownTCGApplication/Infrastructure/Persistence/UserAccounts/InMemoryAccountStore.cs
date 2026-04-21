@@ -1,79 +1,70 @@
-using TakedownTCGApplication.Abstractions;
 using TakedownTCGApplication.Models.UserAccounts;
 
-namespace TakedownTCG.Tests.Shared;
+namespace TakedownTCGApplication.Infrastructure.Persistence.UserAccounts;
 
 public sealed class InMemoryAccountStore
 {
     private readonly Dictionary<string, User> _usersByName = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, string> _userNamesByEmail = new(StringComparer.OrdinalIgnoreCase);
-    private readonly Dictionary<string, Favorite> _favorites = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, Favorite> _favorites = new(StringComparer.OrdinalIgnoreCase);
     private readonly object _gate = new();
 
-    public Task<bool> InsertUserAsync(User user)
+    public bool InsertUser(User user)
     {
         lock (_gate)
         {
             if (_usersByName.ContainsKey(user.UserName) || _userNamesByEmail.ContainsKey(user.UserEmail))
             {
-                return Task.FromResult(false);
+                return false;
             }
 
             User copy = Clone(user);
             _usersByName[copy.UserName] = copy;
             _userNamesByEmail[copy.UserEmail] = copy.UserName;
-
-            return Task.FromResult(true);
+            return true;
         }
     }
 
-    public Task<User?> GetByUserNameAsync(string userName)
+    public User? GetByUserName(string userName)
     {
         lock (_gate)
         {
-            return Task.FromResult(
-                _usersByName.TryGetValue(userName, out User? user) ? Clone(user) : null);
+            return _usersByName.TryGetValue(userName, out User? user) ? Clone(user) : null;
         }
     }
 
-    public Task<User?> GetByEmailAsync(string email)
+    public User? GetByEmail(string email)
     {
         lock (_gate)
         {
-            if (!_userNamesByEmail.TryGetValue(email, out string? userName))
-            {
-                return Task.FromResult<User?>(null);
-            }
-
-            return Task.FromResult<User?>(Clone(_usersByName[userName]));
+            return _userNamesByEmail.TryGetValue(email, out string? userName)
+                ? Clone(_usersByName[userName])
+                : null;
         }
     }
 
-    public Task<User?> GetByUserNameOrEmailAsync(string input)
+    public User? GetByUserNameOrEmail(string input)
     {
         lock (_gate)
         {
             if (_usersByName.TryGetValue(input, out User? user))
             {
-                return Task.FromResult<User?>(Clone(user));
+                return Clone(user);
             }
 
-            if (_userNamesByEmail.TryGetValue(input, out string? userName))
-            {
-                return Task.FromResult<User?>(Clone(_usersByName[userName]));
-            }
-
-            return Task.FromResult<User?>(null);
+            return _userNamesByEmail.TryGetValue(input, out string? userName)
+                ? Clone(_usersByName[userName])
+                : null;
         }
     }
 
-    public Task<bool> UpdateUserNameAsync(string currentUserName, string newUserName)
+    public bool UpdateUserName(string currentUserName, string newUserName)
     {
         lock (_gate)
         {
             if (!_usersByName.TryGetValue(currentUserName, out User? user) || _usersByName.ContainsKey(newUserName))
             {
-                return Task.FromResult(false);
+                return false;
             }
 
             User renamedUser = new()
@@ -86,10 +77,10 @@ public sealed class InMemoryAccountStore
 
             _usersByName.Remove(user.UserName);
             _usersByName[renamedUser.UserName] = renamedUser;
+            _userNamesByEmail[renamedUser.UserEmail] = renamedUser.UserName;
 
             List<KeyValuePair<string, Favorite>> renamedFavorites = _favorites
                 .Where(pair => pair.Value.UserName.Equals(currentUserName, StringComparison.OrdinalIgnoreCase))
-                .Select(pair => new KeyValuePair<string, Favorite>(pair.Key, Clone(pair.Value)))
                 .ToList();
 
             foreach ((string oldKey, Favorite favorite) in renamedFavorites)
@@ -103,27 +94,26 @@ public sealed class InMemoryAccountStore
                     ItemName = favorite.ItemName,
                     CreatedAt = favorite.CreatedAt
                 };
-
                 _favorites[BuildFavoriteKey(renamedFavorite.UserName, renamedFavorite.ItemType, renamedFavorite.ItemId)] = renamedFavorite;
             }
 
-            return Task.FromResult(true);
+            return true;
         }
     }
 
-    public Task<bool> UpdateEmailAsync(string userName, string newEmail)
+    public bool UpdateEmail(string userName, string newEmail)
     {
         lock (_gate)
         {
             if (!_usersByName.TryGetValue(userName, out User? user))
             {
-                return Task.FromResult(false);
+                return false;
             }
 
             if (_userNamesByEmail.TryGetValue(newEmail, out string? existingUserName) &&
                 !existingUserName.Equals(user.UserName, StringComparison.OrdinalIgnoreCase))
             {
-                return Task.FromResult(false);
+                return false;
             }
 
             User updatedUser = new()
@@ -137,18 +127,17 @@ public sealed class InMemoryAccountStore
             _userNamesByEmail.Remove(user.UserEmail);
             _usersByName[user.UserName] = updatedUser;
             _userNamesByEmail[updatedUser.UserEmail] = updatedUser.UserName;
-
-            return Task.FromResult(true);
+            return true;
         }
     }
 
-    public Task<bool> UpdatePasswordHashAsync(string userName, string newPasswordHash)
+    public bool UpdatePasswordHash(string userName, string newPasswordHash)
     {
         lock (_gate)
         {
             if (!_usersByName.TryGetValue(userName, out User? user))
             {
-                return Task.FromResult(false);
+                return false;
             }
 
             _usersByName[user.UserName] = new User
@@ -158,17 +147,17 @@ public sealed class InMemoryAccountStore
                 PasswordHash = newPasswordHash,
                 UserNotifications = user.UserNotifications
             };
-            return Task.FromResult(true);
+            return true;
         }
     }
 
-    public Task<bool> UpdateNotificationsAsync(string userName, bool enabled)
+    public bool UpdateNotifications(string userName, bool enabled)
     {
         lock (_gate)
         {
             if (!_usersByName.TryGetValue(userName, out User? user))
             {
-                return Task.FromResult(false);
+                return false;
             }
 
             _usersByName[user.UserName] = new User
@@ -178,89 +167,85 @@ public sealed class InMemoryAccountStore
                 PasswordHash = user.PasswordHash,
                 UserNotifications = enabled
             };
-            return Task.FromResult(true);
+            return true;
         }
     }
 
-    public Task<bool> DeleteUserAsync(string userName)
+    public bool DeleteUser(string userName)
     {
         lock (_gate)
         {
             if (!_usersByName.TryGetValue(userName, out User? user))
             {
-                return Task.FromResult(false);
+                return false;
             }
 
             _usersByName.Remove(user.UserName);
             _userNamesByEmail.Remove(user.UserEmail);
 
-            string[] favoriteKeys = _favorites
-                .Where(pair => pair.Value.UserName.Equals(userName, StringComparison.OrdinalIgnoreCase))
-                .Select(pair => pair.Key)
-                .ToArray();
-
-            foreach (string favoriteKey in favoriteKeys)
+            foreach (string favoriteKey in _favorites
+                         .Where(pair => pair.Value.UserName.Equals(userName, StringComparison.OrdinalIgnoreCase))
+                         .Select(pair => pair.Key)
+                         .ToArray())
             {
                 _favorites.Remove(favoriteKey);
             }
 
-            return Task.FromResult(true);
+            return true;
         }
     }
 
-    public Task<bool> AddFavoriteAsync(Favorite favorite)
+    public bool AddFavorite(Favorite favorite)
     {
         lock (_gate)
         {
             if (!_usersByName.ContainsKey(favorite.UserName))
             {
-                return Task.FromResult(false);
+                return false;
             }
 
             string key = BuildFavoriteKey(favorite.UserName, favorite.ItemType, favorite.ItemId);
             if (_favorites.ContainsKey(key))
             {
-                return Task.FromResult(false);
+                return false;
             }
 
             _favorites[key] = Clone(favorite);
-            return Task.FromResult(true);
+            return true;
         }
     }
 
-    public Task<bool> RemoveFavoriteAsync(string userName, string itemType, string itemId)
+    public bool RemoveFavorite(string userName, string itemType, string itemId)
     {
         lock (_gate)
         {
-            return Task.FromResult(_favorites.Remove(BuildFavoriteKey(userName, itemType, itemId)));
+            return _favorites.Remove(BuildFavoriteKey(userName, itemType, itemId));
         }
     }
 
-    public Task<bool> FavoriteExistsAsync(string userName, string itemType, string itemId)
+    public bool FavoriteExists(string userName, string itemType, string itemId)
     {
         lock (_gate)
         {
-            return Task.FromResult(_favorites.ContainsKey(BuildFavoriteKey(userName, itemType, itemId)));
+            return _favorites.ContainsKey(BuildFavoriteKey(userName, itemType, itemId));
         }
     }
 
-    public Task<IReadOnlyList<Favorite>> GetFavoritesByUserAsync(string userName)
+    public IReadOnlyList<Favorite> GetFavoritesByUser(string userName)
     {
         lock (_gate)
         {
-            IReadOnlyList<Favorite> results = _favorites.Values
+            return _favorites.Values
                 .Where(favorite => favorite.UserName.Equals(userName, StringComparison.OrdinalIgnoreCase))
                 .OrderByDescending(favorite => favorite.CreatedAt)
                 .Select(Clone)
                 .ToList();
-
-            return Task.FromResult(results);
         }
     }
 
     private static string BuildFavoriteKey(string userName, string itemType, string itemId)
     {
-        return $"{userName.ToUpperInvariant()}::{itemType}::{itemId}";
+        return $"{userName}::{itemType}::{itemId}";
     }
 
     private static User Clone(User user)
@@ -285,39 +270,4 @@ public sealed class InMemoryAccountStore
             CreatedAt = favorite.CreatedAt
         };
     }
-}
-
-public sealed class InMemoryUserRepository : IUserRepository
-{
-    private readonly InMemoryAccountStore _store;
-
-    public InMemoryUserRepository(InMemoryAccountStore store)
-    {
-        _store = store;
-    }
-
-    public Task<bool> InsertUserAsync(User user) => _store.InsertUserAsync(user);
-    public Task<User?> GetByUserNameAsync(string userName) => _store.GetByUserNameAsync(userName);
-    public Task<User?> GetByEmailAsync(string email) => _store.GetByEmailAsync(email);
-    public Task<User?> GetByUserNameOrEmailAsync(string input) => _store.GetByUserNameOrEmailAsync(input);
-    public Task<bool> UpdateUserNameAsync(string currentUserName, string newUserName) => _store.UpdateUserNameAsync(currentUserName, newUserName);
-    public Task<bool> UpdateEmailAsync(string userName, string newEmail) => _store.UpdateEmailAsync(userName, newEmail);
-    public Task<bool> UpdatePasswordHashAsync(string userName, string newPasswordHash) => _store.UpdatePasswordHashAsync(userName, newPasswordHash);
-    public Task<bool> UpdateNotificationsAsync(string userName, bool enabled) => _store.UpdateNotificationsAsync(userName, enabled);
-    public Task<bool> DeleteUserAsync(string userName) => _store.DeleteUserAsync(userName);
-}
-
-public sealed class InMemoryFavoriteRepository : IFavoriteRepository
-{
-    private readonly InMemoryAccountStore _store;
-
-    public InMemoryFavoriteRepository(InMemoryAccountStore store)
-    {
-        _store = store;
-    }
-
-    public Task<bool> AddFavoriteAsync(Favorite favorite) => _store.AddFavoriteAsync(favorite);
-    public Task<bool> RemoveFavoriteAsync(string userName, string itemType, string itemId) => _store.RemoveFavoriteAsync(userName, itemType, itemId);
-    public Task<bool> FavoriteExistsAsync(string userName, string itemType, string itemId) => _store.FavoriteExistsAsync(userName, itemType, itemId);
-    public Task<IReadOnlyList<Favorite>> GetFavoritesByUserAsync(string userName) => _store.GetFavoritesByUserAsync(userName);
 }

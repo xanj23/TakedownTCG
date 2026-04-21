@@ -1,8 +1,8 @@
-using TakedownTCGApplication.ViewModels.Home;
+using TakedownTCGApplication.Models.Home;
 
 namespace TakedownTCGApplication.Abstractions;
 
 public interface ICompletedTcgSalesService
 {
-    Task<IReadOnlyList<CompletedTcgSaleViewModel>> GetRecentCompletedSalesAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<CompletedTcgSale>> GetRecentCompletedSalesAsync(CancellationToken cancellationToken = default);
 }

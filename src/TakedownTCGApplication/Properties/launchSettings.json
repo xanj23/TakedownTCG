@@ -7,8 +7,7 @@
       "launchBrowser": true,
       "applicationUrl": "http://localhost:5167",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "ASPNETCORE_HTTPS_PORT": "7134"
+        "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
     "https": {

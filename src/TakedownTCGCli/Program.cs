@@ -19,34 +19,34 @@ namespace TakedownTCG.cli
                 .Build();
 
             JustTcgApiConfig apiOptions = configuration.GetSection("JustTcgApi").Get<JustTcgApiConfig>() ?? new JustTcgApiConfig();
-            string? apiKeyOverride = Environment.GetEnvironmentVariable("JUSTTCG_API_KEY");
-            if (!string.IsNullOrWhiteSpace(apiKeyOverride))
-            {
-                apiOptions.ApiKey = apiKeyOverride;
-            }
 
             string connectionString = configuration.GetValue<string>("Persistence:ConnectionString") ?? string.Empty;
-            string? dbConnectionStringOverride = Environment.GetEnvironmentVariable("TAKEDOWNTCG_DB_CONNECTION_STRING");
-            if (!string.IsNullOrWhiteSpace(dbConnectionStringOverride))
-            {
-                connectionString = dbConnectionStringOverride;
-            }
-
             if (string.IsNullOrWhiteSpace(connectionString))
             {
                 connectionString = DatabaseConnectionDefaults.ResolveDefaultConnectionString();
+            }
+
+            try
+            {
+                PostgreSqlDatabaseInitializer.EnsureSchema(connectionString);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"PostgreSQL is unavailable; account and favorite features may not work in this CLI run. {ex.Message}");
             }
 
             UserRepository userRepository = new UserRepository(connectionString);
             FavoriteRepository favoriteRepository = new FavoriteRepository(connectionString);
             AccountService accountService = new AccountService(userRepository);
             FavoriteService favoriteService = new FavoriteService(favoriteRepository, userRepository);
+            UserAccountController userAccountController = new UserAccountController(accountService, favoriteService);
             JustTcgHttpGateway httpGateway = new JustTcgHttpGateway();
             JustTcgResponseService responseService = new JustTcgResponseService();
             JustTcgQueryService queryService = new JustTcgQueryService();
 
-            UserAccountController.Configure(accountService, favoriteService);
-            AppCompositionRoot.Configure(() => new JustTCGClient(apiOptions, httpGateway, queryService, responseService));
+            AppCompositionRoot.Configure(
+                () => new JustTCGClient(apiOptions, httpGateway, queryService, responseService, userAccountController.OfferToFavorite),
+                userAccountController);
 
             AppCompositionRoot.Run();
         }
