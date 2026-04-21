@@ -9,18 +9,16 @@
     </div>
 
     <div class="rounded-3xl border border-slate-300 bg-white/80 p-6 shadow-sm md:p-8">
-        <h2 class="text-2xl font-extrabold text-slate-900 md:text-3xl">Featured Price Changes</h2>
+        <h2 class="text-center text-2xl font-extrabold text-slate-900 md:text-3xl">Featured Price Changes</h2>
         <div class="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-slate-600">
             Static placeholder for the featured market panel. Dynamic pricing cards can be plugged in here next.
         </div>
     </div>
 
     <div class="hidden rounded-3xl border border-slate-300 bg-white/80 p-8 shadow-sm md:block">
-        <h3 class="text-3xl font-extrabold text-slate-900">Want to Search for Card, Game, or Set?</h3>
+        <h3 class="text-center text-3xl font-extrabold text-slate-900">Ready to Search Products?</h3>
         <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
-            <a asp-controller="Search" asp-action="Cards" class="btn-primary">Search Cards</a>
-            <a asp-controller="Search" asp-action="Sets" class="btn-primary">Search Sets</a>
-            <a asp-controller="Search" asp-action="Games" class="btn-primary">Search Games</a>
+            <a asp-controller="Search" asp-action="Index" class="btn-primary">Search Products</a>
         </div>
     </div>
 
@@ -30,9 +28,7 @@
             <p class="mt-1 text-sm text-slate-600">Fast, touch-friendly actions built for smaller screens.</p>
         </div>
         <div class="grid grid-cols-1 gap-3">
-            <a asp-controller="Search" asp-action="Cards" class="mobile-action">Find Cards</a>
-            <a asp-controller="Search" asp-action="Sets" class="mobile-action">Find Sets</a>
-            <a asp-controller="Search" asp-action="Games" class="mobile-action">Browse Games</a>
+            <a asp-controller="Search" asp-action="Index" class="mobile-action">Search Products</a>
         </div>
     </div>
 </section>

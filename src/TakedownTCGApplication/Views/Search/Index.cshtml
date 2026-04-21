@@ -1,0 +1,344 @@
+@model ProductsSearchViewModel
+@{
+    ViewData["Title"] = "Search Products";
+    string endpoint = (Model.Endpoint ?? string.Empty).ToLowerInvariant();
+    bool showCards = endpoint == "cards";
+    bool showSets = endpoint == "sets";
+    bool showGames = endpoint == "games";
+
+    static string Slugify(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return string.Empty;
+        }
+
+        char[] chars = value.Trim().ToLowerInvariant().ToCharArray();
+        var buffer = new System.Text.StringBuilder(chars.Length);
+        bool previousWasDash = false;
+
+        foreach (char ch in chars)
+        {
+            if (char.IsLetterOrDigit(ch))
+            {
+                buffer.Append(ch);
+                previousWasDash = false;
+            }
+            else if (!previousWasDash)
+            {
+                buffer.Append('-');
+                previousWasDash = true;
+            }
+        }
+
+        return buffer.ToString().Trim('-');
+    }
+
+    static string GetTcgplayerGameSlug(string? game)
+    {
+        string normalized = Slugify(game);
+        return normalized switch
+        {
+            "mtg" => "magic-the-gathering",
+            "magic-the-gathering" => "magic-the-gathering",
+            "yugioh" => "yu-gi-oh",
+            "yu-gi-oh" => "yu-gi-oh",
+            _ => normalized
+        };
+    }
+}
+
+<section class="space-y-5">
+    <div class="rounded-3xl border border-slate-300 bg-white/90 p-6 shadow-sm">
+        <h1 class="text-3xl font-extrabold text-slate-900">Search Products</h1>
+        <p class="mt-1 text-sm text-slate-600">Choose an API, then an endpoint, and matching fields will appear.</p>
+
+        <form asp-action="Index" method="post" class="mt-4 grid gap-3 md:grid-cols-2">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="Offset" value="0" />
+            <input asp-for="Limit" type="hidden" />
+
+            <label class="block">
+                <span class="form-label">API</span>
+                <select asp-for="Api" class="form-input">
+                    <option value="JustTCG">JustTCG</option>
+                </select>
+                <span asp-validation-for="Api" class="form-error"></span>
+            </label>
+
+            <label class="block">
+                <span class="form-label">Endpoint</span>
+                <select asp-for="Endpoint" id="endpointSelect" class="form-input">
+                    <option value="">Select endpoint</option>
+                    <option value="cards">Cards</option>
+                    <option value="sets">Sets</option>
+                    <option value="games">Games</option>
+                </select>
+                <span asp-validation-for="Endpoint" class="form-error"></span>
+            </label>
+
+            <div id="cardsFields" class="hidden md:col-span-2 grid gap-3 md:grid-cols-2">
+                <label class="block md:col-span-2">
+                    <span class="form-label">Card Name</span>
+                    <input asp-for="CardQuery" class="form-input" />
+                    <span asp-validation-for="CardQuery" class="form-error"></span>
+                </label>
+                <label class="block">
+                    <span class="form-label">Card Number</span>
+                    <input asp-for="CardNumber" class="form-input" />
+                </label>
+                <label class="block">
+                    <span class="form-label">Printing</span>
+                    <input asp-for="CardPrinting" class="form-input" />
+                </label>
+                <label class="block">
+                    <span class="form-label">Condition</span>
+                    <input asp-for="CardCondition" class="form-input" />
+                </label>
+                <label class="block">
+                    <span class="form-label">Order By</span>
+                    <select asp-for="CardOrderBy" class="form-input">
+                        <option value="">Default</option>
+                        <option value="price">price</option>
+                        <option value="24h">24h</option>
+                        <option value="7d">7d</option>
+                        <option value="30d">30d</option>
+                    </select>
+                </label>
+                <label class="block">
+                    <span class="form-label">Sort Order</span>
+                    <select asp-for="CardOrder" class="form-input">
+                        <option value="">Default</option>
+                        <option value="asc">asc</option>
+                        <option value="desc">desc</option>
+                    </select>
+                </label>
+            </div>
+
+            <div id="setsFields" class="hidden md:col-span-2 grid gap-3 md:grid-cols-2">
+                <label class="block">
+                    <span class="form-label">Game</span>
+                    <input asp-for="SetGame" class="form-input" placeholder="mtg, pokemon" />
+                    <span asp-validation-for="SetGame" class="form-error"></span>
+                </label>
+                <label class="block">
+                    <span class="form-label">Set Name</span>
+                    <input asp-for="SetQuery" class="form-input" />
+                </label>
+                <label class="block">
+                    <span class="form-label">Order By</span>
+                    <select asp-for="SetOrderBy" class="form-input">
+                        <option value="">Default</option>
+                        <option value="name">name</option>
+                        <option value="release_date">release_date</option>
+                    </select>
+                </label>
+                <label class="block">
+                    <span class="form-label">Sort Order</span>
+                    <select asp-for="SetOrder" class="form-input">
+                        <option value="">Default</option>
+                        <option value="asc">asc</option>
+                        <option value="desc">desc</option>
+                    </select>
+                </label>
+            </div>
+
+            <div class="md:col-span-2">
+                <button type="submit" class="btn-primary">Run Search</button>
+            </div>
+        </form>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="rounded-xl border border-rose-300 bg-rose-50 p-3 text-sm text-rose-700">@Model.ErrorMessage</div>
+    }
+
+    @if (showCards && Model.CardResults.Count > 0)
+    {
+        <div class="grid gap-3 md:grid-cols-2">
+            @foreach (var card in Model.CardResults)
+            {
+                var fallbackImageUrl = "https://tcgplayer-cdn.tcgplayer.com/product/image-missing.svg";
+                var imageUrl = !string.IsNullOrWhiteSpace(card.TcgplayerId)
+                    ? $"https://tcgplayer-cdn.tcgplayer.com/product/{card.TcgplayerId}_in_1000x1000.jpg"
+                    : fallbackImageUrl;
+                var displayPrice = card.Variants.Where(v => v.Price.HasValue).Select(v => v.Price).FirstOrDefault();
+                var price90d = card.Variants.Where(v => v.MaxPrice90d.HasValue).Select(v => v.MaxPrice90d).FirstOrDefault();
+
+                <article class="panel-card">
+                    <div class="flex items-start gap-4">
+                        <img src="@imageUrl" alt="@card.Name" class="h-auto w-full rounded-xl border border-slate-200 bg-slate-50 object-contain" style="max-width: 10rem;" loading="lazy" onerror="this.onerror=null;this.src='@fallbackImageUrl';" />
+                        <div class="flex-1">
+                            <h3 class="text-lg font-bold text-slate-900">@card.Name</h3>
+                            <p class="text-sm text-slate-600">@card.Game • @card.SetName (@card.Set) • #@card.Number</p>
+                            <p class="mt-2 text-sm text-slate-700">Rarity: @card.Rarity</p>
+                            @if (displayPrice.HasValue)
+                            {
+                                <p class="mt-1 text-sm font-semibold text-cyan-700">
+                                    Price: $@displayPrice.Value.ToString("0.00")
+                                    @if (price90d.HasValue)
+                                    {
+                                        <span class="text-slate-600"> | Price was: $@price90d.Value.ToString("0.00") 3 months ago</span>
+                                    }
+                                </p>
+                            }
+                            else
+                            {
+                                <p class="mt-1 text-sm font-semibold text-slate-500">Price: N/A</p>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(card.TcgplayerId))
+                            {
+                                var tcgplayerProductUrl = $"https://www.tcgplayer.com/product/{card.TcgplayerId}";
+                                <p class="mt-1 text-xs">
+                                    <a href="@tcgplayerProductUrl" target="_blank" rel="noopener noreferrer" class="text-cyan-700 underline">Price from TCGplayer</a>
+                                </p>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(card.Details))
+                            {
+                                <p class="mt-2 text-sm text-slate-600">@card.Details</p>
+                            }
+                            <div class="mt-3 text-xs text-slate-500">Variants: @card.Variants.Count</div>
+                        </div>
+                    </div>
+                </article>
+            }
+        </div>
+    }
+    else if (showSets && Model.SetResults.Count > 0)
+    {
+        <div class="grid gap-3 md:grid-cols-2">
+            @foreach (var setItem in Model.SetResults)
+            {
+                var setGameSlug = GetTcgplayerGameSlug(setItem.Game);
+                var setNameSlug = Slugify(setItem.Name);
+                var setTcgplayerUrl = $"https://www.tcgplayer.com/categories/trading-and-collectible-card-games/{setGameSlug}/{setNameSlug}";
+
+                <article class="panel-card">
+                    <h3 class="text-lg font-bold text-slate-900">@setItem.Name</h3>
+                    <p class="text-sm text-slate-600">@setItem.Game • Release: @setItem.ReleaseDate</p>
+                    <div class="mt-2 grid grid-cols-2 gap-2 text-sm text-slate-700">
+                        <span>Cards: @setItem.CardsCount</span>
+                        <span>Variants: @setItem.VariantsCount</span>
+                        <span>Sealed: @setItem.SealedCount</span>
+                        <span>Value: $@setItem.SetValueUsd</span>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(setGameSlug)
+                        && !string.IsNullOrWhiteSpace(setNameSlug)
+                        && !string.IsNullOrWhiteSpace(setItem.ReleaseDate)
+                        && !setItem.ReleaseDate.Equals("null", StringComparison.OrdinalIgnoreCase))
+                    {
+                        <p class="mt-3 text-xs">
+                            <a href="@setTcgplayerUrl" target="_blank" rel="noopener noreferrer" class="text-cyan-700 underline">View set on TCGplayer</a>
+                        </p>
+                    }
+                </article>
+            }
+        </div>
+    }
+    else if (showGames && Model.GameResults.Count > 0)
+    {
+        <div class="grid gap-3 md:grid-cols-2">
+            @foreach (var game in Model.GameResults)
+            {
+                var gameSlug = GetTcgplayerGameSlug(game.Name);
+                var gameTcgplayerUrl = $"https://www.tcgplayer.com/categories/trading-and-collectible-card-games/{gameSlug}";
+
+                <article class="panel-card">
+                    <h3 class="text-lg font-bold text-slate-900">@game.Name</h3>
+                    <div class="mt-2 grid grid-cols-2 gap-2 text-sm text-slate-700">
+                        <span>Sets: @game.SetsCount</span>
+                        <span>Cards: @game.CardsCount</span>
+                        <span>Variants: @game.VariantsCount</span>
+                        <span>Sealed: @game.SealedCount</span>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(gameSlug))
+                    {
+                        <p class="mt-3 text-xs">
+                            <a href="@gameTcgplayerUrl" target="_blank" rel="noopener noreferrer" class="text-cyan-700 underline">View game on TCGplayer</a>
+                        </p>
+                    }
+                </article>
+            }
+        </div>
+    }
+    else if (Model.HasSearched)
+    {
+        <div class="rounded-xl border border-slate-300 bg-white/80 p-4 text-sm text-slate-600">No results found for this search.</div>
+    }
+
+    @if (Model.HasSearched && !string.IsNullOrWhiteSpace(Model.Endpoint) && (Model.HasPrevious || Model.HasMore))
+    {
+        <div class="mt-4 flex items-center justify-center gap-3">
+            @if (Model.HasPrevious)
+            {
+                <form asp-action="Index" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="Api" value="@Model.Api" />
+                    <input type="hidden" name="Endpoint" value="@Model.Endpoint" />
+                    <input type="hidden" name="CardQuery" value="@Model.CardQuery" />
+                    <input type="hidden" name="CardNumber" value="@Model.CardNumber" />
+                    <input type="hidden" name="CardPrinting" value="@Model.CardPrinting" />
+                    <input type="hidden" name="CardCondition" value="@Model.CardCondition" />
+                    <input type="hidden" name="CardOrderBy" value="@Model.CardOrderBy" />
+                    <input type="hidden" name="CardOrder" value="@Model.CardOrder" />
+                    <input type="hidden" name="SetGame" value="@Model.SetGame" />
+                    <input type="hidden" name="SetQuery" value="@Model.SetQuery" />
+                    <input type="hidden" name="SetOrderBy" value="@Model.SetOrderBy" />
+                    <input type="hidden" name="SetOrder" value="@Model.SetOrder" />
+                    <input type="hidden" name="Offset" value="@Model.PreviousOffset" />
+                    <input type="hidden" name="Limit" value="@Model.Limit" />
+                    <button type="submit" class="btn-ghost">Previous Page</button>
+                </form>
+            }
+
+            <span class="text-sm font-semibold text-slate-700">Page @Model.CurrentPage of @Model.TotalPages</span>
+
+            @if (Model.HasMore)
+            {
+                <form asp-action="Index" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="Api" value="@Model.Api" />
+                    <input type="hidden" name="Endpoint" value="@Model.Endpoint" />
+                    <input type="hidden" name="CardQuery" value="@Model.CardQuery" />
+                    <input type="hidden" name="CardNumber" value="@Model.CardNumber" />
+                    <input type="hidden" name="CardPrinting" value="@Model.CardPrinting" />
+                    <input type="hidden" name="CardCondition" value="@Model.CardCondition" />
+                    <input type="hidden" name="CardOrderBy" value="@Model.CardOrderBy" />
+                    <input type="hidden" name="CardOrder" value="@Model.CardOrder" />
+                    <input type="hidden" name="SetGame" value="@Model.SetGame" />
+                    <input type="hidden" name="SetQuery" value="@Model.SetQuery" />
+                    <input type="hidden" name="SetOrderBy" value="@Model.SetOrderBy" />
+                    <input type="hidden" name="SetOrder" value="@Model.SetOrder" />
+                    <input type="hidden" name="Offset" value="@Model.NextOffset" />
+                    <input type="hidden" name="Limit" value="@Model.Limit" />
+                    <button type="submit" class="btn-primary">Next Page</button>
+                </form>
+            }
+        </div>
+    }
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            const endpointSelect = document.getElementById("endpointSelect");
+            const cardsFields = document.getElementById("cardsFields");
+            const setsFields = document.getElementById("setsFields");
+
+            if (!endpointSelect || !cardsFields || !setsFields) {
+                return;
+            }
+
+            function syncFields() {
+                const endpoint = (endpointSelect.value || "").toLowerCase();
+                cardsFields.classList.toggle("hidden", endpoint !== "cards");
+                setsFields.classList.toggle("hidden", endpoint !== "sets");
+            }
+
+            endpointSelect.addEventListener("change", syncFields);
+            syncFields();
+        })();
+    </script>
+}

@@ -34,6 +34,8 @@ namespace TakedownTCG.Core.Models.JustTcg.Query
             Parameters.Add("q", new QueryParameter("Search query", false));
             Parameters.Add("orderBy", new QueryParameter("Order by (name, release date)", false));
             Parameters.Add("order", new QueryParameter("Sort order (asc, desc)", false));
+            Parameters.Add("limit", new QueryParameter("Page size", false));
+            Parameters.Add("offset", new QueryParameter("Page offset", false));
         }
     }
 }

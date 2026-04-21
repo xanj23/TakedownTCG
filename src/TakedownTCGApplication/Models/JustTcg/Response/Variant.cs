@@ -220,8 +220,14 @@ namespace TakedownTCG.Core.Models.JustTcg.Response
         /// <summary>
         /// Gets or sets the maximum ninety-day price.
         /// </summary>
-        [JsonPropertyName("max_price_90d")]
+        [JsonPropertyName("maxPrice90d")]
         public decimal? MaxPrice90d { get; set; }
+
+        [JsonPropertyName("max_price_90d")]
+        public decimal? MaxPrice90dLegacy
+        {
+            set => MaxPrice90d = value;
+        }
 
         /// <summary>
         /// Gets or sets the ninety-day population standard deviation.

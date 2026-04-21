@@ -29,6 +29,8 @@ namespace TakedownTCG.Core.Models.JustTcg.Query
             Parameters.Add("number", new QueryParameter("Card number (e.g., 15)", false));
             Parameters.Add("printing", new QueryParameter("Printing", false));
             Parameters.Add("condition", new QueryParameter("Condition", false));
+            Parameters.Add("orderBy", new QueryParameter("Order by (price, 24h, 7d, 30d)", false));
+            Parameters.Add("order", new QueryParameter("Sort order (asc, desc)", false));
             Parameters.Add("limit", new QueryParameter("Page size", false));
             Parameters.Add("offset", new QueryParameter("Page offset", false));
         }

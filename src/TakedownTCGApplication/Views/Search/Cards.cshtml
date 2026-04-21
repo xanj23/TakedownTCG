@@ -50,6 +50,7 @@
                     ? $"https://tcgplayer-cdn.tcgplayer.com/product/{card.TcgplayerId}_in_1000x1000.jpg"
                     : fallbackImageUrl;
                 var displayPrice = card.Variants.Where(v => v.Price.HasValue).Select(v => v.Price).FirstOrDefault();
+                var price90d = card.Variants.Where(v => v.MaxPrice90d.HasValue).Select(v => v.MaxPrice90d).FirstOrDefault();
 
                 <article class="panel-card">
                     <div class="flex items-start gap-4">
@@ -60,7 +61,13 @@
                             <p class="mt-2 text-sm text-slate-700">Rarity: @card.Rarity</p>
                             @if (displayPrice.HasValue)
                             {
-                                <p class="mt-1 text-sm font-semibold text-cyan-700">Price: $@displayPrice.Value.ToString("0.00")</p>
+                                <p class="mt-1 text-sm font-semibold text-cyan-700">
+                                    Price: $@displayPrice.Value.ToString("0.00")
+                                    @if (price90d.HasValue)
+                                    {
+                                        <span class="text-slate-600"> | Price was: $@price90d.Value.ToString("0.00") 3 months ago</span>
+                                    }
+                                </p>
                             }
                             else
                             {

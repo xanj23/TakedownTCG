@@ -18,9 +18,7 @@
                     </a>
                     <nav class="flex flex-1 items-center justify-end gap-2 text-sm font-medium">
                         <a asp-controller="Home" asp-action="Index" class="nav-link">Home</a>
-                        <a asp-controller="Search" asp-action="Cards" class="nav-link">Cards</a>
-                        <a asp-controller="Search" asp-action="Sets" class="nav-link">Sets</a>
-                        <a asp-controller="Search" asp-action="Games" class="nav-link">Games</a>
+                        <a asp-controller="Search" asp-action="Index" class="nav-link">Search Products</a>
                         @if (User.Identity?.IsAuthenticated == true)
                         {
                             <a asp-controller="Favorites" asp-action="Index" class="nav-link">Favorites</a>
@@ -77,9 +75,7 @@
             </div>
             <nav class="mobile-nav-list">
                 <a asp-controller="Home" asp-action="Index" class="mobile-nav-link" data-mobile-nav-close="true">Home</a>
-                <a asp-controller="Search" asp-action="Cards" class="mobile-nav-link" data-mobile-nav-close="true">Cards</a>
-                <a asp-controller="Search" asp-action="Sets" class="mobile-nav-link" data-mobile-nav-close="true">Sets</a>
-                <a asp-controller="Search" asp-action="Games" class="mobile-nav-link" data-mobile-nav-close="true">Games</a>
+                <a asp-controller="Search" asp-action="Index" class="mobile-nav-link" data-mobile-nav-close="true">Search Products</a>
                 @if (User.Identity?.IsAuthenticated == true)
                 {
                     <a asp-controller="Favorites" asp-action="Index" class="mobile-nav-link" data-mobile-nav-close="true">Favorites</a>
