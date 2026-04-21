@@ -1,4 +1,4 @@
-using Microsoft.Data.Sqlite;
+using Npgsql;
 using TakedownTCGApplication.Abstractions;
 using TakedownTCGApplication.Models.UserAccounts;
 
@@ -8,67 +8,45 @@ public sealed class FavoriteRepository : IFavoriteRepository
 {
     private readonly string _connectionString;
 
-    public FavoriteRepository(string databasePath)
+    public FavoriteRepository(string connectionString)
     {
-        _connectionString = $"Data Source={databasePath}";
-        EnsureTableExists();
-    }
-
-    private void EnsureTableExists()
-    {
-        using SqliteConnection connection = new(_connectionString);
-        connection.Open();
-
-        using SqliteCommand command = connection.CreateCommand();
-        command.CommandText = @"
-            CREATE TABLE IF NOT EXISTS Favorites (
-                UserName TEXT NOT NULL,
-                ItemType TEXT NOT NULL,
-                ItemId TEXT NOT NULL,
-                ItemName TEXT,
-                CreatedAt TEXT NOT NULL,
-                PRIMARY KEY (UserName, ItemType, ItemId)
-            );
-        ";
-        command.ExecuteNonQuery();
-
-        using SqliteCommand idx = connection.CreateCommand();
-        idx.CommandText = @"
-            CREATE INDEX IF NOT EXISTS idx_favorites_username ON Favorites (UserName);
-        ";
-        idx.ExecuteNonQuery();
+        _connectionString = connectionString;
+        PostgreSqlDatabaseInitializer.EnsureSchema(_connectionString);
     }
 
     public async Task<bool> AddFavoriteAsync(Favorite favorite)
     {
-        await using SqliteConnection connection = new(_connectionString);
+        await using NpgsqlConnection connection = new(_connectionString);
         await connection.OpenAsync();
 
-        await using SqliteCommand command = connection.CreateCommand();
-        command.CommandText = @"
-            INSERT OR IGNORE INTO Favorites (UserName, ItemType, ItemId, ItemName, CreatedAt)
-            VALUES (@UserName, @ItemType, @ItemId, @ItemName, @CreatedAt);
-        ";
+        await using NpgsqlCommand command = new(
+            """
+            INSERT INTO favorites (user_name, item_type, item_id, item_name, created_at)
+            VALUES (@UserName, @ItemType, @ItemId, @ItemName, @CreatedAt)
+            ON CONFLICT (user_name, item_type, item_id) DO NOTHING;
+            """,
+            connection);
 
         command.Parameters.AddWithValue("@UserName", favorite.UserName);
         command.Parameters.AddWithValue("@ItemType", favorite.ItemType);
         command.Parameters.AddWithValue("@ItemId", favorite.ItemId);
         command.Parameters.AddWithValue("@ItemName", favorite.ItemName ?? string.Empty);
-        command.Parameters.AddWithValue("@CreatedAt", favorite.CreatedAt.ToString("o"));
+        command.Parameters.AddWithValue("@CreatedAt", favorite.CreatedAt);
 
         return await command.ExecuteNonQueryAsync() > 0;
     }
 
     public async Task<bool> RemoveFavoriteAsync(string userName, string itemType, string itemId)
     {
-        await using SqliteConnection connection = new(_connectionString);
+        await using NpgsqlConnection connection = new(_connectionString);
         await connection.OpenAsync();
 
-        await using SqliteCommand command = connection.CreateCommand();
-        command.CommandText = @"
-            DELETE FROM Favorites
-            WHERE UserName = @UserName AND ItemType = @ItemType AND ItemId = @ItemId;
-        ";
+        await using NpgsqlCommand command = new(
+            """
+            DELETE FROM favorites
+            WHERE user_name = @UserName AND item_type = @ItemType AND item_id = @ItemId;
+            """,
+            connection);
 
         command.Parameters.AddWithValue("@UserName", userName);
         command.Parameters.AddWithValue("@ItemType", itemType);
@@ -79,21 +57,23 @@ public sealed class FavoriteRepository : IFavoriteRepository
 
     public async Task<bool> FavoriteExistsAsync(string userName, string itemType, string itemId)
     {
-        await using SqliteConnection connection = new(_connectionString);
+        await using NpgsqlConnection connection = new(_connectionString);
         await connection.OpenAsync();
 
-        await using SqliteCommand command = connection.CreateCommand();
-        command.CommandText = @"
-            SELECT 1 FROM Favorites
-            WHERE UserName = @UserName AND ItemType = @ItemType AND ItemId = @ItemId
+        await using NpgsqlCommand command = new(
+            """
+            SELECT 1
+            FROM favorites
+            WHERE user_name = @UserName AND item_type = @ItemType AND item_id = @ItemId
             LIMIT 1;
-        ";
+            """,
+            connection);
 
         command.Parameters.AddWithValue("@UserName", userName);
         command.Parameters.AddWithValue("@ItemType", itemType);
         command.Parameters.AddWithValue("@ItemId", itemId);
 
-        await using SqliteDataReader reader = await command.ExecuteReaderAsync();
+        await using NpgsqlDataReader reader = await command.ExecuteReaderAsync();
         return await reader.ReadAsync();
     }
 
@@ -101,20 +81,21 @@ public sealed class FavoriteRepository : IFavoriteRepository
     {
         List<Favorite> results = new();
 
-        await using SqliteConnection connection = new(_connectionString);
+        await using NpgsqlConnection connection = new(_connectionString);
         await connection.OpenAsync();
 
-        await using SqliteCommand command = connection.CreateCommand();
-        command.CommandText = @"
-            SELECT UserName, ItemType, ItemId, ItemName, CreatedAt
-            FROM Favorites
-            WHERE UserName = @UserName
-            ORDER BY CreatedAt DESC;
-        ";
+        await using NpgsqlCommand command = new(
+            """
+            SELECT user_name, item_type, item_id, item_name, created_at
+            FROM favorites
+            WHERE user_name = @UserName
+            ORDER BY created_at DESC;
+            """,
+            connection);
 
         command.Parameters.AddWithValue("@UserName", userName);
 
-        await using SqliteDataReader reader = await command.ExecuteReaderAsync();
+        await using NpgsqlDataReader reader = await command.ExecuteReaderAsync();
         while (await reader.ReadAsync())
         {
             results.Add(new Favorite
@@ -122,8 +103,8 @@ public sealed class FavoriteRepository : IFavoriteRepository
                 UserName = reader.GetString(0),
                 ItemType = reader.GetString(1),
                 ItemId = reader.GetString(2),
-                ItemName = reader.IsDBNull(3) ? string.Empty : reader.GetString(3),
-                CreatedAt = DateTime.Parse(reader.GetString(4), null, System.Globalization.DateTimeStyles.RoundtripKind)
+                ItemName = reader.GetString(3),
+                CreatedAt = reader.GetFieldValue<DateTime>(4)
             });
         }
 

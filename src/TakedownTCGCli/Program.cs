@@ -25,20 +25,20 @@ namespace TakedownTCG.cli
                 apiOptions.ApiKey = apiKeyOverride;
             }
 
-            string databasePath = configuration.GetValue<string>("Persistence:DatabasePath") ?? string.Empty;
-            string? dbPathOverride = Environment.GetEnvironmentVariable("TAKEDOWNTCG_DB_PATH");
-            if (!string.IsNullOrWhiteSpace(dbPathOverride))
+            string connectionString = configuration.GetValue<string>("Persistence:ConnectionString") ?? string.Empty;
+            string? dbConnectionStringOverride = Environment.GetEnvironmentVariable("TAKEDOWNTCG_DB_CONNECTION_STRING");
+            if (!string.IsNullOrWhiteSpace(dbConnectionStringOverride))
             {
-                databasePath = dbPathOverride;
+                connectionString = dbConnectionStringOverride;
             }
 
-            if (string.IsNullOrWhiteSpace(databasePath))
+            if (string.IsNullOrWhiteSpace(connectionString))
             {
-                databasePath = Path.Combine(AppContext.BaseDirectory, "takedowntcg.db");
+                connectionString = DatabaseConnectionDefaults.ResolveDefaultConnectionString();
             }
 
-            UserRepository userRepository = new UserRepository(databasePath);
-            FavoriteRepository favoriteRepository = new FavoriteRepository(databasePath);
+            UserRepository userRepository = new UserRepository(connectionString);
+            FavoriteRepository favoriteRepository = new FavoriteRepository(connectionString);
             AccountService accountService = new AccountService(userRepository);
             FavoriteService favoriteService = new FavoriteService(favoriteRepository, userRepository);
             JustTcgHttpGateway httpGateway = new JustTcgHttpGateway();

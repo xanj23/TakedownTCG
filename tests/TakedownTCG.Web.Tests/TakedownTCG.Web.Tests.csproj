@@ -23,4 +23,8 @@
     <ProjectReference Include="..\..\src\TakedownTCGApplication\TakedownTCGApplication.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="..\Shared\InMemoryRepositories.cs" Link="Shared\InMemoryRepositories.cs" />
+  </ItemGroup>
+
 </Project>

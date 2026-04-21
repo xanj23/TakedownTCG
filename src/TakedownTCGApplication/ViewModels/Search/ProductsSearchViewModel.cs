@@ -18,6 +18,11 @@ public sealed class ProductsSearchViewModel
     public string? PokemonTcgId { get; set; }
     public string? PokemonSort { get; set; }
 
+    public string? EbaySearch { get; set; }
+    public string? EbayCategoryIds { get; set; }
+    public string? EbayBuyingOptions { get; set; }
+    public string? EbaySort { get; set; }
+
     public string? SetGame { get; set; }
     public string? SetQuery { get; set; }
     public string? SetOrderBy { get; set; }

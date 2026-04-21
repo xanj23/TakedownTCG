@@ -2,5 +2,5 @@ namespace TakedownTCGApplication.Infrastructure.Config;
 
 public sealed class PersistenceOptions
 {
-    public string DatabasePath { get; set; } = DatabasePathDefaults.ResolveDefaultPath();
+    public string ConnectionString { get; set; } = DatabaseConnectionDefaults.ResolveDefaultConnectionString();
 }

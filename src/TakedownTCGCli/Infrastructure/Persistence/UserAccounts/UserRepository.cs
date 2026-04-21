@@ -1,4 +1,4 @@
-using Microsoft.Data.Sqlite;
+using Npgsql;
 using TakedownTCG.cli.Models.UserAccounts;
 
 namespace TakedownTCG.cli.Infrastructure.Persistence.UserAccounts
@@ -7,180 +7,165 @@ namespace TakedownTCG.cli.Infrastructure.Persistence.UserAccounts
     {
         private readonly string _connectionString;
 
-        public UserRepository(string databasePath)
+        public UserRepository(string connectionString)
         {
-            _connectionString = $"Data Source={databasePath}";
-            EnsureUserTableExists();
-        }
-
-        private void EnsureUserTableExists()
-        {
-            using SqliteConnection connection = new(_connectionString);
-            connection.Open();
-
-            using SqliteCommand command = connection.CreateCommand();
-            command.CommandText = @"
-                CREATE TABLE IF NOT EXISTS User (
-                    UserName TEXT PRIMARY KEY,
-                    UserEmail TEXT NOT NULL,
-                    PasswordHash TEXT NOT NULL,
-                    UserNotifications INTEGER NOT NULL DEFAULT 1
-                );
-            ";
-            command.ExecuteNonQuery();
+            _connectionString = connectionString;
+            PostgreSqlDatabaseInitializer.EnsureSchema(_connectionString);
         }
 
         public bool InsertUser(User user)
         {
-            using SqliteConnection connection = new(_connectionString);
+            using NpgsqlConnection connection = new(_connectionString);
             connection.Open();
 
-            using SqliteCommand command = connection.CreateCommand();
-            command.CommandText = @"
-                INSERT INTO User (UserName, UserEmail, PasswordHash, UserNotifications)
+            using NpgsqlCommand command = new(
+                """
+                INSERT INTO users (user_name, user_email, password_hash, user_notifications)
                 VALUES (@UserName, @UserEmail, @PasswordHash, @UserNotifications);
-            ";
+                """,
+                connection);
 
             command.Parameters.AddWithValue("@UserName", user.UserName);
             command.Parameters.AddWithValue("@UserEmail", user.UserEmail);
             command.Parameters.AddWithValue("@PasswordHash", user.PasswordHash);
-            command.Parameters.AddWithValue("@UserNotifications", user.UserNotifications ? 1 : 0);
+            command.Parameters.AddWithValue("@UserNotifications", user.UserNotifications);
 
-            return command.ExecuteNonQuery() > 0;
+            try
+            {
+                return command.ExecuteNonQuery() > 0;
+            }
+            catch (PostgresException ex) when (ex.SqlState == PostgresErrorCodes.UniqueViolation)
+            {
+                return false;
+            }
         }
 
         public User? GetByUserName(string userName)
         {
-            using SqliteConnection connection = new(_connectionString);
+            using NpgsqlConnection connection = new(_connectionString);
             connection.Open();
 
-            using SqliteCommand command = connection.CreateCommand();
-            command.CommandText = @"
-                SELECT UserName, UserEmail, PasswordHash, UserNotifications
-                FROM User
-                WHERE UserName = @UserName
+            using NpgsqlCommand command = new(
+                """
+                SELECT user_name, user_email, password_hash, user_notifications
+                FROM users
+                WHERE LOWER(user_name) = LOWER(@UserName)
                 LIMIT 1;
-            ";
+                """,
+                connection);
+
             command.Parameters.AddWithValue("@UserName", userName);
 
-            using SqliteDataReader reader = command.ExecuteReader();
-            if (!reader.Read())
-            {
-                return null;
-            }
-
-            return new User
-            {
-                UserName = reader.GetString(0),
-                UserEmail = reader.GetString(1),
-                PasswordHash = reader.GetString(2),
-                UserNotifications = reader.GetInt32(3) == 1
-            };
+            using NpgsqlDataReader reader = command.ExecuteReader();
+            return reader.Read() ? ReadUser(reader) : null;
         }
 
         public User? GetByEmail(string email)
         {
-            using SqliteConnection connection = new(_connectionString);
+            using NpgsqlConnection connection = new(_connectionString);
             connection.Open();
 
-            using SqliteCommand command = connection.CreateCommand();
-            command.CommandText = @"
-                SELECT UserName, UserEmail, PasswordHash, UserNotifications
-                FROM User
-                WHERE UserEmail = @UserEmail
+            using NpgsqlCommand command = new(
+                """
+                SELECT user_name, user_email, password_hash, user_notifications
+                FROM users
+                WHERE LOWER(user_email) = LOWER(@UserEmail)
                 LIMIT 1;
-            ";
+                """,
+                connection);
+
             command.Parameters.AddWithValue("@UserEmail", email);
 
-            using SqliteDataReader reader = command.ExecuteReader();
-            if (!reader.Read())
-            {
-                return null;
-            }
-
-            return new User
-            {
-                UserName = reader.GetString(0),
-                UserEmail = reader.GetString(1),
-                PasswordHash = reader.GetString(2),
-                UserNotifications = reader.GetInt32(3) == 1
-            };
+            using NpgsqlDataReader reader = command.ExecuteReader();
+            return reader.Read() ? ReadUser(reader) : null;
         }
 
         public User? GetByUserNameOrEmail(string input)
         {
-            using SqliteConnection connection = new(_connectionString);
+            using NpgsqlConnection connection = new(_connectionString);
             connection.Open();
 
-            using SqliteCommand command = connection.CreateCommand();
-            command.CommandText = @"
-                SELECT UserName, UserEmail, PasswordHash, UserNotifications
-                FROM User
-                WHERE UserName = @Input OR UserEmail = @Input
+            using NpgsqlCommand command = new(
+                """
+                SELECT user_name, user_email, password_hash, user_notifications
+                FROM users
+                WHERE LOWER(user_name) = LOWER(@Input)
+                   OR LOWER(user_email) = LOWER(@Input)
                 LIMIT 1;
-            ";
+                """,
+                connection);
+
             command.Parameters.AddWithValue("@Input", input);
 
-            using SqliteDataReader reader = command.ExecuteReader();
-            if (!reader.Read())
-            {
-                return null;
-            }
-
-            return new User
-            {
-                UserName = reader.GetString(0),
-                UserEmail = reader.GetString(1),
-                PasswordHash = reader.GetString(2),
-                UserNotifications = reader.GetInt32(3) == 1
-            };
+            using NpgsqlDataReader reader = command.ExecuteReader();
+            return reader.Read() ? ReadUser(reader) : null;
         }
 
         public bool UpdateUserName(string currentUserName, string newUserName)
         {
-            using SqliteConnection connection = new(_connectionString);
+            using NpgsqlConnection connection = new(_connectionString);
             connection.Open();
 
-            using SqliteCommand command = connection.CreateCommand();
-            command.CommandText = @"
-                UPDATE User
-                SET UserName = @NewUserName
-                WHERE UserName = @CurrentUserName;
-            ";
+            using NpgsqlCommand command = new(
+                """
+                UPDATE users
+                SET user_name = @NewUserName
+                WHERE LOWER(user_name) = LOWER(@CurrentUserName);
+                """,
+                connection);
+
             command.Parameters.AddWithValue("@NewUserName", newUserName);
             command.Parameters.AddWithValue("@CurrentUserName", currentUserName);
 
-            return command.ExecuteNonQuery() > 0;
+            try
+            {
+                return command.ExecuteNonQuery() > 0;
+            }
+            catch (PostgresException ex) when (ex.SqlState == PostgresErrorCodes.UniqueViolation)
+            {
+                return false;
+            }
         }
 
         public bool UpdateEmail(string userName, string newEmail)
         {
-            using SqliteConnection connection = new(_connectionString);
+            using NpgsqlConnection connection = new(_connectionString);
             connection.Open();
 
-            using SqliteCommand command = connection.CreateCommand();
-            command.CommandText = @"
-                UPDATE User
-                SET UserEmail = @NewEmail
-                WHERE UserName = @UserName;
-            ";
+            using NpgsqlCommand command = new(
+                """
+                UPDATE users
+                SET user_email = @NewEmail
+                WHERE LOWER(user_name) = LOWER(@UserName);
+                """,
+                connection);
+
             command.Parameters.AddWithValue("@NewEmail", newEmail);
             command.Parameters.AddWithValue("@UserName", userName);
 
-            return command.ExecuteNonQuery() > 0;
+            try
+            {
+                return command.ExecuteNonQuery() > 0;
+            }
+            catch (PostgresException ex) when (ex.SqlState == PostgresErrorCodes.UniqueViolation)
+            {
+                return false;
+            }
         }
 
         public bool UpdatePasswordHash(string userName, string newPasswordHash)
         {
-            using SqliteConnection connection = new(_connectionString);
+            using NpgsqlConnection connection = new(_connectionString);
             connection.Open();
 
-            using SqliteCommand command = connection.CreateCommand();
-            command.CommandText = @"
-                UPDATE User
-                SET PasswordHash = @PasswordHash
-                WHERE UserName = @UserName;
-            ";
+            using NpgsqlCommand command = new(
+                """
+                UPDATE users
+                SET password_hash = @PasswordHash
+                WHERE LOWER(user_name) = LOWER(@UserName);
+                """,
+                connection);
+
             command.Parameters.AddWithValue("@PasswordHash", newPasswordHash);
             command.Parameters.AddWithValue("@UserName", userName);
 
@@ -189,16 +174,18 @@ namespace TakedownTCG.cli.Infrastructure.Persistence.UserAccounts
 
         public bool UpdateNotifications(string userName, bool enabled)
         {
-            using SqliteConnection connection = new(_connectionString);
+            using NpgsqlConnection connection = new(_connectionString);
             connection.Open();
 
-            using SqliteCommand command = connection.CreateCommand();
-            command.CommandText = @"
-                UPDATE User
-                SET UserNotifications = @Enabled
-                WHERE UserName = @UserName;
-            ";
-            command.Parameters.AddWithValue("@Enabled", enabled ? 1 : 0);
+            using NpgsqlCommand command = new(
+                """
+                UPDATE users
+                SET user_notifications = @Enabled
+                WHERE LOWER(user_name) = LOWER(@UserName);
+                """,
+                connection);
+
+            command.Parameters.AddWithValue("@Enabled", enabled);
             command.Parameters.AddWithValue("@UserName", userName);
 
             return command.ExecuteNonQuery() > 0;
@@ -206,17 +193,30 @@ namespace TakedownTCG.cli.Infrastructure.Persistence.UserAccounts
 
         public bool DeleteUser(string userName)
         {
-            using SqliteConnection connection = new(_connectionString);
+            using NpgsqlConnection connection = new(_connectionString);
             connection.Open();
 
-            using SqliteCommand command = connection.CreateCommand();
-            command.CommandText = @"
-                DELETE FROM User
-                WHERE UserName = @UserName;
-            ";
+            using NpgsqlCommand command = new(
+                """
+                DELETE FROM users
+                WHERE LOWER(user_name) = LOWER(@UserName);
+                """,
+                connection);
+
             command.Parameters.AddWithValue("@UserName", userName);
 
             return command.ExecuteNonQuery() > 0;
+        }
+
+        private static User ReadUser(NpgsqlDataReader reader)
+        {
+            return new User
+            {
+                UserName = reader.GetString(0),
+                UserEmail = reader.GetString(1),
+                PasswordHash = reader.GetString(2),
+                UserNotifications = reader.GetBoolean(3)
+            };
         }
     }
 }

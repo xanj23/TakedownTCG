@@ -22,12 +22,13 @@
                 <select asp-for="Api" id="apiSelect" class="form-input">
                     <option value="JustTCG">JustTCG</option>
                     <option value="PokemonTCG">Pokemon API</option>
+                    <option value="eBay">eBay</option>
                 </select>
                 <span asp-validation-for="Api" class="form-error"></span>
             </label>
 
             <label class="block">
-                <span class="form-label">Endpoint</span>
+                <span id="endpointLabel" class="form-label">Endpoint</span>
                 <select asp-for="Endpoint" id="endpointSelect" class="form-input">
                     <option value="">Select endpoint</option>
                     <option value="cards">Cards</option>
@@ -92,6 +93,34 @@
                         <option value="price_highest">price_highest</option>
                         <option value="price_lowest">price_lowest</option>
                         <option value="relevance">relevance</option>
+                    </select>
+                </label>
+            </div>
+
+            <div id="ebayCardsFields" class="hidden md:col-span-2 grid gap-3 md:grid-cols-2">
+                <input asp-for="EbayCategoryIds" type="hidden" id="ebayCategoryIds" />
+                <label class="block md:col-span-2">
+                    <span class="form-label">eBay Search</span>
+                    <input asp-for="EbaySearch" class="form-input" placeholder="pokemon charizard psa 10" />
+                    <span asp-validation-for="EbaySearch" class="form-error"></span>
+                </label>
+                <label class="block">
+                    <span class="form-label">Buying Format</span>
+                    <select asp-for="EbayBuyingOptions" class="form-input">
+                        <option value="">Default</option>
+                        <option value="FIXED_PRICE">Buy It Now</option>
+                        <option value="AUCTION">Auction</option>
+                        <option value="FIXED_PRICE|AUCTION">Buy It Now or Auction</option>
+                    </select>
+                </label>
+                <label class="block">
+                    <span class="form-label">Sort</span>
+                    <select asp-for="EbaySort" class="form-input">
+                        <option value="relevance">Best Match</option>
+                        <option value="newlyListed">Newly Listed</option>
+                        <option value="endingSoonest">Ending Soonest</option>
+                        <option value="price">Price Low to High</option>
+                        <option value="-price">Price High to Low</option>
                     </select>
                 </label>
             </div>
@@ -164,7 +193,7 @@
                             @if (!string.IsNullOrWhiteSpace(card.TcgplayerProductUrl))
                             {
                                 <p class="mt-1 text-xs">
-                                    <a href="@card.TcgplayerProductUrl" target="_blank" rel="noopener noreferrer" class="text-cyan-700 underline">Price from TCGplayer</a>
+                                    <a href="@card.TcgplayerProductUrl" target="_blank" rel="noopener noreferrer" class="text-cyan-700 underline">@(card.Game == "eBay" ? "View listing on eBay" : "Price from TCGplayer")</a>
                                 </p>
                             }
                             @if (!string.IsNullOrWhiteSpace(card.Details))
@@ -281,6 +310,10 @@
                     <input type="hidden" name="PokemonSearch" value="@Model.PokemonSearch" />
                     <input type="hidden" name="PokemonTcgId" value="@Model.PokemonTcgId" />
                     <input type="hidden" name="PokemonSort" value="@Model.PokemonSort" />
+                    <input type="hidden" name="EbaySearch" value="@Model.EbaySearch" />
+                    <input type="hidden" name="EbayCategoryIds" value="@Model.EbayCategoryIds" />
+                    <input type="hidden" name="EbayBuyingOptions" value="@Model.EbayBuyingOptions" />
+                    <input type="hidden" name="EbaySort" value="@Model.EbaySort" />
                     <input type="hidden" name="SetGame" value="@Model.SetGame" />
                     <input type="hidden" name="SetQuery" value="@Model.SetQuery" />
                     <input type="hidden" name="SetOrderBy" value="@Model.SetOrderBy" />
@@ -308,6 +341,10 @@
                     <input type="hidden" name="PokemonSearch" value="@Model.PokemonSearch" />
                     <input type="hidden" name="PokemonTcgId" value="@Model.PokemonTcgId" />
                     <input type="hidden" name="PokemonSort" value="@Model.PokemonSort" />
+                    <input type="hidden" name="EbaySearch" value="@Model.EbaySearch" />
+                    <input type="hidden" name="EbayCategoryIds" value="@Model.EbayCategoryIds" />
+                    <input type="hidden" name="EbayBuyingOptions" value="@Model.EbayBuyingOptions" />
+                    <input type="hidden" name="EbaySort" value="@Model.EbaySort" />
                     <input type="hidden" name="SetGame" value="@Model.SetGame" />
                     <input type="hidden" name="SetQuery" value="@Model.SetQuery" />
                     <input type="hidden" name="SetOrderBy" value="@Model.SetOrderBy" />
@@ -326,17 +363,44 @@
     <script>
         (function () {
             const endpointSelect = document.getElementById("endpointSelect");
+            const endpointLabel = document.getElementById("endpointLabel");
             const apiSelect = document.getElementById("apiSelect");
             const cardsFields = document.getElementById("cardsFields");
             const pokemonCardsFields = document.getElementById("pokemonCardsFields");
+            const ebayCardsFields = document.getElementById("ebayCardsFields");
+            const ebayCategoryIds = document.getElementById("ebayCategoryIds");
             const setsFields = document.getElementById("setsFields");
 
-            if (!apiSelect || !endpointSelect || !cardsFields || !pokemonCardsFields || !setsFields) {
+            if (!apiSelect || !endpointSelect || !endpointLabel || !cardsFields || !pokemonCardsFields || !ebayCardsFields || !ebayCategoryIds || !setsFields) {
                 return;
             }
 
             function syncFields() {
                 const api = apiSelect.value || "JustTCG";
+                const isPokemon = api === "PokemonTCG";
+                const isEbay = api === "eBay";
+                endpointLabel.textContent = isEbay ? "Category" : "Endpoint";
+
+                endpointSelect.querySelectorAll("option").forEach(function (option) {
+                    if (isEbay) {
+                        option.hidden = option.value !== "cards" && option.value !== "";
+                        if (option.value === "") {
+                            option.textContent = "All";
+                        }
+                        if (option.value === "cards") {
+                            option.textContent = "Cards";
+                        }
+                        return;
+                    }
+
+                    if (option.value === "") {
+                        option.textContent = "Select endpoint";
+                    }
+                    if (option.value === "cards") {
+                        option.textContent = "Cards";
+                    }
+                });
+
                 endpointSelect.querySelectorAll("option[data-api]").forEach(function (option) {
                     option.hidden = option.dataset.api !== api;
                 });
@@ -346,10 +410,14 @@
                     endpointSelect.value = "cards";
                 }
 
-                const endpoint = (endpointSelect.value || "").toLowerCase();
-                const isPokemon = api === "PokemonTCG";
-                cardsFields.classList.toggle("hidden", isPokemon || endpoint !== "cards");
+                if (isEbay) {
+                    ebayCategoryIds.value = (endpointSelect.value || "") === "" ? "" : "183454";
+                }
+
+                const endpoint = isEbay && (endpointSelect.value || "") === "" ? "cards" : (endpointSelect.value || "").toLowerCase();
+                cardsFields.classList.toggle("hidden", isPokemon || isEbay || endpoint !== "cards");
                 pokemonCardsFields.classList.toggle("hidden", !isPokemon || endpoint !== "cards");
+                ebayCardsFields.classList.toggle("hidden", !isEbay || endpoint !== "cards");
                 setsFields.classList.toggle("hidden", endpoint !== "sets");
             }
 

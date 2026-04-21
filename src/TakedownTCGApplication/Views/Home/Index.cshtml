@@ -1,3 +1,4 @@
+@model HomeIndexViewModel
 @{
     ViewData["Title"] = "Home";
 }
@@ -9,10 +10,46 @@
     </div>
 
     <div class="rounded-3xl border border-slate-300 bg-white/80 p-6 shadow-sm md:p-8">
-        <h2 class="text-center text-2xl font-extrabold text-slate-900 md:text-3xl">Featured Price Changes</h2>
-        <div class="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-slate-600">
-            Static placeholder for the featured market panel. Dynamic pricing cards can be plugged in here next.
+        <div class="flex flex-col gap-1 text-center">
+            <h2 class="text-2xl font-extrabold text-slate-900 md:text-3xl">Recently Completed Card Sales</h2>
+            <p class="text-sm text-slate-600">Sold and completed eBay TCG card listings from SerpApi.</p>
         </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.CompletedSalesErrorMessage))
+        {
+            <div class="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800">@Model.CompletedSalesErrorMessage</div>
+        }
+        else if (Model.CompletedSales.Count > 0)
+        {
+            <div class="mt-5 flex snap-x gap-4 overflow-x-auto pb-3">
+                @foreach (var sale in Model.CompletedSales)
+                {
+                    <article class="min-w-[16rem] max-w-[16rem] snap-start rounded-2xl border border-slate-300 bg-white shadow-sm">
+                        <a href="@sale.Url" target="_blank" rel="noopener noreferrer" class="block">
+                            <img src="@sale.ImageUrl" alt="@sale.Title" class="h-48 w-full rounded-t-2xl bg-slate-50 object-contain p-3" loading="lazy" onerror="this.onerror=null;this.src='@sale.FallbackImageUrl';" />
+                            <div class="space-y-2 p-4">
+                                <h3 class="line-clamp-2 text-sm font-bold text-slate-900">@sale.Title</h3>
+                                <p class="text-base font-extrabold text-cyan-700">@sale.PriceText</p>
+                                @if (!string.IsNullOrWhiteSpace(sale.Condition))
+                                {
+                                    <p class="text-xs text-slate-600">@sale.Condition</p>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(sale.Seller))
+                                {
+                                    <p class="text-xs text-slate-500">Seller: @sale.Seller</p>
+                                }
+                            </div>
+                        </a>
+                    </article>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-slate-600">
+                No completed card sales found right now.
+            </div>
+        }
     </div>
 
     <div class="hidden rounded-3xl border border-slate-300 bg-white/80 p-8 shadow-sm md:block">

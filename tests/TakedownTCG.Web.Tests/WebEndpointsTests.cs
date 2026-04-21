@@ -1,10 +1,14 @@
 using System.Net;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using TakedownTCGApplication.Abstractions;
-using TakedownTCGApplication.Infrastructure.Persistence.UserAccounts;
 using TakedownTCGApplication.Services.UserAccounts;
+using TakedownTCG.Tests.Shared;
 
 namespace TakedownTCG.Web.Tests;
 
@@ -16,10 +20,12 @@ public sealed class WebEndpointsTests
         await using TestAppFactory factory = new();
         using HttpClient client = factory.CreateClient();
 
-        string html = await client.GetStringAsync("/");
+        HttpResponseMessage response = await client.GetAsync("/");
+        string html = await response.Content.ReadAsStringAsync();
+        Assert.True(response.IsSuccessStatusCode, html);
 
         Assert.Contains("Mobile Search Deck", html);
-        Assert.Contains("Featured Price Changes", html);
+        Assert.Contains("Recently Completed Card Sales", html);
     }
 
     [Fact]
@@ -122,43 +128,52 @@ public sealed class WebEndpointsTests
 
     private sealed class TestAppFactory : WebApplicationFactory<Program>, IAsyncDisposable
     {
-        private readonly string _databasePath =
-            System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"takedowntcg-web-tests-{Guid.NewGuid():N}.db");
+        private readonly InMemoryAccountStore _store = new();
+        private readonly InMemoryUserRepository _userRepository;
+        private readonly InMemoryFavoriteRepository _favoriteRepository;
+
+        public TestAppFactory()
+        {
+            _userRepository = new InMemoryUserRepository(_store);
+            _favoriteRepository = new InMemoryFavoriteRepository(_store);
+        }
 
         public async Task SeedUserAsync(string userName, string email, string password)
         {
-            IUserRepository userRepository = new UserRepository(_databasePath);
-            IAccountService accountService = new AccountService(userRepository);
+            IAccountService accountService = new AccountService(_userRepository);
             await accountService.CreateAccountAsync(userName, email, password);
         }
 
         protected override void ConfigureWebHost(Microsoft.AspNetCore.Hosting.IWebHostBuilder builder)
         {
-            Environment.SetEnvironmentVariable("TAKEDOWNTCG_DB_PATH", _databasePath);
-
             builder.ConfigureAppConfiguration((_, config) =>
             {
                 Dictionary<string, string?> overrides = new()
                 {
-                    ["Persistence:DatabasePath"] = _databasePath,
+                    ["Persistence:ConnectionString"] = "",
                     ["JustTcgApi:ApiKey"] = "",
                     ["JustTcgApi:BaseUrl"] = "https://api.justtcg.com/v1",
-                    ["JustTcgApi:ApiKeyHeaderName"] = "x-api-key"
+                    ["JustTcgApi:ApiKeyHeaderName"] = "x-api-key",
+                    ["SerpApi:ApiKey"] = ""
                 };
 
                 config.AddInMemoryCollection(overrides);
+            });
+
+            builder.ConfigureServices(services =>
+            {
+                services.AddLogging(logging => logging.ClearProviders());
+                services.AddDataProtection()
+                    .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(AppContext.BaseDirectory, "data-protection-keys", Guid.NewGuid().ToString("N"))));
+                services.RemoveAll<IUserRepository>();
+                services.RemoveAll<IFavoriteRepository>();
+                services.AddSingleton<IUserRepository>(_userRepository);
+                services.AddSingleton<IFavoriteRepository>(_favoriteRepository);
             });
         }
 
         async ValueTask IAsyncDisposable.DisposeAsync()
         {
-            Environment.SetEnvironmentVariable("TAKEDOWNTCG_DB_PATH", null);
-
-            if (File.Exists(_databasePath))
-            {
-                File.Delete(_databasePath);
-            }
-
             await DisposeAsyncCore();
         }
 

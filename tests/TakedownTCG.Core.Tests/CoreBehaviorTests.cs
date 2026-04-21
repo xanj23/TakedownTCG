@@ -1,12 +1,18 @@
 using TakedownTCGApplication.Abstractions;
-using TakedownTCGApplication.Infrastructure.Persistence.UserAccounts;
+using TakedownTCGApplication.Models.Ebay.Query;
+using TakedownTCGApplication.Models.Ebay.Response;
 using TakedownTCGApplication.Models.JustTcg.Query;
 using TakedownTCGApplication.Models.JustTcg.Response;
 using TakedownTCGApplication.Models.PokemonTcg.Query;
+using TakedownTCGApplication.Models.SerpApi.Response;
 using TakedownTCGApplication.Models.UserAccounts;
+using TakedownTCGApplication.Infrastructure.Config;
+using TakedownTCGApplication.Services.Ebay;
 using TakedownTCGApplication.Services.JustTcg;
 using TakedownTCGApplication.Services.PokemonTcg;
+using TakedownTCGApplication.Services.SerpApi;
 using TakedownTCGApplication.Services.UserAccounts;
+using TakedownTCG.Tests.Shared;
 
 namespace TakedownTCG.Core.Tests;
 
@@ -66,8 +72,8 @@ public sealed class CoreBehaviorTests
     [Fact]
     public async Task AccountService_FullLifecycle_Works()
     {
-        await using TestDatabase db = new();
-        IUserRepository userRepository = new UserRepository(db.Path);
+        InMemoryAccountStore store = new();
+        IUserRepository userRepository = new InMemoryUserRepository(store);
         IAccountService accountService = new AccountService(userRepository);
 
         bool created = await accountService.CreateAccountAsync("tester", "tester@example.com", "Password123!");
@@ -101,9 +107,9 @@ public sealed class CoreBehaviorTests
     [Fact]
     public async Task FavoriteService_PreventsDuplicateFavorites()
     {
-        await using TestDatabase db = new();
-        IUserRepository userRepository = new UserRepository(db.Path);
-        IFavoriteRepository favoriteRepository = new FavoriteRepository(db.Path);
+        InMemoryAccountStore store = new();
+        IUserRepository userRepository = new InMemoryUserRepository(store);
+        IFavoriteRepository favoriteRepository = new InMemoryFavoriteRepository(store);
         IAccountService accountService = new AccountService(userRepository);
         IFavoriteService favoriteService = new FavoriteService(favoriteRepository, userRepository);
 
@@ -167,6 +173,111 @@ public sealed class CoreBehaviorTests
         Assert.IsType<Response<Card>>(result);
         Assert.Contains("Lightning Bolt", mapped);
         Assert.Contains("Results: 1", mapped);
+    }
+
+    [Fact]
+    public void EbayQueryBuilder_UsesBrowseApiSearchShape()
+    {
+        EbayQueryService queryService = new();
+        EbayItemSearchQueryParams query = new()
+        {
+            Search = "pokemon charizard psa 10",
+            CategoryIds = "183454",
+            BuyingOptions = "FIXED_PRICE|AUCTION",
+            Sort = "newlyListed",
+            Limit = 20,
+            Offset = 40
+        };
+
+        string url = queryService.BuildItemSearchUrl(query, "https://api.ebay.com");
+
+        Assert.Equal(
+            "https://api.ebay.com/buy/browse/v1/item_summary/search?q=pokemon%20charizard%20psa%2010&limit=20&offset=40&category_ids=183454&filter=buyingOptions%3A%7BFIXED_PRICE%7CAUCTION%7D&sort=newlyListed",
+            url);
+    }
+
+    [Fact]
+    public void EbayMapper_MapsBrowseItemsToCardDisplayResults()
+    {
+        EbaySearchResultMapper mapper = new();
+        EbayItemSummary item = new()
+        {
+            ItemId = "v1|123|0",
+            Title = "Pokemon Charizard PSA 10",
+            ItemWebUrl = "https://www.ebay.com/itm/123",
+            Image = new EbayImage { ImageUrl = "https://i.ebayimg.com/images/123.jpg" },
+            Price = new EbayMoney { Value = "249.99", Currency = "USD" },
+            Condition = "Graded",
+            BuyingOptions = ["FIXED_PRICE"],
+            Seller = new EbaySeller { Username = "tcg-seller" },
+            ItemCreationDate = "2026-04-20T12:00:00.000Z"
+        };
+
+        var results = mapper.MapItems([item], new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+
+        Assert.Single(results);
+        Assert.Equal("Pokemon Charizard PSA 10", results[0].Name);
+        Assert.Equal("eBay", results[0].Game);
+        Assert.Equal("Active listing", results[0].SetName);
+        Assert.Equal("USD", results[0].SetCode);
+        Assert.Equal(249.99m, results[0].DisplayPrice);
+        Assert.Equal("eBay listing price", results[0].DisplayPriceLabel);
+        Assert.Equal("https://www.ebay.com/itm/123", results[0].TcgplayerProductUrl);
+        Assert.Contains("Seller: tcg-seller", results[0].Details);
+    }
+
+    [Fact]
+    public void SerpApiQueryBuilder_UsesSoldCompletedEbayCardsShape()
+    {
+        SerpApiQueryService queryService = new();
+        SerpApiOptions options = new()
+        {
+            BaseUrl = "https://serpapi.com/search",
+            EbayDomain = "ebay.com",
+            DefaultQuery = "tcg trading card",
+            CategoryId = "183454",
+            ShowOnly = "Sold,Complete",
+            PageSize = 25
+        };
+
+        string url = queryService.BuildCompletedSalesUrl(options);
+
+        Assert.Equal(
+            "https://serpapi.com/search?engine=ebay&ebay_domain=ebay.com&_nkw=tcg%20trading%20card&show_only=Sold%2CComplete&_ipg=25&category_id=183454",
+            url);
+    }
+
+    [Fact]
+    public void CompletedSaleMapper_LimitsCarouselItems()
+    {
+        CompletedTcgSaleMapper mapper = new();
+        List<SerpApiEbayOrganicResult> results =
+        [
+            new()
+            {
+                Title = "Charizard PSA 10",
+                ProductId = "1",
+                Link = "https://www.ebay.com/itm/1",
+                Thumbnail = "https://i.ebayimg.com/images/1.jpg",
+                Condition = "Pre-Owned",
+                Price = new SerpApiEbayPrice { Raw = "$120.00", Extracted = 120m },
+                Seller = new SerpApiEbaySeller { Username = "seller-one" }
+            },
+            new()
+            {
+                Title = "Blue-Eyes White Dragon",
+                ProductId = "2",
+                Price = new SerpApiEbayPrice { Raw = "$80.00", Extracted = 80m }
+            }
+        ];
+
+        var mapped = mapper.MapSales(results, 1);
+
+        Assert.Single(mapped);
+        Assert.Equal("Charizard PSA 10", mapped[0].Title);
+        Assert.Equal("$120.00", mapped[0].PriceText);
+        Assert.Equal(120m, mapped[0].Price);
+        Assert.Equal("seller-one", mapped[0].Seller);
     }
 
     [Fact]
@@ -377,30 +488,4 @@ public sealed class CoreBehaviorTests
         Assert.Equal(new[] { "Grass", "Poison" }, response.Data[0].Types);
     }
 
-    private sealed class TestDatabase : IAsyncDisposable
-    {
-        public string Path { get; }
-
-        public TestDatabase()
-        {
-            Path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"takedowntcg-core-tests-{Guid.NewGuid():N}.db");
-        }
-
-        public ValueTask DisposeAsync()
-        {
-            if (File.Exists(Path))
-            {
-                try
-                {
-                    File.Delete(Path);
-                }
-                catch (IOException)
-                {
-                    // Windows may keep the SQLite file handle briefly after test completion.
-                }
-            }
-
-            return ValueTask.CompletedTask;
-        }
-    }
 }
