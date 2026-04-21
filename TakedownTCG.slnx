@@ -1,6 +1,5 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="src/TakedownTCG.Core/TakedownTCG.Core.csproj" />
     <Project Path="src/TakedownTCGApplication/TakedownTCGApplication.csproj" />
   </Folder>
   <Folder Name="/src/TakedownTCGCli/">

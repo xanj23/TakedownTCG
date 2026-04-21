@@ -19,8 +19,9 @@
 
             <label class="block">
                 <span class="form-label">API</span>
-                <select asp-for="Api" class="form-input">
+                <select asp-for="Api" id="apiSelect" class="form-input">
                     <option value="JustTCG">JustTCG</option>
+                    <option value="PokemonTCG">Pokemon API</option>
                 </select>
                 <span asp-validation-for="Api" class="form-error"></span>
             </label>
@@ -30,8 +31,8 @@
                 <select asp-for="Endpoint" id="endpointSelect" class="form-input">
                     <option value="">Select endpoint</option>
                     <option value="cards">Cards</option>
-                    <option value="sets">Sets</option>
-                    <option value="games">Games</option>
+                    <option value="sets" data-api="JustTCG">Sets</option>
+                    <option value="games" data-api="JustTCG">Games</option>
                 </select>
                 <span asp-validation-for="Endpoint" class="form-error"></span>
             </label>
@@ -51,13 +52,14 @@
                     <input asp-for="CardPrinting" class="form-input" />
                 </label>
                 <label class="block">
-                    <span class="form-label">Condition</span>
+                    <span class="form-label">Condition / Rarity</span>
                     <input asp-for="CardCondition" class="form-input" />
                 </label>
                 <label class="block">
                     <span class="form-label">Order By</span>
                     <select asp-for="CardOrderBy" class="form-input">
                         <option value="">Default</option>
+                        <option value="relevance">relevance</option>
                         <option value="price">price</option>
                         <option value="24h">24h</option>
                         <option value="7d">7d</option>
@@ -70,6 +72,26 @@
                         <option value="">Default</option>
                         <option value="asc">asc</option>
                         <option value="desc">desc</option>
+                    </select>
+                </label>
+            </div>
+
+            <div id="pokemonCardsFields" class="hidden md:col-span-2 grid gap-3 md:grid-cols-2">
+                <label class="block md:col-span-2">
+                    <span class="form-label">Pokemon Search</span>
+                    <input asp-for="PokemonSearch" class="form-input" placeholder="charizard ex 199" />
+                    <span asp-validation-for="PokemonSearch" class="form-error"></span>
+                </label>
+                <label class="block">
+                    <span class="form-label">Pokemon TCG ID</span>
+                    <input asp-for="PokemonTcgId" class="form-input" placeholder="sv3-223" />
+                </label>
+                <label class="block">
+                    <span class="form-label">Sort</span>
+                    <select asp-for="PokemonSort" class="form-input">
+                        <option value="price_highest">price_highest</option>
+                        <option value="price_lowest">price_lowest</option>
+                        <option value="relevance">relevance</option>
                     </select>
                 </label>
             </div>
@@ -128,7 +150,7 @@
                             @if (card.DisplayPrice.HasValue)
                             {
                                 <p class="mt-1 text-sm font-semibold text-cyan-700">
-                                    Price: $@card.DisplayPrice.Value.ToString("0.00")
+                                    @card.DisplayPriceLabel: $@card.DisplayPrice.Value.ToString("0.00")
                                     @if (card.Price90d.HasValue)
                                     {
                                         <span class="text-slate-600"> | Price was: $@card.Price90d.Value.ToString("0.00") 3 months ago</span>
@@ -256,6 +278,9 @@
                     <input type="hidden" name="CardCondition" value="@Model.CardCondition" />
                     <input type="hidden" name="CardOrderBy" value="@Model.CardOrderBy" />
                     <input type="hidden" name="CardOrder" value="@Model.CardOrder" />
+                    <input type="hidden" name="PokemonSearch" value="@Model.PokemonSearch" />
+                    <input type="hidden" name="PokemonTcgId" value="@Model.PokemonTcgId" />
+                    <input type="hidden" name="PokemonSort" value="@Model.PokemonSort" />
                     <input type="hidden" name="SetGame" value="@Model.SetGame" />
                     <input type="hidden" name="SetQuery" value="@Model.SetQuery" />
                     <input type="hidden" name="SetOrderBy" value="@Model.SetOrderBy" />
@@ -280,6 +305,9 @@
                     <input type="hidden" name="CardCondition" value="@Model.CardCondition" />
                     <input type="hidden" name="CardOrderBy" value="@Model.CardOrderBy" />
                     <input type="hidden" name="CardOrder" value="@Model.CardOrder" />
+                    <input type="hidden" name="PokemonSearch" value="@Model.PokemonSearch" />
+                    <input type="hidden" name="PokemonTcgId" value="@Model.PokemonTcgId" />
+                    <input type="hidden" name="PokemonSort" value="@Model.PokemonSort" />
                     <input type="hidden" name="SetGame" value="@Model.SetGame" />
                     <input type="hidden" name="SetQuery" value="@Model.SetQuery" />
                     <input type="hidden" name="SetOrderBy" value="@Model.SetOrderBy" />
@@ -298,19 +326,34 @@
     <script>
         (function () {
             const endpointSelect = document.getElementById("endpointSelect");
+            const apiSelect = document.getElementById("apiSelect");
             const cardsFields = document.getElementById("cardsFields");
+            const pokemonCardsFields = document.getElementById("pokemonCardsFields");
             const setsFields = document.getElementById("setsFields");
 
-            if (!endpointSelect || !cardsFields || !setsFields) {
+            if (!apiSelect || !endpointSelect || !cardsFields || !pokemonCardsFields || !setsFields) {
                 return;
             }
 
             function syncFields() {
+                const api = apiSelect.value || "JustTCG";
+                endpointSelect.querySelectorAll("option[data-api]").forEach(function (option) {
+                    option.hidden = option.dataset.api !== api;
+                });
+
+                const selectedOption = endpointSelect.options[endpointSelect.selectedIndex];
+                if (selectedOption && selectedOption.hidden) {
+                    endpointSelect.value = "cards";
+                }
+
                 const endpoint = (endpointSelect.value || "").toLowerCase();
-                cardsFields.classList.toggle("hidden", endpoint !== "cards");
+                const isPokemon = api === "PokemonTCG";
+                cardsFields.classList.toggle("hidden", isPokemon || endpoint !== "cards");
+                pokemonCardsFields.classList.toggle("hidden", !isPokemon || endpoint !== "cards");
                 setsFields.classList.toggle("hidden", endpoint !== "sets");
             }
 
+            apiSelect.addEventListener("change", syncFields);
             endpointSelect.addEventListener("change", syncFields);
             syncFields();
 

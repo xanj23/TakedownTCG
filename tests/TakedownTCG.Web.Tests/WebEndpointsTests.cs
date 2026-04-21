@@ -2,9 +2,9 @@ using System.Net;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
-using TakedownTCG.Core.Abstractions;
-using TakedownTCG.Core.Infrastructure.Persistence.UserAccounts;
-using TakedownTCG.Core.Services.UserAccounts;
+using TakedownTCGApplication.Abstractions;
+using TakedownTCGApplication.Infrastructure.Persistence.UserAccounts;
+using TakedownTCGApplication.Services.UserAccounts;
 
 namespace TakedownTCG.Web.Tests;
 

@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\TakedownTCG.Core\TakedownTCG.Core.csproj" />
+    <ProjectReference Include="..\..\src\TakedownTCGApplication\TakedownTCGApplication.csproj" />
   </ItemGroup>
 
 </Project>

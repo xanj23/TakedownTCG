@@ -21,7 +21,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\TakedownTCGApplication\TakedownTCGApplication.csproj" />
-    <ProjectReference Include="..\..\src\TakedownTCG.Core\TakedownTCG.Core.csproj" />
   </ItemGroup>
 
 </Project>

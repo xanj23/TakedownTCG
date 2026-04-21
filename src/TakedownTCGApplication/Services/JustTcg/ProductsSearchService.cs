@@ -10,12 +10,16 @@ public sealed class ProductsSearchService : IProductsSearchService
 {
     private readonly IJustTcgSearchService _searchService;
     private readonly IFavoriteService _favoriteService;
-    private const string MissingCardImageUrl = "https://tcgplayer-cdn.tcgplayer.com/product/image-missing.svg";
+    private readonly IProductsSearchResultMapper _resultMapper;
 
-    public ProductsSearchService(IJustTcgSearchService searchService, IFavoriteService favoriteService)
+    public ProductsSearchService(
+        IJustTcgSearchService searchService,
+        IFavoriteService favoriteService,
+        IProductsSearchResultMapper resultMapper)
     {
         _searchService = searchService;
         _favoriteService = favoriteService;
+        _resultMapper = resultMapper;
     }
 
     public async Task<ProductsSearchOperationResult> SearchCardsAsync(
@@ -38,12 +42,8 @@ public sealed class ProductsSearchService : IProductsSearchService
         }
 
         ProductsSearchOperationResult result = CreateOperationResult(response.Meta, fallbackLimit);
-        result.CardResults = response.Data;
         result.ErrorMessage = response.Error ?? string.Empty;
-        result.FavoriteCardIds = favoriteCardIds;
-        result.CardDisplayResults = response.Data
-            .Select(card => MapCardResult(card, favoriteCardIds.Contains(card.Id)))
-            .ToList();
+        result.CardDisplayResults = _resultMapper.MapCards(response.Data, favoriteCardIds);
 
         return result;
     }
@@ -55,9 +55,8 @@ public sealed class ProductsSearchService : IProductsSearchService
     {
         Response<Set> response = (Response<Set>)await _searchService.SearchAsync(JustTcgEndpoint.Sets, query, cancellationToken);
         ProductsSearchOperationResult result = CreateOperationResult(response.Meta, fallbackLimit);
-        result.SetResults = response.Data;
         result.ErrorMessage = response.Error ?? string.Empty;
-        result.SetDisplayResults = response.Data.Select(MapSetResult).ToList();
+        result.SetDisplayResults = _resultMapper.MapSets(response.Data);
         return result;
     }
 
@@ -68,9 +67,8 @@ public sealed class ProductsSearchService : IProductsSearchService
     {
         Response<Game> response = (Response<Game>)await _searchService.SearchAsync(JustTcgEndpoint.Games, query, cancellationToken);
         ProductsSearchOperationResult result = CreateOperationResult(response.Meta, fallbackLimit);
-        result.GameResults = response.Data;
         result.ErrorMessage = response.Error ?? string.Empty;
-        result.GameDisplayResults = response.Data.Select(MapGameResult).ToList();
+        result.GameDisplayResults = _resultMapper.MapGames(response.Data);
         return result;
     }
 
@@ -94,121 +92,4 @@ public sealed class ProductsSearchService : IProductsSearchService
         };
     }
 
-    private static CardSearchResult MapCardResult(Card card, bool isFavorited)
-    {
-        string imageUrl = !string.IsNullOrWhiteSpace(card.TcgplayerId)
-            ? $"https://tcgplayer-cdn.tcgplayer.com/product/{card.TcgplayerId}_in_1000x1000.jpg"
-            : MissingCardImageUrl;
-
-        decimal? displayPrice = card.Variants
-            .Where(v => v.Price.HasValue)
-            .Select(v => v.Price)
-            .FirstOrDefault();
-
-        decimal? price90d = card.Variants
-            .Where(v => v.MaxPrice90d.HasValue)
-            .Select(v => v.MaxPrice90d)
-            .FirstOrDefault();
-
-        return new CardSearchResult
-        {
-            Id = card.Id,
-            Name = card.Name,
-            Game = card.Game,
-            SetName = card.SetName,
-            SetCode = card.Set,
-            Number = card.Number,
-            Rarity = card.Rarity,
-            Details = card.Details,
-            VariantsCount = card.Variants.Count,
-            FallbackImageUrl = MissingCardImageUrl,
-            ImageUrl = imageUrl,
-            TcgplayerProductUrl = !string.IsNullOrWhiteSpace(card.TcgplayerId)
-                ? $"https://www.tcgplayer.com/product/{card.TcgplayerId}"
-                : null,
-            DisplayPrice = displayPrice,
-            Price90d = price90d,
-            IsFavorited = isFavorited
-        };
-    }
-
-    private static SetSearchResult MapSetResult(Set setItem)
-    {
-        string setGameSlug = GetTcgplayerGameSlug(setItem.Game);
-        string setNameSlug = Slugify(setItem.Name);
-        bool hasValidReleaseDate = !string.IsNullOrWhiteSpace(setItem.ReleaseDate)
-                                   && !setItem.ReleaseDate.Equals("null", StringComparison.OrdinalIgnoreCase);
-
-        return new SetSearchResult
-        {
-            Name = setItem.Name,
-            Game = setItem.Game,
-            ReleaseDate = setItem.ReleaseDate,
-            CardsCount = setItem.CardsCount,
-            VariantsCount = setItem.VariantsCount,
-            SealedCount = setItem.SealedCount,
-            SetValueUsd = setItem.SetValueUsd,
-            TcgplayerSetUrl = !string.IsNullOrWhiteSpace(setGameSlug) && !string.IsNullOrWhiteSpace(setNameSlug) && hasValidReleaseDate
-                ? $"https://www.tcgplayer.com/categories/trading-and-collectible-card-games/{setGameSlug}/{setNameSlug}"
-                : null
-        };
-    }
-
-    private static GameSearchResult MapGameResult(Game game)
-    {
-        string gameSlug = GetTcgplayerGameSlug(game.Name);
-
-        return new GameSearchResult
-        {
-            Name = game.Name,
-            SetsCount = game.SetsCount,
-            CardsCount = game.CardsCount,
-            VariantsCount = game.VariantsCount,
-            SealedCount = game.SealedCount,
-            TcgplayerGameUrl = !string.IsNullOrWhiteSpace(gameSlug)
-                ? $"https://www.tcgplayer.com/categories/trading-and-collectible-card-games/{gameSlug}"
-                : null
-        };
-    }
-
-    private static string Slugify(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return string.Empty;
-        }
-
-        char[] chars = value.Trim().ToLowerInvariant().ToCharArray();
-        var buffer = new System.Text.StringBuilder(chars.Length);
-        bool previousWasDash = false;
-
-        foreach (char ch in chars)
-        {
-            if (char.IsLetterOrDigit(ch))
-            {
-                buffer.Append(ch);
-                previousWasDash = false;
-            }
-            else if (!previousWasDash)
-            {
-                buffer.Append('-');
-                previousWasDash = true;
-            }
-        }
-
-        return buffer.ToString().Trim('-');
-    }
-
-    private static string GetTcgplayerGameSlug(string? game)
-    {
-        string normalized = Slugify(game);
-        return normalized switch
-        {
-            "mtg" => "magic-the-gathering",
-            "magic-the-gathering" => "magic-the-gathering",
-            "yugioh" => "yu-gi-oh",
-            "yu-gi-oh" => "yu-gi-oh",
-            _ => normalized
-        };
-    }
 }

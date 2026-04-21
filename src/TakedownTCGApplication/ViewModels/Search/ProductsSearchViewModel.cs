@@ -1,4 +1,3 @@
-using TakedownTCGApplication.Models.JustTcg.Response;
 using TakedownTCGApplication.Models.Search;
 
 namespace TakedownTCGApplication.ViewModels.Search;
@@ -14,6 +13,10 @@ public sealed class ProductsSearchViewModel
     public string? CardCondition { get; set; }
     public string? CardOrderBy { get; set; }
     public string? CardOrder { get; set; }
+
+    public string? PokemonSearch { get; set; }
+    public string? PokemonTcgId { get; set; }
+    public string? PokemonSort { get; set; }
 
     public string? SetGame { get; set; }
     public string? SetQuery { get; set; }
@@ -31,12 +34,8 @@ public sealed class ProductsSearchViewModel
     public int TotalPages { get; set; }
     public bool HasSearched { get; set; }
 
-    public IReadOnlyList<Card> CardResults { get; set; } = Array.Empty<Card>();
     public IReadOnlyList<CardSearchResult> CardDisplayResults { get; set; } = Array.Empty<CardSearchResult>();
     public IReadOnlyList<SetSearchResult> SetDisplayResults { get; set; } = Array.Empty<SetSearchResult>();
     public IReadOnlyList<GameSearchResult> GameDisplayResults { get; set; } = Array.Empty<GameSearchResult>();
-    public IReadOnlyList<Set> SetResults { get; set; } = Array.Empty<Set>();
-    public IReadOnlyList<Game> GameResults { get; set; } = Array.Empty<Game>();
-    public IReadOnlySet<string> FavoriteCardIds { get; set; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
     public string ErrorMessage { get; set; } = string.Empty;
 }

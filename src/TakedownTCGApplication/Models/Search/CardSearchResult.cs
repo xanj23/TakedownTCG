@@ -17,6 +17,7 @@ public sealed class CardSearchResult
     public string? TcgplayerProductUrl { get; set; }
 
     public decimal? DisplayPrice { get; set; }
+    public string DisplayPriceLabel { get; set; } = "Price";
     public decimal? Price90d { get; set; }
     public bool IsFavorited { get; set; }
 }

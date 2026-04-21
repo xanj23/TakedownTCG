@@ -4,6 +4,7 @@ using TakedownTCGApplication.Infrastructure.Config;
 using TakedownTCGApplication.Infrastructure.Http;
 using TakedownTCGApplication.Infrastructure.Persistence.UserAccounts;
 using TakedownTCGApplication.Services.JustTcg;
+using TakedownTCGApplication.Services.PokemonTcg;
 using TakedownTCGApplication.Services.UserAccounts;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,8 +28,17 @@ if (string.IsNullOrWhiteSpace(persistenceOptions.DatabasePath))
     persistenceOptions.DatabasePath = DatabasePathDefaults.ResolveDefaultPath();
 }
 
+PokemonTcgApiOptions pokemonApiOptions = builder.Configuration.GetSection("PokemonTcgApi").Get<PokemonTcgApiOptions>() ?? new PokemonTcgApiOptions();
+string? pokemonApiKeyOverride = Environment.GetEnvironmentVariable("POKEMON_TCG_API_KEY")
+                                ?? Environment.GetEnvironmentVariable("RAPIDAPI_KEY");
+if (!string.IsNullOrWhiteSpace(pokemonApiKeyOverride))
+{
+    pokemonApiOptions.ApiKey = pokemonApiKeyOverride;
+}
+
 builder.Services.AddSingleton(apiOptions);
 builder.Services.AddSingleton(persistenceOptions);
+builder.Services.AddSingleton(pokemonApiOptions);
 
 builder.Services.AddSingleton<IUserRepository>(sp =>
 {
@@ -45,11 +55,19 @@ builder.Services.AddSingleton<IFavoriteRepository>(sp =>
 builder.Services.AddSingleton<IAccountService, AccountService>();
 builder.Services.AddSingleton<IFavoriteService, FavoriteService>();
 builder.Services.AddSingleton<IJustTcgHttpGateway, JustTcgHttpGateway>();
+builder.Services.AddSingleton<IPokemonTcgHttpGateway, PokemonTcgHttpGateway>();
 builder.Services.AddSingleton<JustTcgQueryService>();
 builder.Services.AddSingleton<JustTcgResponseService>();
+builder.Services.AddSingleton<PokemonTcgQueryService>();
+builder.Services.AddSingleton<PokemonTcgResponseService>();
 builder.Services.AddSingleton<IJustTcgResponseMapper>(sp => sp.GetRequiredService<JustTcgResponseService>());
 builder.Services.AddSingleton<IJustTcgSearchService, JustTcgSearchService>();
+builder.Services.AddSingleton<IPokemonTcgSearchService, PokemonTcgSearchService>();
+builder.Services.AddSingleton<IProductsSearchResultMapper, ProductsSearchResultMapper>();
+builder.Services.AddSingleton<IPokemonSearchResultMapper, PokemonSearchResultMapper>();
 builder.Services.AddSingleton<IProductsSearchService, ProductsSearchService>();
+builder.Services.AddSingleton<IPokemonProductsSearchService, PokemonProductsSearchService>();
+builder.Services.AddSingleton<IProductsSearchWorkflow, ProductsSearchWorkflow>();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>

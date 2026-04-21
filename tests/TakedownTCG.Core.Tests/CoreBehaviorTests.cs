@@ -1,10 +1,12 @@
-using TakedownTCG.Core.Abstractions;
-using TakedownTCG.Core.Infrastructure.Persistence.UserAccounts;
-using TakedownTCG.Core.Models.JustTcg.Query;
-using TakedownTCG.Core.Models.JustTcg.Response;
-using TakedownTCG.Core.Models.UserAccounts;
-using TakedownTCG.Core.Services.JustTcg;
-using TakedownTCG.Core.Services.UserAccounts;
+using TakedownTCGApplication.Abstractions;
+using TakedownTCGApplication.Infrastructure.Persistence.UserAccounts;
+using TakedownTCGApplication.Models.JustTcg.Query;
+using TakedownTCGApplication.Models.JustTcg.Response;
+using TakedownTCGApplication.Models.PokemonTcg.Query;
+using TakedownTCGApplication.Models.UserAccounts;
+using TakedownTCGApplication.Services.JustTcg;
+using TakedownTCGApplication.Services.PokemonTcg;
+using TakedownTCGApplication.Services.UserAccounts;
 
 namespace TakedownTCG.Core.Tests;
 
@@ -21,6 +23,44 @@ public sealed class CoreBehaviorTests
         string url = queryService.BuildUrl(JustTcgEndpoint.Cards, query, "https://api.justtcg.com/v1");
 
         Assert.Equal("https://api.justtcg.com/v1/cards?q=Black%20Lotus&printing=1st%20edition", url);
+    }
+
+    [Fact]
+    public void PokemonQueryBuilder_UsesRapidApiSearchShape()
+    {
+        PokemonTcgQueryService queryService = new();
+        PokemonCardQueryParams query = new()
+        {
+            Search = "charizard ex 199",
+            PerPage = 20,
+            Page = 2,
+            Sort = "price_highest"
+        };
+
+        string url = queryService.BuildCardsUrl(query, "https://pokemon-tcg-api.p.rapidapi.com");
+
+        Assert.Equal(
+            "https://pokemon-tcg-api.p.rapidapi.com/cards?per_page=20&page=2&sort=price_highest&search=charizard%20ex%20199",
+            url);
+    }
+
+    [Fact]
+    public void PokemonQueryBuilder_SupportsDirectTcgIdLookup()
+    {
+        PokemonTcgQueryService queryService = new();
+        PokemonCardQueryParams query = new()
+        {
+            TcgId = "sv3-223",
+            PerPage = 20,
+            Page = 1,
+            Sort = "price_highest"
+        };
+
+        string url = queryService.BuildCardsUrl(query, "https://pokemon-tcg-api.p.rapidapi.com");
+
+        Assert.Equal(
+            "https://pokemon-tcg-api.p.rapidapi.com/cards?per_page=20&page=1&sort=price_highest&tcgid=sv3-223",
+            url);
     }
 
     [Fact]
@@ -127,6 +167,214 @@ public sealed class CoreBehaviorTests
         Assert.IsType<Response<Card>>(result);
         Assert.Contains("Lightning Bolt", mapped);
         Assert.Contains("Results: 1", mapped);
+    }
+
+    [Fact]
+    public void PokemonResponseService_DeserializesAndMapsCards()
+    {
+        const string json = """
+        {
+          "data": [
+            {
+              "id": "base1-4",
+              "name": "Charizard",
+              "set": { "id": "base1", "name": "Base" },
+              "number": "4",
+              "rarity": "Rare Holo",
+              "types": [ "Fire" ],
+              "artist": "Mitsuhiro Arita",
+              "images": {
+                "small": "https://images.pokemontcg.io/base1/4.png",
+                "large": "https://images.pokemontcg.io/base1/4_hires.png"
+              },
+              "tcgplayer": {
+                "url": "https://www.tcgplayer.com/product/42382",
+                "prices": {
+                  "holofoil": { "market": 399.99 }
+                }
+              }
+            }
+          ],
+          "page": 1,
+          "pageSize": 20,
+          "count": 1,
+          "totalCount": 1
+        }
+        """;
+
+        PokemonTcgResponseService responseService = new();
+        PokemonSearchResultMapper mapper = new();
+
+        var response = responseService.DeserializeCards(json);
+        var results = mapper.MapCards(response.Data, new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+
+        Assert.Single(results);
+        Assert.Equal("Charizard", results[0].Name);
+        Assert.Equal("pokemon", results[0].Game);
+        Assert.Equal("Base", results[0].SetName);
+        Assert.Equal(399.99m, results[0].DisplayPrice);
+    }
+
+    [Fact]
+    public void PokemonMapper_PrefersGradedPricesOverRawPrices()
+    {
+        const string json = """
+        {
+          "data": [
+            {
+              "id": 3852,
+              "name": "Giratina VSTAR",
+              "card_number": "GG69",
+              "number": "GG69",
+              "rarity": "Rare Secret",
+              "episode": {
+                "name": "Crown Zenith",
+                "code": "CRZ"
+              },
+              "prices": {
+                "cardmarket": {
+                  "currency": "EUR",
+                  "lowest_near_mint": 157.21,
+                  "30d_average": 192.79,
+                  "7d_average": 189.26,
+                  "graded": {
+                    "psa": { "psa10": 279, "psa9": 184 },
+                    "cgc": { "cgc10": 344 }
+                  }
+                },
+                "tcg_player": {
+                  "currency": "USD",
+                  "market_price": 146.69,
+                  "mid_price": 163.71
+                }
+              }
+            }
+          ],
+          "page": 1,
+          "pageSize": 20,
+          "count": 1,
+          "totalCount": 1
+        }
+        """;
+
+        PokemonTcgResponseService responseService = new();
+        PokemonSearchResultMapper mapper = new();
+
+        var response = responseService.DeserializeCards(json);
+        var results = mapper.MapCards(response.Data, new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+
+        Assert.Single(results);
+        Assert.Equal("3852", results[0].Id);
+        Assert.Equal("Crown Zenith", results[0].SetName);
+        Assert.Equal("CRZ", results[0].SetCode);
+        Assert.Equal("GG69", results[0].Number);
+        Assert.Equal(405.92m, results[0].DisplayPrice);
+        Assert.Equal("Graded price (CGC 10)", results[0].DisplayPriceLabel);
+        Assert.DoesNotContain("Graded price:", results[0].Details);
+        Assert.Contains("TCGPlayer market: $146.69", results[0].Details);
+        Assert.Contains("Cardmarket NM: $185.51", results[0].Details);
+        Assert.Equal(3, results[0].VariantsCount);
+    }
+
+    [Fact]
+    public void PokemonMapper_DeserializesListedGradedPriceShapes()
+    {
+        const string json = """
+        {
+          "data": [
+            {
+              "id": 3852,
+              "name": "Giratina VSTAR",
+              "prices": {
+                "cardmarket": {
+                  "currency": "EUR",
+                  "lowest_near_mint": 157.21,
+                  "graded": [
+                    { "company": "psa", "grade": "10", "listed_price": 279 },
+                    { "company": "cgc", "grade": "10", "price": 344 }
+                  ]
+                }
+              }
+            }
+          ],
+          "page": 1,
+          "pageSize": 20,
+          "count": 1,
+          "totalCount": 1
+        }
+        """;
+
+        PokemonTcgResponseService responseService = new();
+        PokemonSearchResultMapper mapper = new();
+
+        var response = responseService.DeserializeCards(json);
+        var results = mapper.MapCards(response.Data, new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+
+        Assert.Single(results);
+        Assert.Equal(405.92m, results[0].DisplayPrice);
+        Assert.DoesNotContain("Graded price:", results[0].Details);
+        Assert.Contains("Cardmarket NM: $185.51", results[0].Details);
+        Assert.Equal(2, results[0].VariantsCount);
+    }
+
+    [Fact]
+    public void PokemonResponseService_DeserializesNumericCardIds()
+    {
+        const string json = """
+        {
+          "data": [
+            {
+              "id": 3852,
+              "name": "Pikachu"
+            }
+          ],
+          "page": 1,
+          "pageSize": 20,
+          "count": 1,
+          "totalCount": 1
+        }
+        """;
+
+        PokemonTcgResponseService responseService = new();
+
+        var response = responseService.DeserializeCards(json);
+
+        Assert.Single(response.Data);
+        Assert.Equal("3852", response.Data[0].Id);
+    }
+
+    [Fact]
+    public void PokemonResponseService_DeserializesObjectValuesForStringFields()
+    {
+        const string json = """
+        {
+          "data": [
+            {
+              "id": "card_1",
+              "name": "Bulbasaur",
+              "artist": { "name": "Ken Sugimori" },
+              "image": { "small": "https://example.test/bulbasaur.png" },
+              "types": [
+                { "name": "Grass" },
+                "Poison"
+              ]
+            }
+          ],
+          "page": 1,
+          "pageSize": 20,
+          "count": 1,
+          "totalCount": 1
+        }
+        """;
+
+        PokemonTcgResponseService responseService = new();
+
+        var response = responseService.DeserializeCards(json);
+
+        Assert.Single(response.Data);
+        Assert.Equal("Ken Sugimori", response.Data[0].Artist);
+        Assert.Equal("https://example.test/bulbasaur.png", response.Data[0].Image);
+        Assert.Equal(new[] { "Grass", "Poison" }, response.Data[0].Types);
     }
 
     private sealed class TestDatabase : IAsyncDisposable
