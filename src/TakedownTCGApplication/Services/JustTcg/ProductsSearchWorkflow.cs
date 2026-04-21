@@ -104,14 +104,10 @@ public sealed class ProductsSearchWorkflow : IProductsSearchWorkflow
         string? userName,
         CancellationToken cancellationToken)
     {
-        return model.Endpoint switch
-        {
-            EndpointCards => await _pokemonProductsSearchService.SearchCardsAsync(
-                BuildPokemonCardQuery(model),
-                userName,
-                cancellationToken),
-            _ => new ProductsSearchOperationResult()
-        };
+        return await _pokemonProductsSearchService.SearchCardsAsync(
+            BuildPokemonCardQuery(model),
+            userName,
+            cancellationToken);
     }
 
     private async Task<ProductsSearchOperationResult> SearchEbayAsync(
@@ -152,7 +148,11 @@ public sealed class ProductsSearchWorkflow : IProductsSearchWorkflow
         model.SetOrder = NormalizeInput(model.SetOrder);
         model.Offset = Math.Max(0, model.Offset);
         model.Limit = model.Limit <= 0 ? 20 : Math.Min(model.Limit, 100);
-        if (model.Api.Equals(EbayApi, StringComparison.OrdinalIgnoreCase) && string.IsNullOrWhiteSpace(model.Endpoint))
+        if (model.Api.Equals(PokemonTcgApi, StringComparison.OrdinalIgnoreCase))
+        {
+            model.Endpoint = EndpointCards;
+        }
+        else if (model.Api.Equals(EbayApi, StringComparison.OrdinalIgnoreCase) && string.IsNullOrWhiteSpace(model.Endpoint))
         {
             model.Endpoint = EndpointCards;
         }

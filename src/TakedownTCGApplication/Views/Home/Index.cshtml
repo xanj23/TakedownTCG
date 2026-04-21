@@ -23,6 +23,15 @@
         {
             <div id="completedSalesCarousel" class="completed-sales-carousel mt-3" data-count="@Model.CompletedSales.Count">
                 <div class="completed-sales-stage" aria-live="polite">
+                    @if (Model.CompletedSales.Count > 1)
+                    {
+                        <button type="button" class="completed-sales-arrow completed-sales-arrow-left" data-carousel-direction="previous" aria-label="Show previous completed sale">
+                            <span aria-hidden="true">&lsaquo;</span>
+                        </button>
+                        <button type="button" class="completed-sales-arrow completed-sales-arrow-right" data-carousel-direction="next" aria-label="Show next completed sale">
+                            <span aria-hidden="true">&rsaquo;</span>
+                        </button>
+                    }
                 @for (int i = 0; i < Model.CompletedSales.Count; i++)
                 {
                     var sale = Model.CompletedSales[i];
@@ -85,6 +94,11 @@
             }
 
             const cards = Array.from(carousel.querySelectorAll(".completed-sale-card"));
+            const previousButton = carousel.querySelector("[data-carousel-direction='previous']");
+            const nextButton = carousel.querySelector("[data-carousel-direction='next']");
+            const rotationDelay = 4500;
+            let rotationTimer;
+
             if (cards.length === 0) {
                 return;
             }
@@ -127,11 +141,44 @@
                 });
             }
 
-            render();
-            window.setInterval(function () {
+            function movePrevious() {
                 activeIndex = (activeIndex - 1 + cards.length) % cards.length;
                 render();
-            }, 4500);
+            }
+
+            function moveNext() {
+                activeIndex = (activeIndex + 1) % cards.length;
+                render();
+            }
+
+            function startRotation() {
+                window.clearInterval(rotationTimer);
+                if (cards.length <= 1) {
+                    return;
+                }
+
+                rotationTimer = window.setInterval(movePrevious, rotationDelay);
+            }
+
+            function handleManualNavigation(move) {
+                move();
+                startRotation();
+            }
+
+            if (previousButton) {
+                previousButton.addEventListener("click", function () {
+                    handleManualNavigation(movePrevious);
+                });
+            }
+
+            if (nextButton) {
+                nextButton.addEventListener("click", function () {
+                    handleManualNavigation(moveNext);
+                });
+            }
+
+            render();
+            startRotation();
         })();
     </script>
 }

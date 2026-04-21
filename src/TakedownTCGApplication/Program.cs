@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection;
 using TakedownTCGApplication.Abstractions;
 using TakedownTCGApplication.Infrastructure.Config;
 using TakedownTCGApplication.Infrastructure.Http;
@@ -110,6 +111,14 @@ builder.Services.AddSession(options =>
 });
 
 builder.Services.AddControllersWithViews();
+
+if (builder.Environment.IsDevelopment())
+{
+    string dataProtectionPath = Path.Combine(builder.Environment.ContentRootPath, "App_Data", "DataProtectionKeys");
+    builder.Services.AddDataProtection()
+        .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionPath))
+        .SetApplicationName("TakedownTCGApplication");
+}
 
 var app = builder.Build();
 

@@ -10,7 +10,7 @@
 <section class="space-y-5">
     <div class="rounded-3xl border border-slate-300 bg-white/90 p-6 shadow-sm">
         <h1 class="text-3xl font-extrabold text-slate-900">Search Products</h1>
-        <p class="mt-1 text-sm text-slate-600">Choose an API, then an endpoint, and matching fields will appear.</p>
+        <p class="mt-1 text-sm text-slate-600">Choose an API, then matching fields will appear.</p>
 
         <form asp-action="Index" method="post" class="mt-4 grid gap-3 md:grid-cols-2">
             @Html.AntiForgeryToken()
@@ -27,7 +27,7 @@
                 <span asp-validation-for="Api" class="form-error"></span>
             </label>
 
-            <label class="block">
+            <label id="endpointField" class="block">
                 <span id="endpointLabel" class="form-label">Endpoint</span>
                 <select asp-for="Endpoint" id="endpointSelect" class="form-input">
                     <option value="">Select endpoint</option>
@@ -363,6 +363,7 @@
     <script>
         (function () {
             const endpointSelect = document.getElementById("endpointSelect");
+            const endpointField = document.getElementById("endpointField");
             const endpointLabel = document.getElementById("endpointLabel");
             const apiSelect = document.getElementById("apiSelect");
             const cardsFields = document.getElementById("cardsFields");
@@ -371,7 +372,7 @@
             const ebayCategoryIds = document.getElementById("ebayCategoryIds");
             const setsFields = document.getElementById("setsFields");
 
-            if (!apiSelect || !endpointSelect || !endpointLabel || !cardsFields || !pokemonCardsFields || !ebayCardsFields || !ebayCategoryIds || !setsFields) {
+            if (!apiSelect || !endpointSelect || !endpointField || !endpointLabel || !cardsFields || !pokemonCardsFields || !ebayCardsFields || !ebayCategoryIds || !setsFields) {
                 return;
             }
 
@@ -380,6 +381,11 @@
                 const isPokemon = api === "PokemonTCG";
                 const isEbay = api === "eBay";
                 endpointLabel.textContent = isEbay ? "Category" : "Endpoint";
+                endpointField.classList.toggle("hidden", isPokemon);
+
+                if (isPokemon) {
+                    endpointSelect.value = "cards";
+                }
 
                 endpointSelect.querySelectorAll("option").forEach(function (option) {
                     if (isEbay) {

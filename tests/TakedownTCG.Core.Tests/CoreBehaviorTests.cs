@@ -258,7 +258,7 @@ public sealed class CoreBehaviorTests
                 Title = "Charizard PSA 10",
                 ProductId = "1",
                 Link = "https://www.ebay.com/itm/1",
-                Thumbnail = "https://i.ebayimg.com/images/1.jpg",
+                Thumbnail = "https://i.ebayimg.com/images/g/EzAAAeSw27Bp3QjJ/s-l225.jpg",
                 Condition = "Pre-Owned",
                 Price = new SerpApiEbayPrice { Raw = "$120.00", Extracted = 120m },
                 Seller = new SerpApiEbaySeller { Username = "seller-one" }
@@ -278,6 +278,28 @@ public sealed class CoreBehaviorTests
         Assert.Equal("$120.00", mapped[0].PriceText);
         Assert.Equal(120m, mapped[0].Price);
         Assert.Equal("seller-one", mapped[0].Seller);
+        Assert.Equal("https://i.ebayimg.com/images/g/EzAAAeSw27Bp3QjJ/s-l500.jpg", mapped[0].ImageUrl);
+    }
+
+    [Fact]
+    public void CompletedSaleMapper_LeavesNonEbayImageUrlsUnchanged()
+    {
+        CompletedTcgSaleMapper mapper = new();
+        const string imageUrl = "https://example.test/card-thumb.jpg";
+        List<SerpApiEbayOrganicResult> results =
+        [
+            new()
+            {
+                Title = "Test Card",
+                Thumbnail = imageUrl,
+                Price = new SerpApiEbayPrice { Raw = "$1.00", Extracted = 1m }
+            }
+        ];
+
+        var mapped = mapper.MapSales(results, 1);
+
+        Assert.Single(mapped);
+        Assert.Equal(imageUrl, mapped[0].ImageUrl);
     }
 
     [Fact]

@@ -4,3 +4,4 @@ node_modules/
 .dotnet/
 data/
 TakedownTCGPostgres/
+src/TakedownTCGApplication/App_Data/

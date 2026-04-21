@@ -83,6 +83,52 @@
     will-change: left, width, transform, opacity;
   }
 
+  .completed-sales-arrow {
+    position: absolute;
+    top: 50%;
+    z-index: 5;
+    display: grid;
+    width: 2.75rem;
+    height: 2.75rem;
+    place-items: center;
+    border: 1px solid var(--color-slate-300);
+    border-radius: 9999px;
+    background-color: rgb(255 255 255 / 0.92);
+    color: var(--color-slate-900);
+    font-size: 2rem;
+    line-height: 1;
+    box-shadow: 0 14px 32px -22px rgb(15 23 42 / 0.8);
+    transform: translateY(-50%);
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease,
+      transform 180ms ease,
+      box-shadow 180ms ease;
+  }
+
+  .completed-sales-arrow:hover,
+  .completed-sales-arrow:focus-visible {
+    border-color: var(--color-cyan-500);
+    background-color: var(--color-white);
+    color: var(--color-cyan-700);
+    box-shadow: 0 16px 36px -20px rgb(8 145 178 / 0.9);
+    transform: translateY(-50%) scale(1.06);
+  }
+
+  .completed-sales-arrow:focus-visible {
+    outline: 2px solid var(--color-cyan-500);
+    outline-offset: 3px;
+  }
+
+  .completed-sales-arrow-left {
+    left: 0.75rem;
+  }
+
+  .completed-sales-arrow-right {
+    right: 0.75rem;
+  }
+
   .completed-sale-card[data-slot="left"] {
     --carousel-left: 17%;
     --carousel-width: clamp(11.5rem, 25vw, 19rem);
@@ -215,6 +261,20 @@
       --carousel-width: min(42vw, 12rem);
       --carousel-scale: 0.84;
       --carousel-opacity: 0.5;
+    }
+
+    .completed-sales-arrow {
+      width: 2.35rem;
+      height: 2.35rem;
+      font-size: 1.65rem;
+    }
+
+    .completed-sales-arrow-left {
+      left: 0.25rem;
+    }
+
+    .completed-sales-arrow-right {
+      right: 0.25rem;
     }
   }
 
