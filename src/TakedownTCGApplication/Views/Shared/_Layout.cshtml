@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - TakedownTCG</title>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/mobile-nav.css" asp-append-version="true" />
 </head>
 <body class="bg-slate-100 text-slate-900">
     <div class="min-h-screen bg-[radial-gradient(circle_at_top_left,#dbeafe_0%,#f1f5f9_45%,#e2e8f0_100%)]">
-        <header class="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+        <header class="mobile-sticky-header mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
             <div class="rounded-2xl border border-slate-300 bg-white/85 p-3 shadow-sm backdrop-blur">
                 <div class="hidden items-center gap-3 md:flex">
                     <a asp-controller="Home" asp-action="Index" class="inline-flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
@@ -38,37 +39,63 @@
                 </div>
 
                 <div class="md:hidden">
-                    <div class="mb-3 flex items-center justify-between">
-                        <a asp-controller="Home" asp-action="Index" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                    <div class="mobile-topbar">
+                        <a asp-controller="Home" asp-action="Index" class="mobile-icon-button" aria-label="Home">
                             <img src="~/images/TakedownTCG_Icon.png" alt="TakedownTCG logo" class="h-6 w-6 rounded-md" />
-                            <span class="text-xs font-bold tracking-wide">TAKEDOWN TCG</span>
                         </a>
+                        <button type="button" id="mobileMenuToggle" class="mobile-icon-button mobile-menu-toggle" aria-label="Open navigation menu" aria-controls="mobileNavDrawer" aria-expanded="false">
+                            <span id="mobileMenuToggleGlyph" aria-hidden="true">≡</span>
+                        </button>
                         @if (User.Identity?.IsAuthenticated == true)
                         {
-                            <form asp-controller="Account" asp-action="Logout" method="post">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="btn-ghost text-xs">Logout</button>
-                            </form>
-                        }
-                    </div>
-                    <nav class="grid grid-cols-2 gap-2 text-xs font-semibold">
-                        <a asp-controller="Search" asp-action="Cards" class="mobile-nav-link">Cards</a>
-                        <a asp-controller="Search" asp-action="Sets" class="mobile-nav-link">Sets</a>
-                        <a asp-controller="Search" asp-action="Games" class="mobile-nav-link">Games</a>
-                        @if (User.Identity?.IsAuthenticated == true)
-                        {
-                            <a asp-controller="Favorites" asp-action="Index" class="mobile-nav-link">Favorites</a>
-                            <a asp-controller="Account" asp-action="Profile" class="mobile-nav-link col-span-2">Account</a>
+                            <a asp-controller="Account" asp-action="Profile" class="mobile-icon-button" aria-label="Profile">
+                                <svg class="mobile-profile-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <circle cx="12" cy="8" r="4"></circle>
+                                    <path d="M4 20c1.7-3.4 5-5 8-5s6.3 1.6 8 5"></path>
+                                </svg>
+                            </a>
                         }
                         else
                         {
-                            <a asp-controller="Account" asp-action="Login" class="mobile-nav-link">Login</a>
-                            <a asp-controller="Account" asp-action="Register" class="mobile-nav-link">Register</a>
+                            <a asp-controller="Account" asp-action="Login" class="mobile-icon-button" aria-label="Login">
+                                <svg class="mobile-profile-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <circle cx="12" cy="8" r="4"></circle>
+                                    <path d="M4 20c1.7-3.4 5-5 8-5s6.3 1.6 8 5"></path>
+                                </svg>
+                            </a>
                         }
-                    </nav>
+                    </div>
                 </div>
             </div>
         </header>
+
+        <div id="mobileNavBackdrop" class="mobile-nav-backdrop" hidden></div>
+        <aside id="mobileNavDrawer" class="mobile-nav-drawer" aria-hidden="true">
+            <div class="mobile-nav-drawer-header">
+                <img src="~/images/TakedownTCG_Icon.png" alt="" class="h-6 w-6 rounded-md" />
+                <span class="text-sm font-semibold tracking-wide text-slate-900">TAKEDOWN TCG</span>
+            </div>
+            <nav class="mobile-nav-list">
+                <a asp-controller="Home" asp-action="Index" class="mobile-nav-link" data-mobile-nav-close="true">Home</a>
+                <a asp-controller="Search" asp-action="Cards" class="mobile-nav-link" data-mobile-nav-close="true">Cards</a>
+                <a asp-controller="Search" asp-action="Sets" class="mobile-nav-link" data-mobile-nav-close="true">Sets</a>
+                <a asp-controller="Search" asp-action="Games" class="mobile-nav-link" data-mobile-nav-close="true">Games</a>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a asp-controller="Favorites" asp-action="Index" class="mobile-nav-link" data-mobile-nav-close="true">Favorites</a>
+                    <a asp-controller="Account" asp-action="Profile" class="mobile-nav-link" data-mobile-nav-close="true">Account</a>
+                    <form asp-controller="Account" asp-action="Logout" method="post" data-mobile-nav-close="true">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="mobile-nav-link mobile-nav-link-button">Logout</button>
+                    </form>
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login" class="mobile-nav-link" data-mobile-nav-close="true">Login</a>
+                    <a asp-controller="Account" asp-action="Register" class="mobile-nav-link" data-mobile-nav-close="true">Register</a>
+                }
+            </nav>
+        </aside>
 
         <main class="mx-auto w-full max-w-7xl px-4 pb-10 sm:px-6 lg:px-8">
             @if (TempData["StatusMessage"] is string statusMessage && !string.IsNullOrWhiteSpace(statusMessage))
@@ -83,6 +110,7 @@
         </main>
     </div>
 
+    <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

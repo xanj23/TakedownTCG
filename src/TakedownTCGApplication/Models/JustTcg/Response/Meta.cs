@@ -28,8 +28,14 @@ namespace TakedownTCG.Core.Models.JustTcg.Response
         /// <summary>
         /// Gets or sets a value indicating whether another page of results is available.
         /// </summary>
-        [JsonPropertyName("has_more")]
+        [JsonPropertyName("hasMore")]
         public bool HasMore { get; set; }
+
+        [JsonPropertyName("has_more")]
+        public bool HasMoreLegacy
+        {
+            set => HasMore = value;
+        }
     }
 }
 

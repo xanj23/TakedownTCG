@@ -36,6 +36,8 @@ public sealed class SearchController : Controller
         model.Number = NormalizeInput(model.Number);
         model.Printing = NormalizeInput(model.Printing);
         model.Condition = NormalizeInput(model.Condition);
+        model.Offset = Math.Max(0, model.Offset);
+        model.Limit = model.Limit <= 0 ? 20 : Math.Min(model.Limit, 100);
 
         if (string.IsNullOrWhiteSpace(model.Query))
         {
@@ -52,12 +54,23 @@ public sealed class SearchController : Controller
         query.Parameters["number"].Value = model.Number;
         query.Parameters["printing"].Value = model.Printing;
         query.Parameters["condition"].Value = model.Condition;
+        query.Parameters["limit"].Value = model.Limit;
+        query.Parameters["offset"].Value = model.Offset;
 
         try
         {
             Response<Card> response = (Response<Card>)await _searchService.SearchAsync(JustTcgEndpoint.Cards, query);
             model.Results = response.Data;
             model.ErrorMessage = response.Error ?? string.Empty;
+            model.Total = response.Meta.Total;
+            model.Offset = response.Meta.Offset;
+            model.Limit = response.Meta.Limit > 0 ? response.Meta.Limit : model.Limit;
+            model.HasMore = response.Meta.HasMore;
+            model.NextOffset = model.Offset + model.Limit;
+            model.HasPrevious = model.Offset > 0;
+            model.PreviousOffset = Math.Max(0, model.Offset - model.Limit);
+            model.CurrentPage = (model.Offset / model.Limit) + 1;
+            model.TotalPages = Math.Max(1, (int)Math.Ceiling((double)model.Total / model.Limit));
         }
         catch (Exception ex)
         {

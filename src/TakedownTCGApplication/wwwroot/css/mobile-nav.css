@@ -1,0 +1,110 @@
+@media (max-width: 767.98px) {
+  .mobile-sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 70;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    background: linear-gradient(to bottom, rgba(241, 245, 249, 0.95), rgba(241, 245, 249, 0.75));
+    backdrop-filter: blur(6px);
+  }
+
+  .mobile-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .mobile-icon-button {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.75rem;
+    border: 1px solid #cbd5e1;
+    background: #f8fafc;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #0f172a;
+    line-height: 1;
+  }
+
+  .mobile-menu-toggle {
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+
+  .mobile-profile-icon {
+    width: 1.15rem;
+    height: 1.15rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .mobile-nav-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.38);
+    opacity: 0;
+    transition: opacity 180ms ease;
+    z-index: 75;
+  }
+
+  .mobile-nav-backdrop.is-open {
+    opacity: 1;
+  }
+
+  .mobile-nav-drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: min(82vw, 20rem);
+    height: 100vh;
+    background: #ffffff;
+    border-right: 1px solid #cbd5e1;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.16);
+    transform: translateX(-105%);
+    transition: transform 210ms ease;
+    z-index: 80;
+    padding: 1rem;
+    overflow-y: auto;
+  }
+
+  .mobile-nav-drawer.is-open {
+    transform: translateX(0);
+  }
+
+  .mobile-nav-drawer-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.85rem;
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .mobile-nav-list {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .mobile-nav-link-button {
+    width: 100%;
+    cursor: pointer;
+  }
+
+  .mobile-nav-open {
+    overflow: hidden;
+  }
+}
+
+@media (min-width: 768px) {
+  .mobile-nav-backdrop,
+  .mobile-nav-drawer {
+    display: none;
+  }
+}
