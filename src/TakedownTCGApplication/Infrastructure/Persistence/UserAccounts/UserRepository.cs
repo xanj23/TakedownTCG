@@ -59,7 +59,7 @@ public sealed class UserRepository : IUserRepository
         command.CommandText = @"
             SELECT UserName, UserEmail, PasswordHash, UserNotifications
             FROM User
-            WHERE UserName = @UserName
+            WHERE UserName COLLATE NOCASE = @UserName
             LIMIT 1;
         ";
         command.Parameters.AddWithValue("@UserName", userName);
@@ -88,7 +88,7 @@ public sealed class UserRepository : IUserRepository
         command.CommandText = @"
             SELECT UserName, UserEmail, PasswordHash, UserNotifications
             FROM User
-            WHERE UserEmail = @UserEmail
+            WHERE UserEmail COLLATE NOCASE = @UserEmail
             LIMIT 1;
         ";
         command.Parameters.AddWithValue("@UserEmail", email);
@@ -117,7 +117,8 @@ public sealed class UserRepository : IUserRepository
         command.CommandText = @"
             SELECT UserName, UserEmail, PasswordHash, UserNotifications
             FROM User
-            WHERE UserName = @Input OR UserEmail = @Input
+            WHERE UserName COLLATE NOCASE = @Input
+               OR UserEmail COLLATE NOCASE = @Input
             LIMIT 1;
         ";
         command.Parameters.AddWithValue("@Input", input);
@@ -146,7 +147,7 @@ public sealed class UserRepository : IUserRepository
         command.CommandText = @"
             UPDATE User
             SET UserName = @NewUserName
-            WHERE UserName = @CurrentUserName;
+            WHERE UserName COLLATE NOCASE = @CurrentUserName;
         ";
         command.Parameters.AddWithValue("@NewUserName", newUserName);
         command.Parameters.AddWithValue("@CurrentUserName", currentUserName);
@@ -163,7 +164,7 @@ public sealed class UserRepository : IUserRepository
         command.CommandText = @"
             UPDATE User
             SET UserEmail = @NewEmail
-            WHERE UserName = @UserName;
+            WHERE UserName COLLATE NOCASE = @UserName;
         ";
         command.Parameters.AddWithValue("@NewEmail", newEmail);
         command.Parameters.AddWithValue("@UserName", userName);
@@ -180,7 +181,7 @@ public sealed class UserRepository : IUserRepository
         command.CommandText = @"
             UPDATE User
             SET PasswordHash = @PasswordHash
-            WHERE UserName = @UserName;
+            WHERE UserName COLLATE NOCASE = @UserName;
         ";
         command.Parameters.AddWithValue("@PasswordHash", newPasswordHash);
         command.Parameters.AddWithValue("@UserName", userName);
@@ -197,7 +198,7 @@ public sealed class UserRepository : IUserRepository
         command.CommandText = @"
             UPDATE User
             SET UserNotifications = @Enabled
-            WHERE UserName = @UserName;
+            WHERE UserName COLLATE NOCASE = @UserName;
         ";
         command.Parameters.AddWithValue("@Enabled", enabled ? 1 : 0);
         command.Parameters.AddWithValue("@UserName", userName);
@@ -213,7 +214,7 @@ public sealed class UserRepository : IUserRepository
         await using SqliteCommand command = connection.CreateCommand();
         command.CommandText = @"
             DELETE FROM User
-            WHERE UserName = @UserName;
+            WHERE UserName COLLATE NOCASE = @UserName;
         ";
         command.Parameters.AddWithValue("@UserName", userName);
 

@@ -67,6 +67,7 @@ public sealed class AccountController : Controller
         }
 
         await SignInAsync(user.UserName, user.UserEmail);
+        TempData["StatusMessage"] = $"Welcome back, {user.UserName}.";
 
         if (!string.IsNullOrWhiteSpace(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
         {

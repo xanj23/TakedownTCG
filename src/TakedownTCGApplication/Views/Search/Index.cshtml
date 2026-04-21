@@ -198,6 +198,31 @@
                             {
                                 <p class="mt-2 text-sm text-slate-600">@card.Details</p>
                             }
+                            <div class="mt-3">
+                                @if (User.Identity?.IsAuthenticated == true)
+                                {
+                                    <form asp-controller="Favorites" asp-action="Add" method="post" class="inline-flex">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="ItemType" value="card" />
+                                        <input type="hidden" name="ItemId" value="@card.Id" />
+                                        <input type="hidden" name="ItemName" value="@card.Name" />
+                                        <input type="hidden" name="ReturnUrl" value="@(Context.Request.Path + Context.Request.QueryString)" />
+                                        <button type="submit" class="btn-ghost" title="Add to favorites" aria-label="Add @card.Name to favorites">
+                                            &#9829; Favorite
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <a asp-controller="Account"
+                                       asp-action="Login"
+                                       asp-route-returnUrl="@(Context.Request.Path + Context.Request.QueryString)"
+                                       class="btn-ghost"
+                                       title="Log in to add favorites">
+                                        &#9829; Favorite
+                                    </a>
+                                }
+                            </div>
                             <div class="mt-3 text-xs text-slate-500">Variants: @card.Variants.Count</div>
                         </div>
                     </div>
