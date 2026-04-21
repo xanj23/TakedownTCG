@@ -32,6 +32,16 @@ public sealed class SearchController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Cards(CardsSearchViewModel model)
     {
+        model.Query = NormalizeInput(model.Query);
+        model.Number = NormalizeInput(model.Number);
+        model.Printing = NormalizeInput(model.Printing);
+        model.Condition = NormalizeInput(model.Condition);
+
+        if (string.IsNullOrWhiteSpace(model.Query))
+        {
+            ModelState.AddModelError(nameof(model.Query), "Name is required.");
+        }
+
         if (!ModelState.IsValid)
         {
             return View(model);
@@ -67,6 +77,16 @@ public sealed class SearchController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Sets(SetsSearchViewModel model)
     {
+        model.Game = NormalizeInput(model.Game);
+        model.Query = NormalizeInput(model.Query);
+        model.OrderBy = NormalizeInput(model.OrderBy);
+        model.Order = NormalizeInput(model.Order);
+
+        if (string.IsNullOrWhiteSpace(model.Game))
+        {
+            ModelState.AddModelError(nameof(model.Game), "Game is required.");
+        }
+
         if (!ModelState.IsValid)
         {
             return View(model);
@@ -114,5 +134,10 @@ public sealed class SearchController : Controller
         }
 
         return View(model);
+    }
+
+    private static string NormalizeInput(string? value)
+    {
+        return value?.Trim() ?? string.Empty;
     }
 }

@@ -1,6 +1,6 @@
 using System;
-using TakedownTCG.Core.Abstractions;
-using TakedownTCG.Core.Models.UserAccounts;
+using TakedownTCG.cli.Models.UserAccounts;
+using TakedownTCG.cli.Services.UserAccounts;
 using TakedownTCG.cli.Views.Input;
 using TakedownTCG.cli.Views.Menus;
 using TakedownTCG.cli.Views.Shared;
@@ -9,15 +9,15 @@ namespace TakedownTCG.cli.Controllers
 {
     public static class UserAccountController
     {
-        private static IAccountService? _accountService;
-        private static IFavoriteService? _favoriteService;
+        private static AccountService? _accountService;
+        private static FavoriteService? _favoriteService;
         private static User? _currentUser;
 
         public static User? CurrentUser => _currentUser;
-        public static IFavoriteService FavoriteService =>
+        public static FavoriteService FavoriteService =>
             _favoriteService ?? throw new InvalidOperationException("Favorite service is not initialized.");
 
-        public static void Configure(IAccountService accountService, IFavoriteService favoriteService)
+        public static void Configure(AccountService accountService, FavoriteService favoriteService)
         {
             _accountService = accountService;
             _favoriteService = favoriteService;
@@ -45,7 +45,7 @@ namespace TakedownTCG.cli.Controllers
             }
         }
 
-        private static IAccountService AccountService =>
+        private static AccountService AccountService =>
             _accountService ?? throw new InvalidOperationException("Account service is not initialized.");
 
         private static void EnsureInitialized()
@@ -107,7 +107,7 @@ namespace TakedownTCG.cli.Controllers
             string email = UserInput.InputRequiredString("Enter email");
             string password = UserInput.InputRequiredString("Enter password");
 
-            bool success = AccountService.CreateAccountAsync(userName, email, password, true).GetAwaiter().GetResult();
+            bool success = AccountService.CreateAccount(userName, email, password, true);
             Console.WriteLine(success ? "Account created successfully." : "Failed to create account. Username or email may already exist.");
         }
 
@@ -122,7 +122,7 @@ namespace TakedownTCG.cli.Controllers
             string userNameOrEmail = UserInput.InputRequiredString("Enter username or email");
             string password = UserInput.InputRequiredString("Enter password");
 
-            User? user = AccountService.LoginAsync(userNameOrEmail, password).GetAwaiter().GetResult();
+            User? user = AccountService.Login(userNameOrEmail, password);
             if (user is null)
             {
                 Console.WriteLine("Login failed. Please check credentials.");
@@ -167,7 +167,7 @@ namespace TakedownTCG.cli.Controllers
             }
 
             string newUserName = UserInput.InputRequiredString("New username");
-            bool success = AccountService.ChangeUserNameAsync(_currentUser.UserName, newUserName).GetAwaiter().GetResult();
+            bool success = AccountService.ChangeUserName(_currentUser.UserName, newUserName);
             if (success)
             {
                 _currentUser.UserName = newUserName;
@@ -188,7 +188,7 @@ namespace TakedownTCG.cli.Controllers
             }
 
             string newEmail = UserInput.InputRequiredString("New email");
-            bool success = AccountService.ChangeEmailAsync(_currentUser.UserName, newEmail).GetAwaiter().GetResult();
+            bool success = AccountService.ChangeEmail(_currentUser.UserName, newEmail);
             if (success)
             {
                 _currentUser.UserEmail = newEmail;
@@ -211,7 +211,7 @@ namespace TakedownTCG.cli.Controllers
             string currentPassword = UserInput.InputRequiredString("Current password");
             string newPassword = UserInput.InputRequiredString("New password");
 
-            bool success = AccountService.ChangePasswordAsync(_currentUser.UserName, currentPassword, newPassword).GetAwaiter().GetResult();
+            bool success = AccountService.ChangePassword(_currentUser.UserName, currentPassword, newPassword);
             Console.WriteLine(success ? "Password changed successfully." : "Failed to change password. Current password may be incorrect.");
         }
 
@@ -225,7 +225,7 @@ namespace TakedownTCG.cli.Controllers
 
             bool currentSetting = _currentUser.UserNotifications;
             bool newSetting = !currentSetting;
-            bool success = AccountService.UpdateUserNotificationsAsync(_currentUser.UserName, newSetting).GetAwaiter().GetResult();
+            bool success = AccountService.UpdateUserNotifications(_currentUser.UserName, newSetting);
             if (success)
             {
                 _currentUser.UserNotifications = newSetting;
@@ -252,7 +252,7 @@ namespace TakedownTCG.cli.Controllers
                 return;
             }
 
-            bool success = AccountService.DeleteAccountAsync(_currentUser.UserName).GetAwaiter().GetResult();
+            bool success = AccountService.DeleteAccount(_currentUser.UserName);
             if (success)
             {
                 Console.WriteLine("Account deleted successfully.");

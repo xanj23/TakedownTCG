@@ -16,7 +16,7 @@ namespace TakedownTCG.cli.Controllers
 
             while (true)
             {
-                var favorites = UserAccountController.FavoriteService.GetFavoritesAsync(current.UserName).GetAwaiter().GetResult();
+                var favorites = UserAccountController.FavoriteService.GetFavorites(current.UserName);
 
                 Console.WriteLine();
                 Console.WriteLine($"Favorites for {current.UserName}:");
@@ -63,7 +63,7 @@ namespace TakedownTCG.cli.Controllers
                     }
 
                     var toRemove = favorites[idx - 1];
-                    bool removed = UserAccountController.FavoriteService.RemoveFavoriteAsync(current.UserName, toRemove.ItemType, toRemove.ItemId).GetAwaiter().GetResult();
+                    bool removed = UserAccountController.FavoriteService.RemoveFavorite(current.UserName, toRemove.ItemType, toRemove.ItemId);
                     Console.WriteLine(removed ? "Favorite removed." : "Failed to remove favorite.");
                 }
                 else

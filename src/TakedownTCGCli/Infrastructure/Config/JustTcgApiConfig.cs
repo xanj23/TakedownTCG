@@ -5,8 +5,8 @@ namespace TakedownTCG.cli.Infrastructure.Config
     /// </summary>
     public sealed class JustTcgApiConfig
     {
-        public string BaseUrl { get; } = "https://api.justtcg.com/v1";
-        public string ApiKey { get; } = Environment.GetEnvironmentVariable("JUSTTCG_API_KEY") ?? string.Empty;
-        public string ApiKeyHeaderName { get; } = "x-api-key";
+        public string BaseUrl { get; set; } = "https://api.justtcg.com/v1";
+        public string ApiKeyHeaderName { get; set; } = "x-api-key";
+        public string ApiKey { get; set; } = string.Empty;
     }
 }

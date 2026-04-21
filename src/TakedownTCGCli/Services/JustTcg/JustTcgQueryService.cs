@@ -90,7 +90,7 @@ namespace TakedownTCG.cli.Services.JustTcg
                     continue;
                 }
 
-                rawQuery.Add(key, value.ToString() ?? string.Empty);
+                rawQuery.Add(Uri.EscapeDataString(key), Uri.EscapeDataString(value.ToString() ?? string.Empty));
             }
 
             return rawQuery;

@@ -1,9 +1,7 @@
-using TakedownTCG.Core.Abstractions;
-using TakedownTCG.Core.Infrastructure.Config;
-using TakedownTCG.Core.Models.JustTcg.Query;
-using TakedownTCG.Core.Models.JustTcg.Response;
-using TakedownTCG.Core.Services.JustTcg;
 using TakedownTCG.cli.Controllers;
+using TakedownTCG.cli.Infrastructure.Config;
+using TakedownTCG.cli.Infrastructure.Http;
+using TakedownTCG.cli.Models.JustTcg.Response;
 using TakedownTCG.cli.Services.Api;
 using TakedownTCG.cli.Views.Input;
 using TakedownTCG.cli.Views.Menus;
@@ -17,18 +15,21 @@ namespace TakedownTCG.cli.Services.JustTcg;
 /// </summary>
 public sealed class JustTCGClient : IApiClient
 {
-    private readonly JustTcgApiOptions _config;
-    private readonly IJustTcgSearchService _searchService;
-    private readonly IJustTcgResponseMapper _responseMapper;
+    private readonly JustTcgApiConfig _config;
+    private readonly JustTcgHttpGateway _httpGateway;
+    private readonly JustTcgQueryService _queryService;
+    private readonly JustTcgResponseService _responseService;
 
     public JustTCGClient(
-        JustTcgApiOptions config,
-        IJustTcgSearchService searchService,
-        IJustTcgResponseMapper responseMapper)
+        JustTcgApiConfig config,
+        JustTcgHttpGateway httpGateway,
+        JustTcgQueryService queryService,
+        JustTcgResponseService responseService)
     {
         _config = config;
-        _searchService = searchService;
-        _responseMapper = responseMapper;
+        _httpGateway = httpGateway;
+        _queryService = queryService;
+        _responseService = responseService;
     }
 
     public string Name => "JustTCG";
@@ -60,48 +61,20 @@ public sealed class JustTCGClient : IApiClient
                 Environment.Exit(0);
             }
 
-            IQueryParams query = InputQuery(ToEndpoint(selectedAction));
-            object responseData = _searchService.SearchAsync(ToEndpoint(selectedAction), query).GetAwaiter().GetResult();
-            string mappedData = _responseMapper.Map(responseData);
+            object responseData = Search(selectedAction);
+            string mappedData = _responseService.Map(responseData);
             JustTcgOutputView.DisplayMappedData(mappedData);
 
             OfferToFavorite(responseData);
         }
     }
 
-    private static JustTcgEndpoint ToEndpoint(Action action)
+    private object Search(Action action)
     {
-        return action switch
-        {
-            Action.Cards => JustTcgEndpoint.Cards,
-            Action.Sets => JustTcgEndpoint.Sets,
-            Action.Games => JustTcgEndpoint.Games,
-            _ => throw new NotSupportedException($"Unsupported action: {action}")
-        };
-    }
-
-    private static IQueryParams InputQuery(JustTcgEndpoint endpoint)
-    {
-        IQueryParams query = endpoint switch
-        {
-            JustTcgEndpoint.Cards => new CardQueryParams(),
-            JustTcgEndpoint.Sets => new SetQueryParams(),
-            JustTcgEndpoint.Games => new GameQueryParams(),
-            _ => throw new NotSupportedException($"Unsupported endpoint: {endpoint}")
-        };
-
-        Console.WriteLine();
-        Console.WriteLine("Input search parameters:");
-
-        foreach (KeyValuePair<string, QueryParameter> kvp in query.Parameters)
-        {
-            QueryParameter param = kvp.Value;
-            param.Value = param.IsRequired
-                ? UserInput.InputRequiredString(param.Label)
-                : UserInput.InputString($"{param.Label} (optional)");
-        }
-
-        return query;
+        var query = _queryService.InputQuery(action);
+        string url = _queryService.BuildUrl(action, query, _config.BaseUrl);
+        string responseContent = _httpGateway.FetchResponse(url, _config.ApiKeyHeaderName, _config.ApiKey);
+        return _responseService.Deserialize(action, responseContent);
     }
 
     private static void OfferToFavorite(object responseData)
@@ -137,10 +110,7 @@ public sealed class JustTCGClient : IApiClient
                 }
 
                 Card card = cardResp.Data[favIndex - 1];
-                bool added = UserAccountController.FavoriteService
-                    .AddFavoriteAsync(current.UserName, "Card", card.Id, card.Name)
-                    .GetAwaiter()
-                    .GetResult();
+                bool added = UserAccountController.FavoriteService.AddFavorite(current.UserName, "Card", card.Id, card.Name);
 
                 Console.WriteLine(added ? "Added to favorites." : "Already favorited or failed.");
                 return;
@@ -155,10 +125,7 @@ public sealed class JustTCGClient : IApiClient
                 }
 
                 Set set = setResp.Data[favIndex - 1];
-                bool added = UserAccountController.FavoriteService
-                    .AddFavoriteAsync(current.UserName, "Set", set.Id, set.Name)
-                    .GetAwaiter()
-                    .GetResult();
+                bool added = UserAccountController.FavoriteService.AddFavorite(current.UserName, "Set", set.Id, set.Name);
 
                 Console.WriteLine(added ? "Added to favorites." : "Already favorited or failed.");
                 return;
@@ -173,10 +140,7 @@ public sealed class JustTCGClient : IApiClient
                 }
 
                 Game game = gameResp.Data[favIndex - 1];
-                bool added = UserAccountController.FavoriteService
-                    .AddFavoriteAsync(current.UserName, "Game", game.Id, game.Name)
-                    .GetAwaiter()
-                    .GetResult();
+                bool added = UserAccountController.FavoriteService.AddFavorite(current.UserName, "Game", game.Id, game.Name);
 
                 Console.WriteLine(added ? "Added to favorites." : "Already favorited or failed.");
                 return;

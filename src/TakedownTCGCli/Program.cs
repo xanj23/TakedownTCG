@@ -1,15 +1,11 @@
 using TakedownTCG.cli.Composition;
 using TakedownTCG.cli.Controllers;
+using TakedownTCG.cli.Infrastructure.Config;
+using TakedownTCG.cli.Infrastructure.Http;
+using TakedownTCG.cli.Infrastructure.Persistence.UserAccounts;
 using TakedownTCG.cli.Services.JustTcg;
-using TakedownTCG.Core.Abstractions;
-using TakedownTCG.Core.Infrastructure.Config;
-using TakedownTCG.Core.Infrastructure.Http;
-using TakedownTCG.Core.Infrastructure.Persistence.UserAccounts;
-using TakedownTCG.Core.Services.JustTcg;
-using TakedownTCG.Core.Services.UserAccounts;
+using TakedownTCG.cli.Services.UserAccounts;
 using Microsoft.Extensions.Configuration;
-using CoreJustTcgQueryService = TakedownTCG.Core.Services.JustTcg.JustTcgQueryService;
-using CoreJustTcgResponseService = TakedownTCG.Core.Services.JustTcg.JustTcgResponseService;
 
 namespace TakedownTCG.cli
 {
@@ -22,31 +18,35 @@ namespace TakedownTCG.cli
                 .AddJsonFile("appsettings.json", optional: true)
                 .Build();
 
-            JustTcgApiOptions apiOptions = configuration.GetSection("JustTcgApi").Get<JustTcgApiOptions>() ?? new JustTcgApiOptions();
+            JustTcgApiConfig apiOptions = configuration.GetSection("JustTcgApi").Get<JustTcgApiConfig>() ?? new JustTcgApiConfig();
             string? apiKeyOverride = Environment.GetEnvironmentVariable("JUSTTCG_API_KEY");
             if (!string.IsNullOrWhiteSpace(apiKeyOverride))
             {
                 apiOptions.ApiKey = apiKeyOverride;
             }
 
-            PersistenceOptions persistenceOptions = configuration.GetSection("Persistence").Get<PersistenceOptions>() ?? new PersistenceOptions();
+            string databasePath = configuration.GetValue<string>("Persistence:DatabasePath") ?? string.Empty;
             string? dbPathOverride = Environment.GetEnvironmentVariable("TAKEDOWNTCG_DB_PATH");
             if (!string.IsNullOrWhiteSpace(dbPathOverride))
             {
-                persistenceOptions.DatabasePath = dbPathOverride;
+                databasePath = dbPathOverride;
             }
 
-            IUserRepository userRepository = new UserRepository(persistenceOptions.DatabasePath);
-            IFavoriteRepository favoriteRepository = new FavoriteRepository(persistenceOptions.DatabasePath);
-            IAccountService accountService = new AccountService(userRepository);
-            IFavoriteService favoriteService = new FavoriteService(favoriteRepository, userRepository);
-            IJustTcgHttpGateway httpGateway = new JustTcgHttpGateway();
-            CoreJustTcgResponseService responseService = new CoreJustTcgResponseService();
-            CoreJustTcgQueryService queryService = new CoreJustTcgQueryService();
-            IJustTcgSearchService searchService = new JustTcgSearchService(apiOptions, queryService, responseService, httpGateway);
+            if (string.IsNullOrWhiteSpace(databasePath))
+            {
+                databasePath = Path.Combine(AppContext.BaseDirectory, "takedowntcg.db");
+            }
+
+            UserRepository userRepository = new UserRepository(databasePath);
+            FavoriteRepository favoriteRepository = new FavoriteRepository(databasePath);
+            AccountService accountService = new AccountService(userRepository);
+            FavoriteService favoriteService = new FavoriteService(favoriteRepository, userRepository);
+            JustTcgHttpGateway httpGateway = new JustTcgHttpGateway();
+            JustTcgResponseService responseService = new JustTcgResponseService();
+            JustTcgQueryService queryService = new JustTcgQueryService();
 
             UserAccountController.Configure(accountService, favoriteService);
-            AppCompositionRoot.Configure(() => new JustTCGClient(apiOptions, searchService, responseService));
+            AppCompositionRoot.Configure(() => new JustTCGClient(apiOptions, httpGateway, queryService, responseService));
 
             AppCompositionRoot.Run();
         }
