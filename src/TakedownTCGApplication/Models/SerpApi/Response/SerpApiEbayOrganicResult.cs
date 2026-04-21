@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using TakedownTCGApplication.Models.PokemonTcg.Response;
 
 namespace TakedownTCGApplication.Models.SerpApi.Response;
 
@@ -26,5 +27,6 @@ public sealed class SerpApiEbayOrganicResult
     public SerpApiEbaySeller? Seller { get; set; }
 
     [JsonPropertyName("shipping")]
+    [JsonConverter(typeof(FlexibleStringConverter))]
     public string Shipping { get; set; } = string.Empty;
 }

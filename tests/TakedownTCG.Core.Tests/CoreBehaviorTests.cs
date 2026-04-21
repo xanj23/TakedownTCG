@@ -281,6 +281,36 @@ public sealed class CoreBehaviorTests
     }
 
     [Fact]
+    public void SerpApiResponseService_DeserializesObjectShapedShipping()
+    {
+        const string json = """
+        {
+          "organic_results": [
+            {
+              "title": "Charizard PSA 10",
+              "link": "https://www.ebay.com/itm/1",
+              "product_id": "1",
+              "shipping": {
+                "raw": "Free shipping"
+              },
+              "price": {
+                "raw": "$120.00",
+                "extracted": 120
+              }
+            }
+          ]
+        }
+        """;
+
+        SerpApiResponseService responseService = new();
+
+        SerpApiEbaySearchResponse response = responseService.DeserializeEbaySearch(json);
+
+        Assert.Single(response.OrganicResults);
+        Assert.Contains("Free shipping", response.OrganicResults[0].Shipping);
+    }
+
+    [Fact]
     public void PokemonResponseService_DeserializesAndMapsCards()
     {
         const string json = """

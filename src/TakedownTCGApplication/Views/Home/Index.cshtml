@@ -21,27 +21,31 @@
         }
         else if (Model.CompletedSales.Count > 0)
         {
-            <div class="mt-5 flex snap-x gap-4 overflow-x-auto pb-3">
-                @foreach (var sale in Model.CompletedSales)
+            <div id="completedSalesCarousel" class="mt-6 overflow-hidden" data-count="@Model.CompletedSales.Count">
+                <div class="flex min-h-[25rem] items-center justify-center gap-3 md:gap-5">
+                @for (int i = 0; i < Model.CompletedSales.Count; i++)
                 {
-                    <article class="min-w-[16rem] max-w-[16rem] snap-start rounded-2xl border border-slate-300 bg-white shadow-sm">
-                        <a href="@sale.Url" target="_blank" rel="noopener noreferrer" class="block">
-                            <img src="@sale.ImageUrl" alt="@sale.Title" class="h-48 w-full rounded-t-2xl bg-slate-50 object-contain p-3" loading="lazy" onerror="this.onerror=null;this.src='@sale.FallbackImageUrl';" />
-                            <div class="space-y-2 p-4">
-                                <h3 class="line-clamp-2 text-sm font-bold text-slate-900">@sale.Title</h3>
-                                <p class="text-base font-extrabold text-cyan-700">@sale.PriceText</p>
-                                @if (!string.IsNullOrWhiteSpace(sale.Condition))
-                                {
-                                    <p class="text-xs text-slate-600">@sale.Condition</p>
-                                }
-                                @if (!string.IsNullOrWhiteSpace(sale.Seller))
-                                {
-                                    <p class="text-xs text-slate-500">Seller: @sale.Seller</p>
-                                }
-                            </div>
-                        </a>
-                    </article>
+                    var sale = Model.CompletedSales[i];
+                    <article class="completed-sale-card hidden w-[28%] min-w-0 rounded-2xl border border-slate-300 bg-white shadow-sm transition-all duration-700 ease-out"
+                             data-carousel-index="@i">
+                            <a href="@sale.Url" target="_blank" rel="noopener noreferrer" class="block">
+                                <img src="@sale.ImageUrl" alt="@sale.Title" class="h-40 w-full rounded-t-2xl bg-slate-50 object-contain p-3 md:h-48" loading="lazy" onerror="this.onerror=null;this.src='@sale.FallbackImageUrl';" />
+                                <div class="space-y-2 p-4">
+                                    <h3 class="line-clamp-2 text-sm font-bold text-slate-900">@sale.Title</h3>
+                                    <p class="text-base font-extrabold text-cyan-700">@sale.PriceText</p>
+                                    @if (!string.IsNullOrWhiteSpace(sale.Condition))
+                                    {
+                                        <p class="text-xs text-slate-600">@sale.Condition</p>
+                                    }
+                                    @if (!string.IsNullOrWhiteSpace(sale.Seller))
+                                    {
+                                        <p class="text-xs text-slate-500">Seller: @sale.Seller</p>
+                                    }
+                                </div>
+                            </a>
+                        </article>
                 }
+                </div>
             </div>
         }
         else
@@ -69,3 +73,66 @@
         </div>
     </div>
 </section>
+
+@section Scripts {
+    <script>
+        (function () {
+            const carousel = document.getElementById("completedSalesCarousel");
+            if (!carousel) {
+                return;
+            }
+
+            const cards = Array.from(carousel.querySelectorAll(".completed-sale-card"));
+            if (cards.length === 0) {
+                return;
+            }
+
+            let activeIndex = Math.min(1, cards.length - 1);
+
+            function resetCard(card) {
+                card.classList.add("hidden");
+                card.classList.remove("block", "scale-110", "scale-90", "opacity-100", "opacity-70", "z-10", "z-0", "w-[38%]", "w-[28%]");
+            }
+
+            function applyCard(card, position) {
+                card.classList.remove("hidden");
+                card.classList.add("block");
+
+                if (position === "center") {
+                    card.classList.add("scale-110", "opacity-100", "z-10", "w-[38%]");
+                    return;
+                }
+
+                card.classList.add("scale-90", "opacity-70", "z-0", "w-[28%]");
+            }
+
+            function render() {
+                cards.forEach(resetCard);
+
+                const leftIndex = (activeIndex - 1 + cards.length) % cards.length;
+                const rightIndex = (activeIndex + 1) % cards.length;
+
+                if (cards.length === 1) {
+                    applyCard(cards[activeIndex], "center");
+                    return;
+                }
+
+                if (cards.length === 2) {
+                    applyCard(cards[activeIndex], "center");
+                    applyCard(cards[rightIndex], "side");
+                    return;
+                }
+
+                applyCard(cards[leftIndex], "side");
+                applyCard(cards[activeIndex], "center");
+                applyCard(cards[rightIndex], "side");
+            }
+
+            render();
+            window.setInterval(function () {
+                activeIndex = (activeIndex + 1) % cards.length;
+                render();
+            }, 4500);
+        })();
+    </script>
+}

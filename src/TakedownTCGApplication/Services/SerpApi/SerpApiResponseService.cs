@@ -1,4 +1,5 @@
 using System.Text.Json;
+using TakedownTCGApplication.Models.PokemonTcg.Response;
 using TakedownTCGApplication.Models.SerpApi.Response;
 
 namespace TakedownTCGApplication.Services.SerpApi;
@@ -9,6 +10,11 @@ public sealed class SerpApiResponseService
     {
         PropertyNameCaseInsensitive = true
     };
+
+    static SerpApiResponseService()
+    {
+        JsonOptions.Converters.Add(new FlexibleStringConverter());
+    }
 
     public SerpApiEbaySearchResponse DeserializeEbaySearch(string responseContent)
     {
