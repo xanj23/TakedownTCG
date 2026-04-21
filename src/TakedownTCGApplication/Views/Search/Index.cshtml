@@ -165,6 +165,7 @@
                     : fallbackImageUrl;
                 var displayPrice = card.Variants.Where(v => v.Price.HasValue).Select(v => v.Price).FirstOrDefault();
                 var price90d = card.Variants.Where(v => v.MaxPrice90d.HasValue).Select(v => v.MaxPrice90d).FirstOrDefault();
+                bool isFavorited = Model.FavoriteCardIds.Contains(card.Id);
 
                 <article class="panel-card">
                     <div class="flex items-start gap-4">
@@ -201,13 +202,21 @@
                             <div class="mt-3">
                                 @if (User.Identity?.IsAuthenticated == true)
                                 {
-                                    <form asp-controller="Favorites" asp-action="Add" method="post" class="inline-flex">
+                                    <form asp-controller="Favorites"
+                                          asp-action="Add"
+                                          method="post"
+                                          class="inline-flex js-favorite-form"
+                                          data-remove-url="@Url.Action("Remove", "Favorites")">
                                         @Html.AntiForgeryToken()
                                         <input type="hidden" name="ItemType" value="card" />
                                         <input type="hidden" name="ItemId" value="@card.Id" />
                                         <input type="hidden" name="ItemName" value="@card.Name" />
                                         <input type="hidden" name="ReturnUrl" value="@(Context.Request.Path + Context.Request.QueryString)" />
-                                        <button type="submit" class="btn-ghost" title="Add to favorites" aria-label="Add @card.Name to favorites">
+                                        <button type="submit"
+                                                class="js-favorite-btn @(isFavorited ? "btn-ghost bg-rose-50 text-rose-700 border border-rose-300" : "btn-ghost")"
+                                                data-favorited="@(isFavorited ? "true" : "false")"
+                                                title="@(isFavorited ? "Remove from favorites" : "Add to favorites")"
+                                                aria-label="@(isFavorited ? $"Remove {card.Name} from favorites" : $"Add {card.Name} to favorites")">
                                             &#9829; Favorite
                                         </button>
                                     </form>
@@ -364,6 +373,69 @@
 
             endpointSelect.addEventListener("change", syncFields);
             syncFields();
+
+            document.querySelectorAll(".js-favorite-form").forEach(function (form) {
+                form.addEventListener("submit", async function (event) {
+                    event.preventDefault();
+
+                    const button = form.querySelector(".js-favorite-btn");
+                    if (!button || button.disabled) {
+                        return;
+                    }
+
+                    const isFavorited = button.dataset.favorited === "true";
+                    const removeUrl = form.dataset.removeUrl || "";
+                    const tokenInput = form.querySelector("input[name='__RequestVerificationToken']");
+                    const token = tokenInput ? tokenInput.value : "";
+                    const addFormData = new URLSearchParams(new FormData(form));
+                    const removeFormData = new URLSearchParams();
+                    removeFormData.set("itemType", form.querySelector("input[name='ItemType']").value);
+                    removeFormData.set("itemId", form.querySelector("input[name='ItemId']").value);
+                    const targetUrl = isFavorited ? removeUrl : form.action;
+                    const payload = isFavorited ? removeFormData.toString() : addFormData.toString();
+
+                    button.disabled = true;
+
+                    try {
+                        const response = await fetch(targetUrl, {
+                            method: "POST",
+                            headers: {
+                                "X-Requested-With": "XMLHttpRequest",
+                                "RequestVerificationToken": token,
+                                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+                            },
+                            body: payload
+                        });
+
+                        if (!response.ok) {
+                            button.disabled = false;
+                            return;
+                        }
+
+                        const result = await response.json();
+                        if (!result || result.success !== true) {
+                            button.disabled = false;
+                            return;
+                        }
+
+                        if (isFavorited) {
+                            button.dataset.favorited = "false";
+                            button.classList.remove("bg-rose-50", "text-rose-700", "border", "border-rose-300");
+                            button.setAttribute("aria-label", "Add to favorites");
+                            button.title = "Add to favorites";
+                        } else {
+                            button.dataset.favorited = "true";
+                            button.classList.add("bg-rose-50", "text-rose-700", "border", "border-rose-300");
+                            button.setAttribute("aria-label", "Remove from favorites");
+                            button.title = "Remove from favorites";
+                        }
+
+                        button.disabled = false;
+                    } catch {
+                        button.disabled = false;
+                    }
+                });
+            });
         })();
     </script>
 }

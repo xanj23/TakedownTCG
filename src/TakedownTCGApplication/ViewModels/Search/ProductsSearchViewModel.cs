@@ -33,5 +33,6 @@ public sealed class ProductsSearchViewModel
     public IReadOnlyList<Card> CardResults { get; set; } = Array.Empty<Card>();
     public IReadOnlyList<Set> SetResults { get; set; } = Array.Empty<Set>();
     public IReadOnlyList<Game> GameResults { get; set; } = Array.Empty<Game>();
+    public IReadOnlySet<string> FavoriteCardIds { get; set; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
     public string ErrorMessage { get; set; } = string.Empty;
 }

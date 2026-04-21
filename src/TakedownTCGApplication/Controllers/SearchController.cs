@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using TakedownTCG.Core.Abstractions;
 using TakedownTCG.Core.Models.JustTcg.Query;
 using TakedownTCG.Core.Models.JustTcg.Response;
+using TakedownTCG.Core.Models.UserAccounts;
 using TakedownTCG.Core.Services.JustTcg;
 using TakedownTCGApplication.ViewModels.Search;
 
@@ -10,14 +11,16 @@ namespace TakedownTCGApplication.Controllers;
 public sealed class SearchController : Controller
 {
     private readonly IJustTcgSearchService _searchService;
+    private readonly IFavoriteService _favoriteService;
     private const string JustTcgApi = "JustTCG";
     private const string EndpointCards = "cards";
     private const string EndpointSets = "sets";
     private const string EndpointGames = "games";
 
-    public SearchController(IJustTcgSearchService searchService)
+    public SearchController(IJustTcgSearchService searchService, IFavoriteService favoriteService)
     {
         _searchService = searchService;
+        _favoriteService = favoriteService;
     }
 
     [HttpGet]
@@ -147,6 +150,17 @@ public sealed class SearchController : Controller
         model.CardResults = response.Data;
         model.ErrorMessage = response.Error ?? string.Empty;
         ApplyPaging(model, response.Meta);
+
+        string? userName = User.Identity?.Name;
+        if (!string.IsNullOrWhiteSpace(userName))
+        {
+            IReadOnlyList<Favorite> favorites = await _favoriteService.GetFavoritesAsync(userName);
+            model.FavoriteCardIds = favorites
+                .Where(f => string.Equals(f.ItemType, "card", StringComparison.OrdinalIgnoreCase))
+                .Select(f => f.ItemId)
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        }
     }
 
     private async Task SearchSetsAsync(ProductsSearchViewModel model)

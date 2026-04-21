@@ -34,12 +34,27 @@ public sealed class FavoritesController : Controller
     {
         if (!ModelState.IsValid)
         {
+            if (IsAjaxRequest())
+            {
+                return BadRequest(new { success = false, message = "Unable to add favorite with the provided data." });
+            }
+
             TempData["ErrorMessage"] = "Unable to add favorite with the provided data.";
             return RedirectToReturnUrl(model.ReturnUrl);
         }
 
         string userName = User.Identity?.Name ?? string.Empty;
         bool success = await _favoriteService.AddFavoriteAsync(userName, model.ItemType, model.ItemId, model.ItemName);
+
+        if (IsAjaxRequest())
+        {
+            return Ok(new
+            {
+                success,
+                message = success ? "Added to favorites." : "Already favorited or failed to add."
+            });
+        }
+
         TempData[success ? "StatusMessage" : "ErrorMessage"] = success
             ? "Added to favorites."
             : "Already favorited or failed to add.";
@@ -53,6 +68,16 @@ public sealed class FavoritesController : Controller
     {
         string userName = User.Identity?.Name ?? string.Empty;
         bool success = await _favoriteService.RemoveFavoriteAsync(userName, itemType, itemId);
+
+        if (IsAjaxRequest())
+        {
+            return Ok(new
+            {
+                success,
+                message = success ? "Favorite removed." : "Failed to remove favorite."
+            });
+        }
+
         TempData[success ? "StatusMessage" : "ErrorMessage"] = success
             ? "Favorite removed."
             : "Failed to remove favorite.";
@@ -68,5 +93,11 @@ public sealed class FavoritesController : Controller
         }
 
         return RedirectToAction(nameof(Index));
+    }
+
+    private bool IsAjaxRequest()
+    {
+        return Request.Headers.TryGetValue("X-Requested-With", out var headerValue)
+               && string.Equals(headerValue, "XMLHttpRequest", StringComparison.OrdinalIgnoreCase);
     }
 }
