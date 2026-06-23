@@ -1,49 +1,82 @@
 # Takedown TCG
 
 ## Status
-- This repository contains two separate applications: an ASP.NET Core MVC web app and a console CLI.
-- `TakedownTCGApplication` is the MVC web application.
-- `TakedownTCG` is the CLI application.
+
+This repository contains two separate applications:
+
+* `TakedownTCGApplication`: ASP.NET Core MVC web application
+* `TakedownTCG`: Console CLI application
 
 ## Project Scope
-Takedown TCF is a C# trading card search application for exploring card, set, game, listing, and completed-sales data through supported external APIs. The current implementation keeps the web application and CLI as separate programs under the same repository.
+
+Takedown TCG is a C# trading card search application for exploring card, set, game, listing, and completed sales data through supported external APIs.
+
+The web application and CLI are maintained as separate programs within the same repository.
 
 ## Features
-- Search cards by required text query with optional number, printing, and condition filters.
-- Search sets by game with optional text search and sort options.
-- Retrieve the full `/games` endpoint from the menu.
-- Build URL-safe query strings from user input.
-- Deserialize JustTCG JSON responses into strongly typed C# models.
-- Run from checked-in configuration without presentation-time environment variable setup.
-- Available search APIs include JustTCG, Pokemon TCG, eBay, and SerpApi-powered completed sales.
+
+* Search for cards using a required text query with optional card number, printing, and condition filters.
+* Search for sets by game with optional text search and sorting options.
+* Retrieve the full `/games` endpoint from the application menu.
+* Build URL-safe query strings from user input.
+* Deserialize JustTCG JSON responses into strongly typed C# models.
+* Search using JustTCG, Pokémon TCG, eBay, and SerpApi-powered completed sales data.
+* Support account, favorites, and search workflows.
+* Run the web application and CLI independently.
 
 ## Current Architecture
-- `TakedownTCG.slnx`
-  Root solution containing the web app, CLI app, and test projects.
-- `src/TakedownTCGApplication/`
-  ASP.NET Core MVC application with controllers, Razor views, view models, application services, infrastructure, and static assets.
-- `src/TakedownTCGCli/`
-  Console application with menu controllers, CLI views, JustTCG client flow, user account services, and persistence.
-- `tests/TakedownTCG.Core.Tests/`
+
+* `TakedownTCG.slnx`
+  Root solution containing the web application, CLI application, and test projects.
+
+* `src/TakedownTCGApplication/`
+  ASP.NET Core MVC application containing controllers, Razor views, view models, application services, infrastructure, and static assets.
+
+* `src/TakedownTCGCli/`
+  Console application containing menu controllers, CLI views, the JustTCG client flow, user account services, and persistence.
+
+* `tests/TakedownTCG.Core.Tests/`
   Service and behavior tests for account, favorite, and search workflows.
-- `tests/TakedownTCG.Web.Tests/`
-  Web endpoint tests for the MVC application.
+
+* `tests/TakedownTCG.Web.Tests/`
+  Endpoint tests for the ASP.NET Core MVC application.
 
 ## Setup
-1. Install the .NET SDK used by the project.
-2. From the repository root, run:
+
+1. Install the .NET 10 SDK.
+
+2. From the repository root, build the solution:
 
 ```powershell
 dotnet build .\TakedownTCG.slnx
+```
+
+3. Run the ASP.NET Core MVC application:
+
+```powershell
 dotnet run --project .\src\TakedownTCGApplication\TakedownTCGApplication.csproj
+```
+
+4. Run the CLI application:
+
+```powershell
 dotnet run --project .\src\TakedownTCGCli\TakedownTCG.csproj
 ```
 
+5. Run the test projects:
+
+```powershell
+dotnet test .\TakedownTCG.slnx
+```
+
 ## Documentation
-- `README.md`
-  High-level project scope and setup information.
-- `TakedownTCG.slnx`
-  The main solution entry point for build and test workflows.
+
+* `README.md`
+  High-level project scope, architecture, and setup information.
+
+* `TakedownTCG.slnx`
+  Main solution entry point for build and test workflows.
 
 ## Planned Direction
-The broader project direction points toward richer price tracking, watchlists, and additional user-facing features while keeping the web and CLI applications independently runnable.
+
+The broader project direction includes richer price tracking, watchlists, and additional user-facing features while keeping the web and CLI applications independently runnable.
