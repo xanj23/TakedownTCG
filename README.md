@@ -77,6 +77,8 @@ dotnet test .\TakedownTCG.slnx
 * `TakedownTCG.slnx`
   Main solution entry point for build and test workflows.
 
-## Planned Direction
+## Developers
 
-The broader project direction includes richer price tracking, watchlists, and additional user-facing features while keeping the web and CLI applications independently runnable.
+* Xan Johnson
+* Chris Herriman Jr
+
