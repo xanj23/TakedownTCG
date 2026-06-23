@@ -1,4 +1,4 @@
-# OOP-TCG-App
+# Takedown TCG
 
 ## Status
 - This repository contains two separate applications: an ASP.NET Core MVC web app and a console CLI.
@@ -6,7 +6,7 @@
 - `TakedownTCG` is the CLI application.
 
 ## Project Scope
-OOP-TCG-App is a C# trading card search application for exploring card, set, game, listing, and completed-sales data through supported external APIs. The current implementation keeps the web application and CLI as separate programs under the same repository.
+Takedown TCF is a C# trading card search application for exploring card, set, game, listing, and completed-sales data through supported external APIs. The current implementation keeps the web application and CLI as separate programs under the same repository.
 
 ## Features
 - Search cards by required text query with optional number, printing, and condition filters.
